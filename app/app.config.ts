@@ -134,9 +134,12 @@ export default defineAppConfig({
     /** Whose words these are. */
     author: 'Swarnil Singhai',
     /** The claim the badge makes, in the author's own voice. */
-    message: 'The words are mine. AI helps me edit, not write.',
-    /** The widget's own layout name. */
-    style: 'certificate',
+    message: 'Written by a human. AI is used only to refine ideas — never to generate.',
+    /**
+     * Which of the widget's nine layouts to draw: stamp, wax, passport,
+     * postmark, ribbon, certificate, typewriter, banner or compact.
+     */
+    style: 'ribbon',
     /** `light` or `dark`. Fixed, so it does not follow the site's theme. */
     theme: 'light',
     region: 'India',
