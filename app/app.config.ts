@@ -114,6 +114,36 @@ export default defineAppConfig({
   },
 
   /**
+   * The "a human wrote this" badge in the sidebar of every path page.
+   *
+   * A third-party widget, rendered by `AuthorBadge.vue`. The fields below are
+   * the `data-` attributes it reads, one for one.
+   */
+  authorBadge: {
+    /** Off removes it everywhere. */
+    enabled: true,
+    /**
+     * Where the widget script comes from.
+     *
+     * Has to stay `https://`. The page is served over https, and a browser
+     * blocks a plain-http script on an https page as mixed content — so the
+     * `http://localhost:3000` address the widget is developed against renders
+     * nothing once this site is deployed.
+     */
+    src: 'https://nac.imswarnil.com/widget.js',
+    /** Whose words these are. */
+    author: 'Swarnil Singhai',
+    /** The claim the badge makes, in the author's own voice. */
+    message: 'The words are mine. AI helps me edit, not write.',
+    /** The widget's own layout name. */
+    style: 'certificate',
+    /** `light` or `dark`. Fixed, so it does not follow the site's theme. */
+    theme: 'light',
+    region: 'India',
+    category: 'Education'
+  },
+
+  /**
    * Advertising. `enabled: false` removes every slot site-wide, including the
    * ones authors placed inline in markdown.
    */

@@ -131,6 +131,11 @@ usePageSeo({
         variant="card"
       />
 
+      <!-- Who wrote the lesson the reader is looking at, and how. It sits under
+           the ad rather than above it so a paid slot never sits on top of the
+           claim it makes. -->
+      <AuthorBadge />
+
       <PageActions :file="file" />
     </template>
 
