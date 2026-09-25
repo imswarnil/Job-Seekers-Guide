@@ -31,8 +31,14 @@
 # The learning path moved from /path to /start.
 /path                     /start         301
 
-# The story became one section with two doors: /my-story is now a real page,
-# and the series and the book are children of it.
-/series/read              /my-story/book   301
-/series/*                 /my-story/watch  301
-/series                   /my-story/watch  301
+# The story is one page. It was three — an overview, a ten-part web series and
+# the same story again as a flippable book — and a reader was being asked to pick
+# a format before they had any reason to care. Every URL those three published
+# lands on the page that replaced them.
+/series/read              /my-story        301
+/series/*                 /my-story        301
+/series                   /my-story        301
+/my-story/watch/*         /my-story        301
+/my-story/watch           /my-story        301
+/my-story/book/*          /my-story        301
+/my-story/book            /my-story        301

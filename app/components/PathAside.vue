@@ -97,6 +97,10 @@ onMounted(() => {
         note="One email a month at the very most, and nothing else — ever."
       />
 
+      <!-- A directly-sold sponsor, above the network slot: somebody paid for
+           this one specifically, so it goes first. -->
+      <SponsorSlot />
+
       <AdSlot
         placement="sidebar"
         variant="card"

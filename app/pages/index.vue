@@ -172,10 +172,9 @@ useSchemaOrg([
       <HomeCourseRail :path="path" />
     </UContainer>
 
-    <!-- Then who is telling you all this, and the two ways in. One band: the
-         sentence the site rests on, the set and the book drawn as themselves,
-         and the numbers underneath. -->
-    <StoryReel />
+    <!-- Then who is telling you all this. One band: the sentence the site rests
+         on, and the four numbers that stop it being a motivational poster. -->
+    <HomeStory />
 
     <UContainer class="py-8 lg:py-10">
       <AdSlot

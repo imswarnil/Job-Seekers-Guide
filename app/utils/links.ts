@@ -10,8 +10,9 @@ import type { NavigationMenuItem } from '@nuxt/ui'
  * working, and every item removed makes the three that are left easier to see.
  *
  * `/run` is deliberately not here either: it is a component demonstrated inside
- * lessons, not a destination somebody navigates to, and the story is one entry
- * with two doors behind it.
+ * lessons, not a destination somebody navigates to. The story is one entry and
+ * one page behind it: it used to be one entry with two doors, and making the
+ * visitor pick a format before they had a reason to care was the problem.
  *
  * Every item carries an icon, because this list is rendered three ways — the
  * desktop menu, the mobile sheet and the command palette — and the palette is
@@ -23,7 +24,7 @@ export const navLinks: NavigationMenuItem[] = [{
   to: '/start'
 }, {
   label: 'My story',
-  icon: 'i-lucide-clapperboard',
+  icon: 'i-lucide-user-round',
   to: '/my-story'
 }, {
   label: 'Questions',

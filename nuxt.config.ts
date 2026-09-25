@@ -86,11 +86,15 @@ export default defineNuxtConfig({
     // `/path` was the first name for the curriculum index. "Start here" is what
     // somebody frightened of the whole thing actually needs to read.
     '/path': { redirect: { to: '/start', statusCode: 301 }, prerender: false },
-    // The story moved under one roof: an overview at `/my-story`, with the
-    // series and the book as children of it.
-    '/series': { redirect: { to: '/my-story/watch', statusCode: 301 }, prerender: false },
-    '/series/read': { redirect: { to: '/my-story/book', statusCode: 301 }, prerender: false },
-    '/series/**': { redirect: { to: '/my-story/watch', statusCode: 301 }, prerender: false },
+    // The story is one page now. It was three — an overview, a ten-part web
+    // series and a flippable book — and all three of those URL shapes were
+    // published, so all three land on the page that replaced them.
+    '/series': { redirect: { to: '/my-story', statusCode: 301 }, prerender: false },
+    '/series/**': { redirect: { to: '/my-story', statusCode: 301 }, prerender: false },
+    '/my-story/watch': { redirect: { to: '/my-story', statusCode: 301 }, prerender: false },
+    '/my-story/watch/**': { redirect: { to: '/my-story', statusCode: 301 }, prerender: false },
+    '/my-story/book': { redirect: { to: '/my-story', statusCode: 301 }, prerender: false },
+    '/my-story/book/**': { redirect: { to: '/my-story', statusCode: 301 }, prerender: false },
     // About became a band of the front page. The URL was published, so it keeps
     // working and lands on the anchor.
     '/about': { redirect: { to: '/#about', statusCode: 301 }, prerender: false },
@@ -118,8 +122,6 @@ export default defineNuxtConfig({
         '/',
         '/start',
         '/my-story',
-        '/my-story/watch',
-        '/my-story/book',
         '/run',
         '/faq',
         '/changelog',
@@ -221,7 +223,7 @@ export default defineNuxtConfig({
     // URLs are harvested from the prerender crawl, which reaches every lesson
     // through the server-rendered player rail. The legacy paths below only exist
     // as redirects and must not be advertised as destinations.
-    exclude: ['/login', '/signup', '/search', '/courses/**', '/docs/**', '/blog/**', '/path', '/series', '/series/**']
+    exclude: ['/login', '/signup', '/search', '/courses/**', '/docs/**', '/blog/**', '/path', '/series', '/series/**', '/my-story/**']
   },
 
   /**

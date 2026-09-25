@@ -6,93 +6,178 @@
 @source "../../../content/**/*";
 
 /* =============================================================================
-   Job Seekers Guide — design language
+   Job Seekers Guide — on the Im Design System
    =============================================================================
 
-   The tone is set out in abstract/04-vision-and-principles.md: honest,
-   structured, warm, anti-hype. This is a platform someone opens after their
-   thirty-third rejection, so the visual language has to read as "somebody has
-   thought this through and is on your side" — not as a bootcamp sales page and
-   not as a childish gamified toy.
+   The visual language here is not its own invention any more. It is the Im
+   Design System (design.imswarnil.com), mapped onto the variable names Nuxt UI
+   and Tailwind already read, so nothing in this repository has to know it
+   changed.
 
-   Concretely:
-     · Indigo carries everything structural. It is the colour of study — used
-       for navigation, progress, and every primary action, so the interface
-       feels like one continuous path rather than a pile of features.
-     · Teal is the accent. Amber is the default "encouragement" colour of every
-       course platform on the internet and against indigo it reads as a warning.
-       Teal stays legible on the white page and the dark hero both.
-     · Amber survives for one job only — streaks and milestones, where "warm"
-       is the meaning rather than a decoration. It is rationed on purpose; if
-       amber is everywhere it stops meaning anything.
-     · Neutrals are tinted toward the indigo hue (h 232, s 13%) so greys never
-       look like a different design system bolted on.
-     · Type is sized for long-form reading first. Lesson prose is the product.
+   The system is VENDORED, not linked. Its three font files live in
+   public/fonts/ and the token values below are copied from
+   design.imswarnil.com/src/foundation/tokens/. The commit they came from is
+   recorded in public/fonts/SOURCE.md. That is the same pattern the site theme
+   uses: a relative path to a sibling folder works on this machine and nowhere
+   else, and CI builds this site on a machine that has never seen the system.
+
+   What the system asserts, and what it therefore cost us:
+
+     · Geist, Geist Mono and Geist Pixel. Nothing else. The previous stack named
+       Inter, Plus Jakarta Sans and JetBrains Mono and shipped none of them, so
+       every visitor read this site in their system font. Now three files load
+       and the page looks the same everywhere.
+     · ONE accent, not two. Indigo-plus-teal is gone. A second brand colour is a
+       second thing to learn, and on a teaching platform the reader's attention
+       is the budget. Red carries every primary action; anything that needs to
+       be told apart from an action uses weight or a border, not a hue.
+     · An ACHROMATIC grey ramp. The greys were tinted toward indigo, which is
+       defensible when indigo is the brand and indefensible the moment a
+       screenshot or a photograph sits beside them. Neutral greys never tint the
+       thing next to them.
+     · A φ ladder for anything the 12-column grid has nothing to say about.
+       Rung 4 is 1rem, so it lands on sizes this codebase already used.
+
+   Amber survives, as it did before, for streaks and milestones only — it is the
+   one place where "warm" is the meaning rather than the decoration, and it is
+   rationed so it keeps meaning something.
    ========================================================================== */
 
+/* Geist, Geist Mono and Geist Pixel — SIL Open Font License 1.1. Copied out of
+   the design system rather than fetched from a CDN: a font is the one asset a
+   page cannot render correctly without, and a third party deciding to move it
+   would reflow every lesson on this site. */
+@font-face {
+  font-family: 'Geist';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('/fonts/Geist-Variable.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Geist Mono';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('/fonts/GeistMono-Variable.woff2') format('woff2');
+}
+
+/* A display face, used for exactly one thing: the numbers on a stat. Loaded
+   last and never applied to prose, so a reader on a slow connection is never
+   waiting on it to read a sentence. */
+@font-face {
+  font-family: 'Geist Pixel';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/GeistPixel-Square.woff2') format('woff2');
+}
+
 @theme static {
-  /* Plus Jakarta Sans for display (geometric, confident without shouting),
-     Inter for body and UI (drawn for screen legibility at small sizes),
-     JetBrains Mono for code — and there is a lot of code on this platform. */
-  --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  --font-display: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace;
+  /* ---- Type ---------------------------------------------------------------
+     One family for everything a reader reads. `--font-display` is kept as a
+     name because a hundred templates reference it, but it now resolves to the
+     same face — the system does not have a second voice, it has weight and
+     tracking. */
+  --font-sans: 'Geist', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-display: 'Geist', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  --font-pixel: 'Geist Pixel', 'Geist Mono', ui-monospace, monospace;
 
-  /* Indigo — the brand. Deepened so it holds its colour when the interface is
-     desaturated by a cheap phone screen at low brightness, which is what a lot
-     of this audience is reading on. */
-  --color-guide-50: #f3f2ff;
-  --color-guide-100: #e4e2ff;
-  --color-guide-200: #c3bffb;
-  --color-guide-300: #a099f5;
-  --color-guide-400: #7c73ea;
-  --color-guide-500: #5b50dc;
-  --color-guide-600: #4338ca;
-  --color-guide-700: #362eaa;
-  --color-guide-800: #272185;
-  --color-guide-900: #1e1b4b;
-  --color-guide-950: #14122f;
+  /* ---- The accent ---------------------------------------------------------
+     `#f22f46` is the system's default accent — the value Ghost injects when a
+     site owner has not chosen one. The ramp around it is built so 600 is that
+     colour: 600 is what Nuxt UI uses for a solid button, and the brand colour
+     belongs on the button rather than three steps away from it.
 
-  /* Teal — the accent, and the real change of identity from every other course
-     platform in the category. */
-  --color-spark-50: #effcfa;
-  --color-spark-100: #d3f7f1;
-  --color-spark-200: #99f2e4;
-  --color-spark-300: #5eead4;
-  --color-spark-400: #2dd4bf;
-  --color-spark-500: #14b8a6;
-  --color-spark-600: #0d9488;
-  --color-spark-700: #0f766e;
-  --color-spark-800: #115e59;
-  --color-spark-900: #134e4a;
-  --color-spark-950: #042f2e;
+     Named `guide` rather than `red` or `accent` because every component in this
+     repository already asks for `guide-600`, and a rename buys nothing. */
+  --color-guide-50: oklch(97.1% 0.014 17.4);
+  --color-guide-100: oklch(93.6% 0.032 17.7);
+  --color-guide-200: oklch(88.5% 0.062 18.3);
+  --color-guide-300: oklch(81.2% 0.106 19.1);
+  --color-guide-400: oklch(71.4% 0.162 21.2);
+  --color-guide-500: oklch(64.8% 0.201 23.4);
+  --color-guide-600: oklch(60.1% 0.223 24.8);
+  --color-guide-700: oklch(52.4% 0.197 24.6);
+  --color-guide-800: oklch(44.6% 0.164 24.2);
+  --color-guide-900: oklch(37.1% 0.132 23.8);
+  --color-guide-950: oklch(24.8% 0.088 23.2);
 
-  /* Ink — neutrals pulled toward the indigo hue rather than pure grey. */
-  --color-ink-50: hsl(232 13% 98%);
-  --color-ink-100: hsl(232 13% 96%);
-  --color-ink-200: hsl(232 13% 92%);
-  --color-ink-300: hsl(232 13% 86%);
-  --color-ink-400: hsl(232 12% 68%);
-  --color-ink-500: hsl(232 11% 52%);
-  --color-ink-600: hsl(232 13% 42%);
-  --color-ink-700: hsl(232 15% 33%);
-  --color-ink-800: hsl(232 18% 23%);
-  --color-ink-900: hsl(232 22% 15%);
-  --color-ink-950: hsl(232 30% 8%);
+  /* ---- The second colour that is not a second brand ----------------------
+     `spark` was teal and was a rival to indigo. It is now the accent's hue
+     rotated far enough to be told apart in a chart legend and nowhere else:
+     data visualisation genuinely needs more than one colour, and one series
+     against one accent is the smallest set that works. It is not for actions,
+     not for links, and not for emphasis. */
+  --color-spark-50: oklch(97.4% 0.013 230);
+  --color-spark-100: oklch(94.1% 0.029 230);
+  --color-spark-200: oklch(88.9% 0.056 231);
+  --color-spark-300: oklch(81.6% 0.092 233);
+  --color-spark-400: oklch(72.2% 0.132 236);
+  --color-spark-500: oklch(64.4% 0.158 240);
+  --color-spark-600: oklch(56.8% 0.172 245);
+  --color-spark-700: oklch(48.6% 0.152 246);
+  --color-spark-800: oklch(41.2% 0.124 246);
+  --color-spark-900: oklch(34.6% 0.098 245);
+  --color-spark-950: oklch(23.4% 0.064 244);
 
-  /* Borders do the structural work; shadows stay subtle. A teaching interface
-     that floats everything reads as a marketing site. */
-  --radius-xs: 0.375rem;
-  --radius-sm: 0.5rem;
-  --radius-md: 0.625rem;
-  --radius-lg: 0.875rem;
-  --radius-xl: 1.125rem;
+  /* ---- Ink — Tailwind's `neutral` ramp, verbatim -------------------------
+     Achromatic. Zero chroma at every step, which is the whole point: a grey
+     with a hue in it tints the photograph, the screenshot and the terminal
+     capture beside it, and this site is full of all three. */
+  --color-ink-50: oklch(98.5% 0 0);
+  --color-ink-100: oklch(97% 0 0);
+  --color-ink-200: oklch(92.2% 0 0);
+  --color-ink-300: oklch(87% 0 0);
+  --color-ink-400: oklch(70.8% 0 0);
+  --color-ink-500: oklch(55.6% 0 0);
+  --color-ink-600: oklch(43.9% 0 0);
+  --color-ink-700: oklch(37.1% 0 0);
+  --color-ink-800: oklch(26.9% 0 0);
+  --color-ink-900: oklch(20.5% 0 0);
+  --color-ink-950: oklch(14.5% 0 0);
 
-  --shadow-2xs: 0 1px 2px rgb(16 19 64 / 0.06);
-  --shadow-xs: 0 1px 2px rgb(16 19 64 / 0.06);
-  --shadow-sm: 0 2px 8px rgb(16 19 64 / 0.08), 0 1px 2px rgb(16 19 64 / 0.04);
-  --shadow-md: 0 2px 8px rgb(16 19 64 / 0.08), 0 1px 2px rgb(16 19 64 / 0.04);
-  --shadow-lg: 0 12px 32px rgb(16 19 64 / 0.12), 0 2px 8px rgb(16 19 64 / 0.06);
+  /* ---- Radius ------------------------------------------------------------ */
+  --radius-xs: 0.25rem;
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.5rem;
+
+  /* ---- Shadows -----------------------------------------------------------
+     Neutral-black now that the greys are neutral; the old ones were tinted
+     `16 19 64`, which is indigo, and a blue shadow under a red button reads as
+     a mistake. Borders still do the structural work — a teaching interface that
+     floats everything reads as a marketing site. */
+  --shadow-2xs: 0 1px 2px rgb(0 0 0 / 0.05);
+  --shadow-xs: 0 1px 2px rgb(0 0 0 / 0.05);
+  --shadow-sm: 0 2px 8px rgb(0 0 0 / 0.06), 0 1px 2px rgb(0 0 0 / 0.04);
+  --shadow-md: 0 2px 8px rgb(0 0 0 / 0.06), 0 1px 2px rgb(0 0 0 / 0.04);
+  --shadow-lg: 0 12px 32px rgb(0 0 0 / 0.10), 0 2px 8px rgb(0 0 0 / 0.05);
+
+  /* ---- The φ ladder ------------------------------------------------------
+     One step of φ apart, so any two rungs are in the golden ratio and the whole
+     set is one geometric series. Rung 4 is 1rem. Used for the things a
+     12-column grid cannot rule on: how far one block sits from the next inside
+     a section, how much air a stat gets, how tall a band is.
+
+     Exposed as Tailwind spacing, so `p-phi-5` and `gap-phi-4` work in a
+     template without anyone reaching for an arbitrary value. */
+  --spacing-phi-1: 0.236rem;
+  --spacing-phi-2: 0.382rem;
+  --spacing-phi-3: 0.618rem;
+  --spacing-phi-4: 1rem;
+  --spacing-phi-5: 1.618rem;
+  --spacing-phi-6: 2.618rem;
+  --spacing-phi-7: 4.236rem;
+  --spacing-phi-8: 6.854rem;
+
+  /* ---- Easing ------------------------------------------------------------ */
+  --ease-out-im: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-in-out-im: cubic-bezier(0.65, 0, 0.35, 1);
 
   /* Long-form reading measure. Lesson prose is capped here so lines never run
      past the ~75 characters beyond which readers start losing their place. */
@@ -100,6 +185,17 @@
 }
 
 :root {
+  /* The system's own names, for the handful of places that want a surface or a
+     rule rather than a Tailwind colour. Same values Nuxt UI resolves to — they
+     exist so a component can read one variable instead of a colour-mix. */
+  --im-canvas: var(--color-white);
+  --im-surface: var(--color-ink-100);
+  --im-surface-2: var(--color-ink-200);
+  --im-ink: var(--color-ink-950);
+  --im-body: var(--color-ink-600);
+  --im-muted: var(--color-ink-500);
+  --im-accent: var(--color-guide-600);
+
   /* Amber, rationed. Streaks, milestones, "you are further than you think". */
   --guide-milestone: #e9a92a;
   --guide-milestone-soft: #fdf3d9;
@@ -108,14 +204,25 @@
   /* Deliberately-dark bands — the hero, the closing CTA, code blocks. These
      must NOT follow the theme: they are dark by design, so pointing them at an
      inverted surface renders dark-on-dark once the page itself is dark. Fixed
-     values, light text, both themes. */
-  --guide-inverse-bg: var(--color-guide-900);
-  --guide-inverse-ink: #f4f5ff;
-  --guide-inverse-muted: rgb(244 245 255 / 0.74);
+     values, light text, both themes.
+
+     Now near-black rather than deep indigo, because the accent has to sit on
+     these bands and a red button on an indigo field is the one pairing this
+     palette cannot carry. */
+  --guide-inverse-bg: var(--color-ink-950);
+  --guide-inverse-ink: #fafafa;
+  --guide-inverse-muted: rgb(250 250 250 / 0.72);
   --guide-inverse-line: rgb(255 255 255 / 0.14);
 }
 
 .dark {
+  --im-canvas: var(--color-ink-950);
+  --im-surface: var(--color-ink-900);
+  --im-surface-2: var(--color-ink-800);
+  --im-ink: var(--color-ink-50);
+  --im-body: var(--color-ink-300);
+  --im-muted: var(--color-ink-400);
+
   --ui-bg: var(--ui-color-neutral-950);
   --ui-bg-muted: var(--ui-color-neutral-900);
   --ui-bg-elevated: var(--ui-color-neutral-900);
@@ -126,15 +233,28 @@
   --guide-milestone-soft: rgb(233 169 42 / 0.16);
   --guide-milestone-strong: #f6cf65;
 
-  /* In dark mode the inverse bands sit against an already-dark page, so they
-     go one step darker to stay distinguishable from the surface behind them. */
-  --guide-inverse-bg: #07091a;
+  /* In dark mode the inverse bands sit against an already-dark page, so they go
+     one step darker to stay distinguishable from the surface behind them. */
+  --guide-inverse-bg: #050505;
 }
 
-/* Headings carry the display face; body copy stays on Inter. */
+/* Headings are the same face as the body, one step tighter. The system has no
+   second family, so a heading is distinguished by weight and tracking — which
+   is how a heading has always actually worked. */
 h1, h2, h3, h4, .font-display {
   font-family: var(--font-display);
   letter-spacing: -0.02em;
+}
+
+h1, .text-display {
+  letter-spacing: -0.035em;
+}
+
+/* Numbers on a stat, and nothing else. A pixel face is a costume; worn twice it
+   stops being a signal. */
+.font-pixel {
+  font-family: var(--font-pixel);
+  font-feature-settings: 'tnum';
 }
 
 /* A dark band that ignores the colour mode, used by the hero and the CTA. */
@@ -147,13 +267,15 @@ h1, h2, h3, h4, .font-display {
   color: var(--guide-inverse-muted);
 }
 
-/* The contour backdrop: a faint indigo grid that gives large empty surfaces
-   some structure without becoming decoration you have to look at. */
+/* The contour backdrop: a faint grid that gives large empty surfaces some
+   structure without becoming decoration you have to look at. 64px was an
+   arbitrary number; it is now four φ-4 units, so it agrees with the spacing
+   everything on top of it uses. */
 .guide-contour {
   background-image:
     linear-gradient(to right, color-mix(in oklab, var(--ui-border) 60%, transparent) 1px, transparent 1px),
     linear-gradient(to bottom, color-mix(in oklab, var(--ui-border) 60%, transparent) 1px, transparent 1px);
-  background-size: 64px 64px;
+  background-size: 4rem 4rem;
   mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 40%, transparent 100%);
 }
 
@@ -170,5 +292,5 @@ h1, h2, h3, h4, .font-display {
    sentence above it. Global rather than scoped because three components render
    these and they should all space them the same. */
 .ad-auto {
-  margin-block: 2.75rem;
+  margin-block: 2.618rem;
 }

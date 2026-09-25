@@ -20,9 +20,12 @@
 /** Exact matches, checked first. */
 const exact: Record<string, string> = {
   '/path': '/start',
-  // `/my-story` is a real page now; `/series` is what moved under it.
-  '/series': '/my-story/watch',
-  '/series/read': '/my-story/book',
+  // The story was three sections — an overview, a web series and a book — and
+  // is now one page. Every shape those URLs took lands on it.
+  '/series': '/my-story',
+  '/series/read': '/my-story',
+  '/my-story/watch': '/my-story',
+  '/my-story/book': '/my-story',
   '/courses': '/start',
   // About stopped being a page and became a band of the front page. The URL was
   // published, so it keeps working — it just lands on the anchor now.
@@ -40,8 +43,10 @@ const prefixes: [string, string | ((rest: string) => string)][] = [
   // A course lesson kept its whole shape when courses became the path; only the
   // section prefix was dropped. `/courses/java/collections/generics` → `/java/…`
   ['/courses/', rest => `/${rest}`],
-  // Old episode URLs. `/series/read` is handled above, before this prefix.
-  ['/series/', '/my-story/watch'],
+  // Old episode and chapter URLs. The exact matches above are checked first.
+  ['/series/', '/my-story'],
+  ['/my-story/watch/', '/my-story'],
+  ['/my-story/book/', '/my-story'],
   // "How this course works" was a chapter of the terminal track until the
   // orientation track was put in front of it. Same lessons, one level across.
   ['/terminal/how-this-course-works/', rest => `/orientation/how-this-course-works/${rest}`],
