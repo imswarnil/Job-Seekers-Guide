@@ -1,5 +1,5 @@
 ---
-title: AI — use it, then build with it
+title: AI
 description: You can now program, model data, query it, build an interface, secure a backend and ship it. That is exactly the foundation you need to build AI features that are useful instead of dangerous.
 code: JSG-20
 duration: 4 weeks

@@ -126,17 +126,17 @@ export interface StageMeta {
  */
 export const stages: Record<Stage, StageMeta> = {
   introduction: {
-    label: 'Introduction',
+    label: 'Start',
     blurb: 'What the job actually is and whether it is for you, then what a computer is really doing and the two tools every job assumes you already have.',
     icon: 'i-lucide-compass'
   },
   foundation: {
-    label: 'Computer science',
+    label: 'Foundations',
     blurb: 'The four subjects a degree would have given you, taught as ideas rather than syllabus: the machine, the wire, the data, and the cost of moving it around.',
     icon: 'i-lucide-blocks'
   },
   language: {
-    label: 'Languages',
+    label: 'The language',
     blurb: 'You learn to program once, and you learn to ask a database questions once. Everything after this is a dialect of one or the other.',
     icon: 'i-lucide-code'
   },
@@ -151,17 +151,17 @@ export const stages: Record<Stage, StageMeta> = {
     icon: 'i-lucide-wrench'
   },
   applied: {
-    label: 'Building the application',
-    blurb: 'Types, components, a framework, a real backend and a URL a stranger can open.',
+    label: 'The build',
+    blurb: 'Types, components, a framework, a real backend and a URL a stranger can open. The University Management App stops being a plan and becomes a thing people use.',
     icon: 'i-lucide-hammer'
   },
   ai: {
     label: 'AI',
-    blurb: 'A tool you use throughout, and a thing you build with only here — once you know enough to tell when it is wrong.',
+    blurb: 'How these models actually work, what they cost, and the features you add to the university app once you know enough to tell when one is wrong.',
     icon: 'i-lucide-sparkles'
   },
   interview: {
-    label: 'Interview preparation',
+    label: 'The job',
     blurb: 'The finished system, the rounds, the questions, and what you say out loud when somebody is deciding whether to pay you.',
     icon: 'i-lucide-messages-square'
   }

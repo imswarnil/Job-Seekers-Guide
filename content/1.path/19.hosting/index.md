@@ -1,5 +1,5 @@
 ---
-title: Vercel, DNS and hosting — go live
+title: Going live
 description: Software nobody can visit is not software. DNS is the piece almost every self-taught developer waves their hands at, which makes understanding it a quiet advantage.
 code: JSG-19
 duration: 2 weeks

@@ -1,5 +1,5 @@
 ---
-title: TypeScript — stop shipping preventable bugs
+title: TypeScript
 description: JavaScript will let you pass a string where a number belongs and find out in production. TypeScript catches it while you type — and nearly every serious job posting for the web now expects it.
 code: JSG-14
 duration: 2 weeks

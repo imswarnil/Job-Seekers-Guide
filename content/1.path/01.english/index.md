@@ -1,5 +1,5 @@
 ---
-title: "English: the filter nobody calls a subject"
+title: English
 description: Reading comprehension, the grammar that actually costs you marks, writing a bug report somebody can act on, and answering "tell me about yourself". The first round tests this before it tests your code, and no programming course teaches it.
 code: JSG-01
 duration: 2 weeks

@@ -90,7 +90,7 @@ const stamp = computed(() => props.date ? formatter.format(new Date(props.date))
         :width="row.w"
         :height="row.h"
         :rx="row.h / 2"
-        :fill="row.match ? '#5eead4' : 'rgba(244,245,255,0.55)'"
+        :fill="row.match ? 'var(--color-guide-400)' : 'rgba(250,250,250,0.55)'"
       />
       <circle
         :cx="logoMark.lens.cx"
@@ -132,7 +132,7 @@ const stamp = computed(() => props.date ? formatter.format(new Date(props.date))
   place-items: center;
   isolation: isolate;
   background:
-    linear-gradient(140deg, hsl(var(--hue) 62% 34%), hsl(var(--hue) 70% 16%) 62%, #14122f);
+    linear-gradient(140deg, hsl(var(--hue) 62% 34%), hsl(var(--hue) 70% 16%) 62%, var(--color-ink-950));
   border: 1px solid rgb(255 255 255 / 0.1);
 }
 
@@ -198,7 +198,7 @@ const stamp = computed(() => props.date ? formatter.format(new Date(props.date))
   font-size: clamp(1.15rem, 9cqw, 1.75rem);
   font-weight: 800;
   letter-spacing: -0.02em;
-  color: #f4f5ff;
+  color: var(--color-ink-50);
   font-variant-numeric: tabular-nums;
 }
 
@@ -208,7 +208,7 @@ const stamp = computed(() => props.date ? formatter.format(new Date(props.date))
   font-weight: 600;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: #5eead4;
+  color: var(--color-guide-400);
   text-wrap: balance;
 }
 
@@ -218,7 +218,7 @@ const stamp = computed(() => props.date ? formatter.format(new Date(props.date))
   height: 2px;
   margin-top: 0.6rem;
   border-radius: 999px;
-  background: #2dd4bf;
+  background: var(--color-guide-400);
   opacity: 0.8;
 }
 

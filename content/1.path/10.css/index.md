@@ -1,5 +1,5 @@
 ---
-title: CSS — make it look like something
+title: CSS
 description: The page works and nobody would use it. This is the track where the system gets a face, on every screen size, and where most self-taught developers quietly stay weak.
 code: JSG-10
 duration: 5 weeks

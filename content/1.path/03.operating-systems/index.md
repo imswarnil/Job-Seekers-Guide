@@ -1,5 +1,5 @@
 ---
-title: "Operating systems: the program that says no"
+title: Operating systems
 description: You spent three weeks talking to something. This is what was listening. It hands out memory, shares one processor between everything, and is the real author of every "permission denied" you have seen.
 code: JSG-03
 duration: 3 weeks

@@ -1,5 +1,5 @@
 ---
-title: HTML — give the system a body
+title: HTML
 description: Everything you have built so far is invisible to everyone but you. HTML is the structure a browser can render — and the first version of it you write will be the university's actual enquiry form.
 code: JSG-09
 duration: 3 weeks

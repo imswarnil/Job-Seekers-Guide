@@ -1,5 +1,5 @@
 ---
-title: NoSQL, and the other shape of data
+title: NoSQL
 description: You know relational databases deeply, which is exactly the right moment to meet the alternative — because now you can judge it instead of following a trend.
 code: JSG-17
 duration: 1 week

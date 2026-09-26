@@ -1,5 +1,5 @@
 ---
-title: "Data structures and algorithms: how to think about work"
+title: Data structures
 description: Arrays, lists, stacks, queues, trees, hash tables and graphs, and the vocabulary for saying how expensive something is. Taught as ideas first, in plain English and pictures, before any language is in the way.
 code: JSG-06
 duration: 6 weeks

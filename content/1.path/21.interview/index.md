@@ -1,5 +1,5 @@
 ---
-title: The interview, and what comes next
+title: The interview
 description: Every lesson in this course has been quietly training for this. Here it is all lined up — the finished system, the questions, the rounds, and honestly where you go afterwards.
 code: JSG-21
 duration: 3 weeks

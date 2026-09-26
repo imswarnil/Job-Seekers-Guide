@@ -1,5 +1,5 @@
 ---
-title: "DBMS: how data is really stored"
+title: Databases
 description: "The theory before the language. Normalisation, keys, transactions, isolation and indexes: the reasons SQL looks the way it does, learned before you write a line of it."
 code: JSG-05
 duration: 2 weeks

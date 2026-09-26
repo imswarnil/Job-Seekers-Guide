@@ -54,9 +54,12 @@ const accent = computed(() => {
   if (tech.value) {
     return tech.value.color
   }
+  /* Two alternating brand colours used to make a shelf of cards look varied.
+     The system has one accent now, so variety comes from depth rather than
+     hue, which is also what stops a row of cards reading as a legend. */
   return hash(props.subject.path) % 2 === 0
     ? 'var(--color-guide-500)'
-    : 'var(--color-spark-500)'
+    : 'var(--color-guide-700)'
 })
 
 const glyph = computed(() =>

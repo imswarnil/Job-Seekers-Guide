@@ -103,15 +103,15 @@ const chips = SUBJECTS.map((name, index) => {
             >
               <stop
                 offset="0"
-                stop-color="#362eaa"
+                class="cv__cover-1"
               />
               <stop
                 offset="0.55"
-                stop-color="#1e1b4b"
+                class="cv__cover-2"
               />
               <stop
                 offset="1"
-                stop-color="#14122f"
+                class="cv__cover-3"
               />
             </linearGradient>
           </defs>
@@ -123,7 +123,7 @@ const chips = SUBJECTS.map((name, index) => {
             width="140"
             height="194"
             rx="5"
-            fill="#e6e3d8"
+            class="cv__pages-back"
           />
           <rect
             x="18"
@@ -131,7 +131,7 @@ const chips = SUBJECTS.map((name, index) => {
             width="140"
             height="194"
             rx="5"
-            fill="#f7f5ee"
+            class="cv__pages"
           />
 
           <!-- The board. -->
@@ -149,7 +149,7 @@ const chips = SUBJECTS.map((name, index) => {
             width="15"
             height="196"
             rx="4"
-            fill="#0b0a1f"
+            class="cv__spine"
           />
           <rect
             x="24"
@@ -163,13 +163,12 @@ const chips = SUBJECTS.map((name, index) => {
           <!-- Gilt rules. A guide that claims to be the one book had better
                look like it was bound rather than printed. -->
           <rect
-            class="cv__gilt"
             x="34"
             y="18"
             width="104"
             height="168"
             rx="3"
-            stroke="#2dd4bf"
+            class="cv__rule"
             stroke-width="1.4"
             opacity="0.55"
           />
@@ -187,19 +186,19 @@ const chips = SUBJECTS.map((name, index) => {
               :width="row.w"
               :height="row.h"
               :rx="row.h / 2"
-              :fill="row.match ? '#2dd4bf' : '#a099f5'"
+              :class="row.match ? 'cv__mark-accent' : 'cv__mark'"
             />
             <circle
               :cx="logoMark.lens.cx"
               :cy="logoMark.lens.cy"
               :r="logoMark.lens.r"
-              stroke="#f4f5ff"
+              class="cv__lens"
               :stroke-width="logoMark.lensWidth"
               fill="none"
             />
             <path
               :d="logoMark.handle"
-              stroke="#f4f5ff"
+              class="cv__lens"
               :stroke-width="logoMark.handleWidth"
               stroke-linecap="round"
               fill="none"
@@ -233,15 +232,13 @@ const chips = SUBJECTS.map((name, index) => {
             width="44"
             height="1.6"
             rx="0.8"
-            fill="#2dd4bf"
-            opacity="0.7"
+            class="cv__underline"
           />
 
           <!-- The ribbon, because every book somebody keeps has one. -->
           <path
             d="M124 4V44L117 37L110 44V4Z"
-            fill="#2dd4bf"
-            opacity="0.9"
+            class="cv__ribbon"
           />
         </svg>
       </div>
@@ -283,7 +280,7 @@ const chips = SUBJECTS.map((name, index) => {
   height: 62cqw;
   translate: -50% -50%;
   border-radius: 999px;
-  background: radial-gradient(circle, color-mix(in oklab, var(--color-spark-400) 26%, transparent), transparent 66%);
+  background: radial-gradient(circle, color-mix(in oklab, var(--color-guide-500) 26%, transparent), transparent 66%);
   opacity: 0;
   pointer-events: none;
   animation: cv-glow var(--cycle) ease-in-out infinite;
@@ -395,16 +392,53 @@ const chips = SUBJECTS.map((name, index) => {
   100% { opacity: 0 }
 }
 
+/* ── The book's colours ─────────────────────────────────────────────────
+   These were nine hard-coded hex values left over from the indigo-and-teal
+   palette, so the one illustration on the front page was the only thing on
+   the site still wearing the old colours. They are tokens now, which means
+   the book follows the design system and follows the theme.
+
+   `fill` and `stroke` are CSS properties, so a class works on an SVG element
+   exactly as it would on a div. Presentation attributes were only ever the
+   shorthand. */
+.cv__cover-1 { stop-color: var(--color-guide-700); }
+.cv__cover-2 { stop-color: var(--color-guide-900); }
+.cv__cover-3 { stop-color: var(--color-ink-950); }
+
+.cv__pages-back { fill: var(--color-ink-300); }
+.cv__pages      { fill: var(--color-ink-100); }
+.cv__spine      { fill: var(--color-ink-950); }
+
+.cv__rule {
+  fill: none;
+  stroke: var(--color-guide-400);
+  opacity: 0.55;
+}
+
+.cv__mark        { fill: var(--color-ink-300); }
+.cv__mark-accent { fill: var(--color-guide-400); }
+.cv__lens        { stroke: var(--color-ink-50); }
+
+.cv__underline {
+  fill: var(--color-guide-400);
+  opacity: 0.7;
+}
+
+.cv__ribbon {
+  fill: var(--color-guide-500);
+  opacity: 0.95;
+}
+
 .cv__word {
   font-family: var(--font-display);
   font-size: 21px;
   font-weight: 800;
   letter-spacing: 1.2px;
-  fill: #f4f5ff;
+  fill: var(--color-ink-50);
 }
 
 .cv__word--accent {
-  fill: #5eead4;
+  fill: var(--color-guide-400);
 }
 
 /* The lettering only resolves once the book has something in it. */

@@ -1,5 +1,5 @@
 ---
-title: "Java: learn to program"
+title: Java
 description: You learn to program once. Everything after this is a dialect. Java is strict enough to show you what is really happening, and it is what a very large number of entry-level jobs still run on.
 code: JSG-07
 duration: 16 weeks

@@ -1,5 +1,5 @@
 ---
-title: The toolchain — how real projects are run
+title: The toolchain
 description: Everything so far has been loose files opened in a browser. Every professional project has a package manager, a build tool and a linter, and not knowing them is the fastest way to look self-taught in a bad way.
 code: JSG-13
 duration: 1 week

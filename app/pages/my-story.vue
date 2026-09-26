@@ -55,6 +55,12 @@ useSchemaOrg([
 const chapters = computed(() => page.value?.chapters || [])
 const stats = computed(() => page.value?.stats || [])
 const places = computed(() => page.value?.places || [])
+const arc = computed(() => page.value?.arc || [])
+const lessons = computed(() => page.value?.lessons || [])
+
+/* The salary chart's bars are drawn from the largest figure, so adding a year
+   rescales it rather than requiring somebody to redraw the heights. */
+const arcPeak = computed(() => Math.max(1, ...arc.value.map(point => point.lpa)))
 
 /* ── The rail, grouped ──────────────────────────────────────────────────
    Fifteen flat entries is a list and reads as a chore. Five groups of three is
@@ -226,6 +232,45 @@ onMounted(() => {
       </UContainer>
     </section>
 
+    <!-- ── The film ───────────────────────────────────────────────────────
+         Reserved, not omitted. A story like this wants footage, none exists
+         yet, and a page that simply leaves the space out looks finished when
+         it is not. -->
+    <section class="story-film">
+      <UContainer>
+        <div class="story-film__inner">
+          <div class="story-film__say">
+            <p class="story-film__kicker">
+              Ten minutes, when it exists
+            </p>
+            <h2 class="story-film__title">
+              The whole thing, told out loud
+            </h2>
+            <p class="story-film__body">
+              Written down it takes twenty minutes to read. Said out loud it is
+              about ten, and some of it only works said out loud. This is where
+              that goes.
+            </p>
+          </div>
+
+          <div class="story-film__frame">
+            <div class="story-film__hatch" />
+            <div class="story-film__note">
+              <span class="story-film__play">
+                <UIcon name="i-lucide-play" />
+              </span>
+              <p class="story-film__kind">
+                Film to come
+              </p>
+              <p class="story-film__label">
+                Mahroni to Budapest, in ten minutes
+              </p>
+            </div>
+          </div>
+        </div>
+      </UContainer>
+    </section>
+
     <!-- ── The route ──────────────────────────────────────────────────────
          Five towns in a row. The geography is half the story for anybody who
          grew up somewhere like Mahroni, and it is the fastest way to say "this
@@ -334,6 +379,80 @@ onMounted(() => {
       </div>
     </UContainer>
 
+    <!-- ── The arc ────────────────────────────────────────────────────────
+         Every salary, drawn. The flat stretch in the middle is three of the
+         six years and it is the part nobody puts on a poster, so it is drawn
+         at the same weight as the rest. -->
+    <section
+      v-if="arc.length"
+      class="guide-inverse story-arc"
+    >
+      <div class="guide-contour story-arc__grid" />
+
+      <UContainer class="story-arc__inner">
+        <p class="story-arc__kicker">
+          <span class="story-arc__dot" />
+          Six years, every number
+        </p>
+        <h2 class="story-arc__title">
+          From ₹13,000 a month.
+        </h2>
+
+        <ol class="story-arc__bars">
+          <li
+            v-for="point in arc"
+            :key="point.label"
+            class="story-arc__bar"
+            :data-peak="point.lpa === arcPeak ? 'true' : undefined"
+          >
+            <span class="story-arc__value">{{ point.value }}</span>
+            <span
+              class="story-arc__fill"
+              :style="{ height: `${Math.max(4, (point.lpa / arcPeak) * 100)}%` }"
+            />
+            <span class="story-arc__label">{{ point.label }}</span>
+            <span class="story-arc__year">{{ point.year }}</span>
+          </li>
+        </ol>
+
+        <p class="story-arc__note">
+          Three years flat in the middle, and I did not notice I was standing
+          still. That is the part of this worth copying: not the numbers, the
+          moment somebody the same as me moved and I had not.
+        </p>
+      </UContainer>
+    </section>
+
+    <!-- ── What it actually taught ────────────────────────────────────────
+         The payoff. Without this the page is a salary chart with anecdotes
+         around it, and the point was never the salary. -->
+    <section
+      v-if="lessons.length"
+      class="story-lessons"
+    >
+      <UContainer>
+        <h2 class="story-lessons__title">
+          What I would tell the version of me reading a rejection email
+        </h2>
+
+        <ol class="story-lessons__grid">
+          <li
+            v-for="(lesson, index) in lessons"
+            :key="lesson.title"
+            class="story-lesson"
+          >
+            <span class="story-lesson__n font-pixel">{{ String(index + 1).padStart(2, '0') }}</span>
+            <h3 class="story-lesson__title">
+              {{ lesson.title }}
+            </h3>
+            <p class="story-lesson__body">
+              {{ lesson.body }}
+            </p>
+          </li>
+        </ol>
+      </UContainer>
+    </section>
+
     <UContainer class="pb-10 lg:pb-16">
       <AdSlot
         placement="lesson-footer"
@@ -433,6 +552,296 @@ onMounted(() => {
   color: var(--guide-inverse-muted);
 }
 
+/* ── The film ──────────────────────────────────────────────────────────── */
+.story-film {
+  border-bottom: 1px solid var(--ui-border);
+  padding-block: var(--spacing-phi-6);
+}
+
+.story-film__inner {
+  display: grid;
+  gap: var(--spacing-phi-5);
+  align-items: center;
+}
+
+/* Seven columns of words to five of picture: the nearest whole-column golden
+   split the system allows. */
+@media (min-width: 900px) {
+  .story-film__inner {
+    grid-template-columns: 5fr 7fr;
+    gap: var(--spacing-phi-6);
+  }
+}
+
+.story-film__kicker {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ui-text-dimmed);
+}
+
+.story-film__title {
+  margin-top: 0.5rem;
+  font-size: clamp(1.375rem, 1.2rem + 0.9vw, 1.875rem);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  font-weight: 600;
+  color: var(--ui-text-highlighted);
+}
+
+.story-film__body {
+  margin-top: 0.75rem;
+  max-width: 44ch;
+  line-height: 1.6;
+  color: var(--ui-text-muted);
+}
+
+.story-film__frame {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  background: var(--ui-bg-elevated);
+  border: 1px solid var(--ui-border);
+}
+
+.story-film__hatch {
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    45deg,
+    var(--ui-border) 0 1px,
+    transparent 1px 8px
+  );
+  opacity: 0.7;
+}
+
+.story-film__note {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  text-align: center;
+  padding: 1.5rem;
+}
+
+.story-film__play {
+  display: grid;
+  place-items: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 999px;
+  background: var(--color-guide-600);
+  color: #fff;
+  font-size: 1.125rem;
+}
+
+.story-film__kind {
+  margin-top: 0.25rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ui-text-dimmed);
+}
+
+.story-film__label {
+  font-size: 0.875rem;
+  color: var(--ui-text-muted);
+}
+
+/* ── The arc ───────────────────────────────────────────────────────────── */
+.story-arc {
+  position: relative;
+  overflow: hidden;
+  border-top: 1px solid var(--ui-border);
+}
+
+.story-arc__grid {
+  position: absolute;
+  inset: 0;
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.story-arc__inner {
+  position: relative;
+  padding-block: var(--spacing-phi-7);
+}
+
+.story-arc__kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--guide-inverse-muted);
+}
+
+.story-arc__dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 999px;
+  background: var(--color-guide-500);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-guide-500) 24%, transparent);
+}
+
+.story-arc__title {
+  margin-top: var(--spacing-phi-4);
+  font-size: clamp(1.625rem, 1.3rem + 1.5vw, 2.5rem);
+  line-height: 1.08;
+  letter-spacing: -0.025em;
+  font-weight: 600;
+  color: var(--guide-inverse-ink);
+}
+
+.story-arc__bars {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  align-items: end;
+  gap: 0.5rem;
+  height: 14rem;
+  margin-top: var(--spacing-phi-6);
+  padding-bottom: 3.25rem;
+  border-bottom: 1px solid var(--guide-inverse-line);
+}
+
+@media (min-width: 640px) {
+  .story-arc__bars {
+    gap: 1.25rem;
+    height: 18rem;
+  }
+}
+
+.story-arc__bar {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  height: 100%;
+  min-width: 0;
+}
+
+.story-arc__value {
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  margin-bottom: 0.375rem;
+  color: var(--guide-inverse-muted);
+}
+
+.story-arc__bar[data-peak] .story-arc__value {
+  color: var(--guide-inverse-ink);
+  font-weight: 600;
+}
+
+.story-arc__fill {
+  display: block;
+  width: 100%;
+  border-radius: var(--radius-xs) var(--radius-xs) 0 0;
+  background: color-mix(in oklab, var(--color-guide-500) 45%, transparent);
+  /* Animating height rather than transform so the bar grows from its base
+     without the label riding up with it. */
+  transition: height 0.6s var(--ease-out-im);
+}
+
+.story-arc__bar[data-peak] .story-arc__fill {
+  background: var(--color-guide-500);
+}
+
+.story-arc__label,
+.story-arc__year {
+  position: absolute;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 0.6875rem;
+  line-height: 1.3;
+}
+
+.story-arc__label {
+  bottom: -2.5rem;
+  color: var(--guide-inverse-muted);
+}
+
+.story-arc__year {
+  bottom: -3.75rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--guide-inverse-muted);
+  opacity: 0.65;
+}
+
+.story-arc__note {
+  margin-top: var(--spacing-phi-6);
+  max-width: 56ch;
+  line-height: 1.65;
+}
+
+/* ── What it taught ────────────────────────────────────────────────────── */
+.story-lessons {
+  padding-block: var(--spacing-phi-7);
+  border-top: 1px solid var(--ui-border);
+}
+
+.story-lessons__title {
+  max-width: 24ch;
+  font-size: clamp(1.5rem, 1.25rem + 1.2vw, 2.125rem);
+  line-height: 1.12;
+  letter-spacing: -0.025em;
+  font-weight: 600;
+  color: var(--ui-text-highlighted);
+}
+
+.story-lessons__grid {
+  display: grid;
+  gap: var(--spacing-phi-5);
+  margin-top: var(--spacing-phi-6);
+}
+
+@media (min-width: 720px) {
+  .story-lessons__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1100px) {
+  .story-lessons__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.story-lesson {
+  padding-top: var(--spacing-phi-4);
+  border-top: 2px solid var(--color-guide-600);
+}
+
+.story-lesson__n {
+  font-size: 1.25rem;
+  color: var(--ui-text-dimmed);
+}
+
+.story-lesson__title {
+  margin-top: 0.375rem;
+  font-size: 1.0625rem;
+  line-height: 1.3;
+  font-weight: 600;
+  color: var(--ui-text-highlighted);
+}
+
+.story-lesson__body {
+  margin-top: 0.5rem;
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: var(--ui-text-muted);
+}
+
 /* ── The route ─────────────────────────────────────────────────────────── */
 .story-route {
   border-bottom: 1px solid var(--ui-border);
@@ -510,7 +919,12 @@ onMounted(() => {
 }
 
 /* ── The body ──────────────────────────────────────────────────────────── */
+/* The story runs wider than the rest of the site on purpose. It is a page
+   somebody reads once, from the top, with pictures in it — not a reference
+   page that has to line up with a rail of lessons. The default container
+   squeezed it into a column with two thirds of the screen empty beside it. */
 .story-body {
+  max-width: 82rem;
   padding-block: var(--spacing-phi-6);
 }
 
@@ -529,8 +943,15 @@ onMounted(() => {
    golden split the system allows. */
 @media (min-width: 1024px) {
   .story-body__grid {
-    grid-template-columns: 17rem minmax(0, 1fr);
+    grid-template-columns: 15rem minmax(0, 1fr);
     gap: var(--spacing-phi-7);
+  }
+}
+
+@media (min-width: 1400px) {
+  .story-body__grid {
+    grid-template-columns: 17rem minmax(0, 1fr);
+    gap: var(--spacing-phi-8);
   }
 }
 
@@ -665,9 +1086,11 @@ onMounted(() => {
 }
 
 .story-prose {
-  /* Wider than the default reading measure: this is one long page rather than a
-     lesson, and the chapter headings already break it up. */
-  max-width: 72ch;
+  /* No cap. Each chapter caps its own prose at a readable measure, which lets
+     a picture, a pull quote or a chart break out past it. A cap here would
+     stop all three and make every band the same width, which is what made the
+     first version of this page read as one long column. */
+  min-width: 0;
 }
 
 /* A chapter heading is a scroll target, so it needs to clear the sticky

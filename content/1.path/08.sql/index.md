@@ -1,5 +1,5 @@
 ---
-title: "SQL: learn to store and ask"
+title: SQL
 description: Your Java program forgot everything the moment it stopped, and a flat file cannot answer a question. SQL has barely changed in decades, which is exactly why it is worth learning properly.
 code: JSG-08
 duration: 10 weeks

@@ -43,12 +43,17 @@ export const logoMark = {
 } as const
 
 /**
- * Literal colours, for renderers with no access to the stylesheet. Keep in step
- * with `--color-guide-600`, `--color-guide-300` and `--color-spark-400` in
- * app/assets/css/main.css.
+ * Literal colours, for renderers with no access to the stylesheet: the social
+ * image generator runs outside the browser and cannot resolve a custom
+ * property.
+ *
+ * Keep in step with `--color-guide-600`, `--color-ink-300` and
+ * `--color-guide-400` in app/assets/css/main.css. These were the old indigo and
+ * teal and were the last place on the site still wearing them, which showed up
+ * on every social card.
  */
 export const logoColors = {
-  frame: '#4338ca',
-  row: '#a099f5',
-  match: '#2dd4bf'
+  frame: '#d92d3f',
+  row: '#d4d4d4',
+  match: '#f0616f'
 } as const

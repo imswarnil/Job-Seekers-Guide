@@ -94,10 +94,14 @@ const glyph = computed(() => lessonIcon(props.lesson))
   --ink: var(--color-guide-100);
 }
 
+/* Named 'teal' when there were two brand colours. Kept as a name because the
+   families are chosen by a hash of the path and renaming them would reshuffle
+   every existing thumbnail; it is a deeper accent now rather than a second
+   hue. */
 .thumb[data-family='teal'] {
-  --a: var(--color-spark-600);
-  --b: var(--color-spark-800);
-  --ink: var(--color-spark-100);
+  --a: var(--color-guide-800);
+  --b: var(--color-ink-950);
+  --ink: var(--color-guide-200);
 }
 
 .thumb[data-shade='1'] {

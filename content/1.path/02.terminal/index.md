@@ -1,5 +1,5 @@
 ---
-title: The machine and the terminal
+title: The machine
 description: Before a single line of code — what a computer actually does, how to command one without touching a mouse, and how to keep a permanent, reversible history of everything you write.
 code: JSG-02
 duration: 3 weeks

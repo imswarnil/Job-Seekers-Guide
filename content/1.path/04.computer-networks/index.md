@@ -1,5 +1,5 @@
 ---
-title: "Computer networks: how two machines talk"
+title: Networks
 description: "One machine you understand. Every real system is several, and the wire between them is where the interesting failures live: timeouts, ports, certificates, and requests that vanish."
 code: JSG-04
 duration: 2 weeks

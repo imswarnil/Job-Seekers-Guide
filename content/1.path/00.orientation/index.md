@@ -1,5 +1,5 @@
 ---
-title: "Before you begin: the industry, the job, and this course"
+title: Before you begin
 description: What a software job actually is, what the day looks like, how the industry got here, who does the work, and an honest answer to whether it is for you. No code anywhere in this track, and it is the one to read before you commit a year, or a degree.
 code: JSG-00
 duration: 1 week

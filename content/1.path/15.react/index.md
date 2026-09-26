@@ -1,5 +1,5 @@
 ---
-title: React — build interfaces out of pieces
+title: React
 description: Hand-writing DOM updates does not scale past one screen. React is how most of the industry builds interfaces, and it is the framework most job postings name.
 code: JSG-15
 duration: 6 weeks

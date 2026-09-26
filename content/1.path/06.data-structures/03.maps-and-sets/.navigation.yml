@@ -1,3 +1,3 @@
-title: Finding by name
+title: Maps and sets
 icon: i-lucide-hash
 description: Hash tables, the one idea behind most fast lookups. Collisions, what a good hash is, and the Java contract that breaks a HashMap when you get it wrong.

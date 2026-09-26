@@ -123,6 +123,22 @@ export default defineContentConfig({
           years: z.string().optional(),
           note: z.string().nonempty()
         })).optional().editor({ label: 'The route' }),
+        // Every salary, in order, drawn as a bar chart. `lpa` is the number the
+        // bar height is computed from; `value` is what is printed, because
+        // "₹13,000/mo" and "1.8 LPA" are the same figure said two ways and the
+        // first is the one that means something to a reader.
+        arc: z.array(z.object({
+          label: z.string().nonempty(),
+          year: z.string().nonempty(),
+          value: z.string().nonempty(),
+          lpa: z.number()
+        })).optional().editor({ label: 'The salary arc' }),
+        // The payoff. Without these the page is a salary chart with anecdotes
+        // around it, and the point was never the salary.
+        lessons: z.array(z.object({
+          title: z.string().nonempty(),
+          body: z.string().nonempty()
+        })).optional().editor({ label: 'What it taught' }),
         // Questions, grouped. Kept as data rather than as accordion blocks in
         // the body so the page can filter them, group them and emit FAQ
         // structured data — none of which is possible over rendered prose.

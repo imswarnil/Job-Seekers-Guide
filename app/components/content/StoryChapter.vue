@@ -184,4 +184,13 @@ withDefaults(defineProps<{
 .chapter__body :deep(p:last-child) {
   margin-bottom: 0;
 }
+
+/* The reading measure lives here rather than on the page, so that a picture,
+   a pull quote or a diagram can be wider than the text it sits between. */
+.chapter__body :deep(p),
+.chapter__body :deep(ul),
+.chapter__body :deep(ol),
+.chapter__body :deep(h3) {
+  max-width: 64ch;
+}
 </style>
