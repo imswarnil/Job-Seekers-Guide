@@ -1,0 +1,3 @@
+title: Processes and threads
+icon: i-lucide-layers
+description: What a running program actually is, how one processor runs forty of them, what a thread shares that a process does not, and the two bugs that only exist because of it.

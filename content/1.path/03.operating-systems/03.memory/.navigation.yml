@@ -1,0 +1,3 @@
+title: Memory
+icon: i-lucide-memory-stick
+description: Why every program thinks it owns the whole machine, what a page is, why your laptop slows to nothing when it runs out, and where an OutOfMemoryError really comes from.
