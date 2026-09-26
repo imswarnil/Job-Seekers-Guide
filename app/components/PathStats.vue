@@ -113,14 +113,24 @@ onMounted(() => {
     return
   }
 
-  // Wind back only now that we know we can wind forward.
-  t.value = 0
+  /* Wind back only at the moment we wind forward, in the same tick.
 
+     The previous version set `t` to 0 on mount and waited for the element to
+     become visible. When that never arrived the headline numbers on /start sat
+     at "0 Subjects, 0 Lessons" permanently — which it did on the production
+     build, where hydration lands differently from dev, and which is very much
+     worse than no animation at all.
+
+     Now the finished numbers are the resting state and nothing can take them
+     away. Vue flushes the DOM update and the first animation frame together, so
+     there is no flash of zero on the way. */
   const stop = watch(visible, (isVisible) => {
-    if (isVisible) {
-      run()
-      stop()
+    if (!isVisible) {
+      return
     }
+    t.value = 0
+    run()
+    stop()
   }, { immediate: true })
 })
 
