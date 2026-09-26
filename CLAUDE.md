@@ -37,6 +37,15 @@ at Rs 13,000 a month, and is now a Salesforce engineer in Europe. He is not
 anonymous any more. "In 2018 I spent a month stuck on joins" is exactly the
 kind of sentence this course wants.
 
+**He is writing from the years he could not get a job, with hindsight.** The
+frame is a journal kept by somebody who failed every written round for four
+years and then learned this properly, not a retrospective by somebody who has
+arrived. That is why a lesson names the specific thing that beat him rather than
+the general principle: "I was rejected in round one eleven times and concluded
+something about my intelligence; what was true was that I had never practised
+reading a passage against a clock." Every track has at least one of those, and
+they are the reason the course is not interchangeable with a syllabus.
+
 - **First person, to one reader.** "I", and "you". Never "students", never "we"
   meaning the reader, never "one".
 - **Assume nothing.** Not "assume little" — the reader has never opened a
@@ -64,6 +73,12 @@ person. Replace it with a full stop and a new sentence (usually the best fix),
 a comma, a colon, or brackets used sparingly. The en dash `–` stays legal in
 numeric ranges only: "Weeks 1–4", "2017–2019". Command-line flags such as
 `--force` inside code blocks are code, not prose, and are fine.
+
+`pnpm check:lessons` reports every one it finds, so a new lesson has no excuse
+for containing any. It reports rather than fails on them, because the lessons
+written before that check existed contain a great many, and mechanically
+substituting punctuation across finished prose makes it worse. Those are a
+backlog to fix by hand, not a rule that has been quietly dropped.
 
 The thesis, proved over and over rather than asserted:
 
@@ -234,6 +249,14 @@ are available too: `::callout`, `::note`, `::tip`, `::warning`, `::caution`,
 **A component every screen or two. A lesson that is a wall of prose has failed,
 however good the prose is.** Reach for these by beat:
 
+**Nesting: a child needs one more colon than its parent, and its closing fence
+must match.** A `::callout` inside a `::story-chapter` is `:::callout`, closed
+with `:::`. Closing any of them with a code fence swallows everything until the
+next one. And check the syntax before using a component: `::pros-cons` and
+`::persona` take YAML front matter rather than attributes, `::memory` with
+`kind="table"` renders one row per frame, and `::timeline-item` states are
+`done`, `current` and `todo`.
+
 | Beat | Reach for |
 | --- | --- |
 | The idea, drawn | `::flow` for anything with an order · `::memory` for boxes and pointers · `::feature-list` for parallel small points · `::timeline` for things in time |
@@ -384,4 +407,7 @@ numbers, it cannot know your business rules.
 - [ ] Components throughout. It is never a wall of text.
 - [ ] `minutes` is an honest estimate, and `kind` matches how it is written.
 - [ ] No "simply", no "just", no exclamation marks, no "capstone".
+- [ ] `pnpm check:lessons` passes. It catches the two failures that render as a
+      wall of raw YAML and fail nothing else: an MDC block closed with ``` instead
+      of `::`, and a nested component opened with two colons instead of three.
 - [ ] `pnpm lint` passes and the page renders.

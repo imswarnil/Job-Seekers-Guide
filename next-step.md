@@ -1,67 +1,75 @@
-# Where this branch got to, and what is next
+# Where this branch got to, and what is left
 
-Branch: **`ai-era-curriculum`**. Three commits, all green on `pnpm lint`.
-The dev server was running on port 3002 while this was written; the design, the
-story page and the new lessons were all checked in a browser.
+Branch: **`ai-era-curriculum`**. Every commit green on `pnpm lint`,
+`pnpm check:lessons` and `pnpm build` (748 routes prerendered, no errors).
 
 ## Done
 
-**The Im Design System is in.** `app/assets/css/main.css` now maps this site's
-Tailwind theme onto design.imswarnil.com's tokens. Geist, Geist Mono and Geist
-Pixel are vendored into `public/fonts/` with the source commit recorded in
-`public/fonts/SOURCE.md` — the old stack named three fonts and shipped none of
-them, so every visitor was reading this site in their system font. Indigo and
-teal became one accent; `spark` survives only so a chart can have a second
-series. The greys are achromatic now. The golden-ratio ladder is exposed as
-Tailwind spacing, so `gap-phi-5` works in a template.
+**The Im Design System is in.** `app/assets/css/main.css` maps this site's
+Tailwind theme onto design.imswarnil.com's tokens: Geist, Geist Mono and Geist
+Pixel vendored into `public/fonts/` with the source commit in
+`public/fonts/SOURCE.md`, one accent instead of indigo-plus-teal, an achromatic
+grey ramp, and the golden-ratio ladder exposed as Tailwind spacing. The previous
+stack named Inter, Plus Jakarta Sans and JetBrains Mono and shipped none of them.
 
 **The story is one page.** `content/6.story` (16 chapters), `content/5.series`
-(10 episodes), the book reader, the CRT television and about 2,400 lines of
-component are gone. `content/5.my-story.md` + `app/pages/my-story.vue` replace
-them: fifteen chapters as `::story-chapter` bands with number, year, place and
-phase, four pull quotes, the salary chart, and a rail that is a real timeline
-grouped into five phases. Every old URL redirects, in all four mechanisms this
-repo uses to say that.
+(10 episodes), the book reader, the CRT television and ~2,400 lines of component
+are gone. `content/5.my-story.md` + `app/pages/my-story.vue` replace them:
+fifteen `::story-chapter` bands with number, year, place and phase, four pull
+quotes, the salary chart, and a rail that is a real timeline grouped into five
+phases. Every old URL redirects, in all four mechanisms this repo uses.
 
-**The header was never sticky** and is now. `UHeader`'s own `sticky top-0` was
-doing nothing because its wrapper div is one header tall, so it had nowhere to
-travel. Fixed in `AppHeader.vue`.
+**The header was never sticky.** `UHeader`'s own `sticky top-0` did nothing,
+because its wrapper div in `AppHeader.vue` is exactly one header tall and a
+sticky element cannot travel outside its containing block. Fixed.
 
-**Orientation is written**: five chapters, 18 lessons.
+**`pnpm check:lessons`** (`scripts/check-lessons.mjs`) walks every lesson and
+reports two failures that render as a wall of raw YAML and fail nothing else: an
+MDC block closed with ``` instead of `::`, and a nested component opened with too
+few colons. It also reports em dashes, which CLAUDE.md bans.
 
-**English is a new track at `content/1.path/01.english`**, and every track after
-it is renumbered one higher. Chapter 1 (the written round) is complete with its
-glossary and interview Q&A; chapter 2 (reading like an engineer) has two of four.
+**All 22 tracks have content.** English is new, at `content/1.path/01.english`,
+and every track after it was renumbered (URL-safe: Nuxt Content strips the
+numeric prefix). 174 lesson files, 143 lessons in the path, ~29 hours of reading.
 
-## Next, in order
+| Track | State |
+| --- | --- |
+| orientation, english, terminal | Full: chapters, glossaries, interview Q&A, exercises |
+| operating-systems, computer-networks, dbms, data-structures | Full |
+| java, sql | Full, and the deepest — these are the two the course rests on |
+| html, css, javascript | Two chapters each, worked projects |
+| data-visualisation, toolchain, typescript, react, nextjs, nosql, supabase, hosting | One chapter each, the decision each track exists to teach |
+| ai, interview | Full |
 
-1. **Finish English.** `02.reading-like-an-engineer` needs *Reading
-   documentation* and *Reading somebody else's code*. Then `03.writing-that-gets-read`
-   (commit messages, bug reports, status updates, email, documentation) and
-   `04.speaking-and-being-understood` (stand-up, explaining a bug, asking for
-   help, "tell me about yourself"), each with a glossary and an interview Q&A.
-2. **The technical tracks, in path order**: operating systems, computer networks,
-   DBMS, data structures, Java, SQL, HTML, CSS, JavaScript, data visualisation,
-   the toolchain, TypeScript, React, Next.js, NoSQL, Supabase, hosting, AI,
-   interview. Every one of them currently has a written `index.md` and no
-   chapters. `content-plan.md` Parts B and C already specify the lessons and the
-   exact cliffhanger each one ends on — follow it rather than inventing.
-3. **Java and SQL carry the most weight** and should be written first of the
-   nineteen: they are the two the whole course rests on, and they are what an
-   interviewer actually tests.
+## What is left
 
-## Rules that were established while writing, and are worth keeping
+1. **Bookends for the tracks written at one chapter.** The web and tooling
+   tracks have their lessons and not their glossary, interview Q&A and exercises
+   files. The pattern is in `06.data-structures` and `07.java`.
+2. **More chapters for the web tracks.** Each currently teaches the decision
+   that track exists for. `content-plan.md` Parts C lists the rest.
+3. **The 210 em dashes** in lessons written before this branch, mostly the
+   terminal track. `pnpm check:lessons` lists them. Fix by hand: a script makes
+   the prose worse, which is why they were left.
+4. **The University Management App itself.** Every track now references it and
+   the build lessons are specified rather than written. `content-plan.md` §26 is
+   the spec.
 
-- **The narrator journals.** Swarnil is writing with hindsight about the years he
-  could not get a job. Present-tense hindsight, named failures, real numbers.
+## Rules that were established while writing
+
+- **The narrator journals** from the years he could not get a job. Every track
+  has at least one named, specific failure with a number in it.
 - **The university, always.** Applicant, Application, Programme, Department,
-  Student, Faculty, Subject, ExamResult, Attendance, FeePayment. Every example,
-  including the throwaway ones.
-- **Every lesson shows its work.** Real code, its real output, and where a result
-  is illustrative rather than from a run, it says so.
-- **No em dashes** in lesson prose. En dashes in numeric ranges only.
-- **Check the component syntax before using it.** `::pros-cons` and `::persona`
-  take YAML front matter, not attributes, and `::timeline-item` states are
-  `done`, `current`, `todo`. `.studio/components.md` is the reference.
-- **Nested MDC needs deeper fences.** A `::callout` inside a `::story-chapter` is
-  `:::callout`, closed with `:::`.
+  Student, Faculty, Subject, ExamResult, Attendance, FeePayment.
+- **Definition, then consequence.** Every interview answer in every track is one
+  sentence of definition and two of what it causes. The consequence is the part
+  that cannot be memorised from a list.
+- **Every lesson shows its work.** Real code, its real output, and a note where a
+  result is illustrative rather than from a run.
+- **One idea runs through several tracks on purpose.** Zero against missing
+  appears in DBMS, Java and JavaScript. Idempotency appears in networks, SQL and
+  HTML forms. Stability appears in data structures and SQL. Those connections are
+  the argument of the course and they should survive editing.
+- **Check the component syntax first.** `::pros-cons` and `::persona` take YAML
+  front matter, `::memory{kind="table"}` renders one row per frame, and
+  `::timeline-item` states are `done`, `current`, `todo`.
