@@ -11,8 +11,8 @@ const kindEnum = z.enum(['lesson', 'practice', 'project', 'quiz', 'reading'])
 const changeEnum = z.enum(['feature', 'fix', 'content', 'other'])
 
 const createBaseSchema = () => z.object({
-  title: z.string().nonempty(),
-  description: z.string().nonempty()
+  title: z.string().nonempty().editor({ label: 'Title' }),
+  description: z.string().nonempty().editor({ input: 'textarea', label: 'Description' })
 })
 
 const createFeatureItemSchema = () => createBaseSchema().extend({
@@ -50,17 +50,17 @@ export default defineContentConfig({
       type: 'page',
       schema: z.object({
         hero: z.object({
-          headline: z.string().optional(),
-          links: z.array(createLinkSchema())
-        }),
+          headline: z.string().optional().editor({ label: 'Headline' }),
+          links: z.array(createLinkSchema()).editor({ label: 'Buttons' })
+        }).editor({ label: 'Hero' }),
         sections: z.array(
           createBaseSchema().extend({
-            id: z.string().nonempty(),
+            id: z.string().nonempty().editor({ label: 'Anchor id', description: 'Used in the URL, e.g. #why' }),
             orientation: orientationEnum.optional(),
-            reverse: z.boolean().optional(),
+            reverse: z.boolean().optional().editor({ label: 'Flip the layout' }),
             features: z.array(createFeatureItemSchema())
           })
-        ),
+        ).editor({ label: 'Front page bands' }),
         features: createBaseSchema().extend({
           items: z.array(createFeatureItemSchema())
         }),
@@ -155,23 +155,23 @@ export default defineContentConfig({
         // of prose, so its structure is data. Every field is optional — the
         // other root pages in this collection use none of them.
         hero: z.object({
-          kicker: z.string().optional(),
-          headline: z.string().nonempty(),
-          lede: z.string().optional()
-        }).optional(),
+          kicker: z.string().optional().editor({ label: 'Kicker', description: 'The small line above the headline.' }),
+          headline: z.string().nonempty().editor({ label: 'Headline' }),
+          lede: z.string().optional().editor({ input: 'textarea', label: 'Lede' })
+        }).optional().editor({ label: 'Hero' }),
         pillars: z.array(z.object({
           title: z.string().nonempty(),
-          body: z.string().nonempty(),
+          body: z.string().nonempty().editor({ input: 'textarea' }),
           illustration: z.string().optional()
-        })).optional(),
+        })).optional().editor({ label: 'Pillars' }),
         audience: z.object({
           title: z.string().nonempty(),
-          body: z.string().nonempty()
-        }).optional(),
+          body: z.string().nonempty().editor({ input: 'textarea' })
+        }).optional().editor({ label: 'Who this is for' }),
         principles: z.array(z.object({
           title: z.string().nonempty(),
-          body: z.string().nonempty()
-        })).optional(),
+          body: z.string().nonempty().editor({ input: 'textarea' })
+        })).optional().editor({ label: 'Principles' }),
         excluded: z.array(z.object({
           what: z.string().nonempty(),
           why: z.string().nonempty()

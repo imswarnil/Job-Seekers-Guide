@@ -6,7 +6,7 @@ const { path } = usePath()
 const { state, pathProgress, resume, streak } = useProgress()
 
 const title = 'Start here'
-const description = 'One sequence, end to end. What this is and how it is taught first, then the whole route — orientation, foundations, the web, the tools, the build, AI, and the job hunt taught with the same seriousness as everything before it.'
+const description = 'One sequence, from nothing to a job. The foundations first, because those are what a machine writing code cannot supervise for you. Then you build one real system with them, add AI to it once you know enough to tell when it is wrong, and learn the job hunt with the same seriousness as everything before it.'
 
 usePageSeo({ title, description, headline: 'Everything, in order' })
 

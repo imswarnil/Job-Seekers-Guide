@@ -24,11 +24,24 @@ machine unless you publish.
 > `NUXT_STUDIO_AUTH_GITHUB_CLIENT_ID`. The module does not read that. The names
 > below are the ones taken from the module source, and they are what works.
 
-There are two ways in. Pick one.
+**You need both.** This is the thing the documentation does not make clear and
+which costs everybody an hour:
 
-### Option A — a personal access token (easiest, and right for you)
+- **An OAuth app** is how you *sign in* to the editor. `/_studio` returns
+  `404 No authentication provider found` without `STUDIO_GITHUB_CLIENT_ID`,
+  whatever else is set. There is no token-only route in and no development
+  bypass; the check is in the module's `/_studio` handler and it looks only for
+  a client id.
+- **A token** is how Studio *commits* on your behalf when it is not running as
+  a signed-in user. Useful in production, not a substitute for the OAuth app.
 
-One person editing their own repo. No OAuth app, no callback URLs, two minutes.
+So do Option B. Option A is below because a token is still worth having, and
+because if you were told a token alone is enough, it is not.
+
+### Option A — a personal access token (for committing, not for signing in)
+
+No OAuth app, no callback URLs, two minutes. This does **not** open the editor
+on its own.
 
 1. Go to **[github.com/settings/personal-access-tokens](https://github.com/settings/personal-access-tokens)**
    → **Generate new token** → *Fine-grained token*.
@@ -53,7 +66,7 @@ One person editing their own repo. No OAuth app, no callback URLs, two minutes.
 That token is equivalent to your write access on this repo. If it leaks, revoke
 it on the same page immediately — that is the whole remedy, and it works.
 
-### Option B — a GitHub OAuth app
+### Option B — a GitHub OAuth app (required)
 
 Do this instead if more than one person will ever edit, or if you later move to
 a host that can run Studio in production. Each editor signs in as themselves and

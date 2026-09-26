@@ -280,7 +280,7 @@ const chips = SUBJECTS.map((name, index) => {
   height: 62cqw;
   translate: -50% -50%;
   border-radius: 999px;
-  background: radial-gradient(circle, color-mix(in oklab, var(--color-guide-500) 26%, transparent), transparent 66%);
+  background: radial-gradient(circle, color-mix(in oklab, var(--color-guide-400) 18%, transparent), transparent 66%);
   opacity: 0;
   pointer-events: none;
   animation: cv-glow var(--cycle) ease-in-out infinite;
@@ -401,31 +401,41 @@ const chips = SUBJECTS.map((name, index) => {
    `fill` and `stroke` are CSS properties, so a class works on an SVG element
    exactly as it would on a div. Presentation attributes were only ever the
    shorthand. */
-.cv__cover-1 { stop-color: var(--color-guide-700); }
-.cv__cover-2 { stop-color: var(--color-guide-900); }
-.cv__cover-3 { stop-color: var(--color-ink-950); }
+/* The cover runs 500 → 700 rather than 700 → 950. The darker version read as
+   almost black with a red tint: a book you would not pick up, and it lost the
+   accent entirely at the spine where the gradient ended. Three lighter stops
+   keep it recognisably the brand colour across the whole board, and the type
+   still clears contrast comfortably against the darkest of them. */
+.cv__cover-1 { stop-color: var(--color-guide-500); }
+.cv__cover-2 { stop-color: var(--color-guide-600); }
+.cv__cover-3 { stop-color: var(--color-guide-700); }
 
 .cv__pages-back { fill: var(--color-ink-300); }
 .cv__pages      { fill: var(--color-ink-100); }
-.cv__spine      { fill: var(--color-ink-950); }
 
+/* The spine is the one dark element, and it is a shade of the accent rather
+   than black, so the board does not look like it is sitting on a hole. */
+.cv__spine { fill: var(--color-guide-800); }
+
+/* The rules, the underline and the mark are all lighter than the cover now
+   rather than darker, which is what makes them read as embossed on it. */
 .cv__rule {
   fill: none;
-  stroke: var(--color-guide-400);
-  opacity: 0.55;
+  stroke: var(--color-guide-100);
+  opacity: 0.45;
 }
 
-.cv__mark        { fill: var(--color-ink-300); }
-.cv__mark-accent { fill: var(--color-guide-400); }
+.cv__mark        { fill: var(--color-guide-200); opacity: 0.85; }
+.cv__mark-accent { fill: var(--color-ink-50); }
 .cv__lens        { stroke: var(--color-ink-50); }
 
 .cv__underline {
-  fill: var(--color-guide-400);
-  opacity: 0.7;
+  fill: var(--color-guide-100);
+  opacity: 0.55;
 }
 
 .cv__ribbon {
-  fill: var(--color-guide-500);
+  fill: var(--color-guide-300);
   opacity: 0.95;
 }
 
@@ -437,8 +447,12 @@ const chips = SUBJECTS.map((name, index) => {
   fill: var(--color-ink-50);
 }
 
+/* On a lighter cover, guide-400 on guide-600 is nearly invisible. The third
+   word is distinguished by being the only one that is NOT full white, which
+   reads as embossed rather than as a second colour. */
 .cv__word--accent {
-  fill: var(--color-guide-400);
+  fill: var(--color-guide-100);
+  opacity: 0.85;
 }
 
 /* The lettering only resolves once the book has something in it. */

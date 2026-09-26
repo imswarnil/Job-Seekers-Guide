@@ -127,42 +127,42 @@ export interface StageMeta {
 export const stages: Record<Stage, StageMeta> = {
   introduction: {
     label: 'Start',
-    blurb: 'What the job actually is and whether it is for you, then what a computer is really doing and the two tools every job assumes you already have.',
+    blurb: 'From nothing. What the job actually is and whether it is for you, the English that decides the first round, and what the machine in front of you is really doing.',
     icon: 'i-lucide-compass'
   },
   foundation: {
     label: 'Foundations',
-    blurb: 'The four subjects a degree would have given you, taught as ideas rather than syllabus: the machine, the wire, the data, and the cost of moving it around.',
+    blurb: 'The four subjects a degree would have given you: the machine, the wire, the data and the cost of moving it around. This is the layer a model cannot supervise for you, which is exactly why it is worth the weeks.',
     icon: 'i-lucide-blocks'
   },
   language: {
     label: 'The language',
-    blurb: 'You learn to program once, and you learn to ask a database questions once. Everything after this is a dialect of one or the other.',
+    blurb: 'You learn to program once and to ask a database questions once. Everything after is a dialect of one or the other, and the two joined together are an API.',
     icon: 'i-lucide-code'
   },
   web: {
     label: 'The web',
-    blurb: 'Structure, style, behaviour, and the pictures that make a table of numbers mean something.',
+    blurb: 'Structure, style, behaviour, and the pictures that make a table of numbers mean something. The part of the university system a person actually opens.',
     icon: 'i-lucide-globe'
   },
   tooling: {
     label: 'Tools',
-    blurb: 'The package manager, the build, the linter. What every professional project switches on before the first line is written.',
+    blurb: 'The package manager, the build, the types, the review. What a professional project switches on before the first line, and what you switch on before you build yours.',
     icon: 'i-lucide-wrench'
   },
   applied: {
     label: 'The build',
-    blurb: 'Types, components, a framework, a real backend and a URL a stranger can open. The University Management App stops being a plan and becomes a thing people use.',
+    blurb: 'Components, a framework, a real backend, permissions and a URL a stranger can open. The University Management App stops being a plan and becomes a thing people use.',
     icon: 'i-lucide-hammer'
   },
   ai: {
     label: 'AI',
-    blurb: 'How these models actually work, what they cost, and the features you add to the university app once you know enough to tell when one is wrong.',
+    blurb: 'How a model works, how one is trained, what it costs, and how to give it safe access to a real system. Last, because you can only supervise what you already understand.',
     icon: 'i-lucide-sparkles'
   },
   interview: {
     label: 'The job',
-    blurb: 'The finished system, the rounds, the questions, and what you say out loud when somebody is deciding whether to pay you.',
+    blurb: 'The finished system, the rounds, the questions, and the two minutes that decide more than the technical round does.',
     icon: 'i-lucide-messages-square'
   }
 }
