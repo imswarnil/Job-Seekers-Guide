@@ -1,0 +1,3 @@
+title: Grouping and summarising
+icon: i-lucide-chart-column
+description: GROUP BY, the aggregates and what they do with NULL, WHERE against HAVING, and the window functions that answer the questions GROUP BY cannot.

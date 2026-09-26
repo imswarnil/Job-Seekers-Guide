@@ -1,0 +1,3 @@
+title: Changing data safely
+icon: i-lucide-pencil
+description: INSERT, UPDATE and DELETE, the WHERE clause you forgot, transactions from the SQL side, and the injection that is still the most exploited vulnerability there is.

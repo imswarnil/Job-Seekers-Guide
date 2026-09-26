@@ -1,0 +1,3 @@
+title: Joining
+icon: i-lucide-combine
+description: Questions that need two tables. The four joins, what each one does to rows with no match, and the join that silently doubles every number on a dashboard.
