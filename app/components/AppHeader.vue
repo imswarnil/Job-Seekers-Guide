@@ -47,7 +47,19 @@ const continueLabel = computed(() => progress.value.started ? 'Continue' : 'Star
 </script>
 
 <template>
-  <div>
+  <!-- ── Why this wrapper is the sticky one ────────────────────────────────
+       `UHeader`'s own root is `sticky top-0`, and that quietly did nothing here.
+       A sticky element can only travel inside its containing block, and this
+       wrapper's box is exactly one header tall — so the header reached the
+       bottom of its parent immediately and scrolled away with the page, on
+       every lesson and every marketing page.
+
+       Nothing looked broken, which is why it survived: a header that scrolls off
+       is a design decision somebody might have made on purpose.
+
+       The wrapper carries the sticky now. `UHeader` keeps its own, which is
+       harmless and correct if this div is ever removed. -->
+  <div class="sticky top-0 z-50">
     <UHeader
       v-model:open="open"
       :ui="{ container: fluid ? 'max-w-full' : undefined }"

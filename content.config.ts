@@ -104,8 +104,13 @@ export default defineContentConfig({
         chapters: z.array(z.object({
           id: z.string().nonempty(),
           label: z.string().nonempty(),
-          year: z.union([z.string(), z.number()]).optional()
-        })).optional().editor({ label: 'Chapters', description: 'Ids must match the {#anchor} on each heading.' }),
+          year: z.union([z.string(), z.number()]).optional(),
+          // Which act this chapter belongs to. Several chapters share one, and
+          // the rail groups on it — fifteen flat entries is a list, five groups
+          // of three is a shape. It must match the `phase` on the matching
+          // `::story-chapter` in the body, because the reader sees both.
+          phase: z.string().optional()
+        })).optional().editor({ label: 'Chapters', description: 'Ids must match the id on each ::story-chapter in the body.' }),
         stats: z.array(z.object({
           value: z.string().nonempty(),
           label: z.string().nonempty()

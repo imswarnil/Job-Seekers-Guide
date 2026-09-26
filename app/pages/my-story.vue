@@ -56,6 +56,56 @@ const chapters = computed(() => page.value?.chapters || [])
 const stats = computed(() => page.value?.stats || [])
 const places = computed(() => page.value?.places || [])
 
+/* ── The rail, grouped ──────────────────────────────────────────────────
+   Fifteen flat entries is a list and reads as a chore. Five groups of three is
+   a shape, and the shape is the story: four chapters before anything happens,
+   four in the gap, then the turn.
+
+   Grouping is done here rather than in the front matter because the front
+   matter's job is to say which phase a chapter belongs to, not to know that
+   consecutive chapters sharing one should be drawn together. Consecutive, not
+   collected: if a phase ever recurred later it would open a second group, which
+   is correct — the story would have gone back there. */
+const phases = computed(() => {
+  const out: { phase: string, years: string, items: typeof chapters.value }[] = []
+
+  for (const chapter of chapters.value) {
+    const phase = chapter.phase || ''
+    const last = out.at(-1)
+
+    if (last && last.phase === phase) {
+      last.items.push(chapter)
+    } else {
+      out.push({ phase, years: '', items: [chapter] })
+    }
+  }
+
+  /* The span each group covers, printed once at its head so fifteen repeated
+     years do not run down the rail.
+
+     Earliest and latest, not first and last: chapter four is 2017 and chapter
+     three runs 2015–2018, so reading the ends of the list in order gives
+     "2013–2017" for a phase that demonstrably reaches 2018. A group whose
+     chapters carry no year at all (the closing one) gets none. */
+  for (const group of out) {
+    const years = group.items
+      .flatMap(item => String(item.year || '').split('–'))
+      .map(year => Number.parseInt(year, 10))
+      .filter(year => Number.isFinite(year))
+
+    if (!years.length) {
+      group.years = ''
+      continue
+    }
+
+    const first = Math.min(...years)
+    const last = Math.max(...years)
+    group.years = first === last ? String(first) : `${first}–${last}`
+  }
+
+  return out
+})
+
 /* ── Which chapter the reader is inside ─────────────────────────────────
    One IntersectionObserver over the `{#id}` anchors the markdown put on each
    heading, rather than a scroll listener doing arithmetic on every frame.
@@ -80,27 +130,55 @@ onMounted(() => {
     return
   }
 
-  const observer = new IntersectionObserver(
-    (entries) => {
-      /* The topmost heading currently in the band wins. Taking the last entry
-         to fire instead makes the rail jump backwards when two headings are on
-         screen at once, which on a phone is most of the time. */
-      const onScreen = entries
-        .filter(entry => entry.isIntersecting)
-        .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)
+  /* The line across the viewport that decides "where you are": below the sticky
+     header, in the part of the screen a person is actually reading. */
+  const READING_LINE = 160
 
-      if (onScreen[0]?.target.id) {
-        active.value = onScreen[0].target.id
+  /* "The last chapter that has started" — one answer, always.
+
+     An IntersectionObserver is the reflex here and it is the wrong tool for
+     this page. A chapter is a tall section, so several straddle the line at
+     once and the observer only reports the ones whose intersecting state
+     changed; scroll far enough in one jump and nothing it hands you says which
+     chapter you landed in. Reading all fifteen positions is exact, and fifteen
+     `getBoundingClientRect` calls on a frame the browser was painting anyway
+     is not a measurable cost. */
+  const sync = () => {
+    let current = targets[0]!.id
+
+    for (const target of targets) {
+      if (target.getBoundingClientRect().top > READING_LINE) {
+        break
       }
-    },
-    /* A band across the upper third of the viewport. A heading counts as "where
-       you are" once it has reached the area you are actually reading, not the
-       moment its first pixel appears at the bottom of the screen. */
-    { rootMargin: '-72px 0px -66% 0px', threshold: 0 }
-  )
+      current = target.id
+    }
 
-  targets.forEach(target => observer.observe(target))
-  onBeforeUnmount(() => observer.disconnect())
+    active.value = current
+  }
+
+  /* One read per animation frame at most. Without this the handler runs on
+     every scroll event, which on a trackpad is far more often than the screen
+     is redrawn, and all but the last of those reads is thrown away. */
+  let queued = false
+  const onScroll = () => {
+    if (queued) {
+      return
+    }
+    queued = true
+    requestAnimationFrame(() => {
+      queued = false
+      sync()
+    })
+  }
+
+  sync()
+  window.addEventListener('scroll', onScroll, { passive: true })
+  window.addEventListener('resize', onScroll, { passive: true })
+
+  onBeforeUnmount(() => {
+    window.removeEventListener('scroll', onScroll)
+    window.removeEventListener('resize', onScroll)
+  })
 })
 </script>
 
@@ -194,31 +272,52 @@ onMounted(() => {
              one: a fifteen-item list above 2,500 words of prose is a wall
              between the reader and the first sentence. -->
         <nav
-          v-if="chapters.length"
+          v-if="phases.length"
           class="story-rail"
           aria-label="Chapters"
         >
           <div class="story-rail__inner">
             <p class="story-rail__head">
-              Fifteen chapters
+              {{ chapters.length }} chapters, five phases
             </p>
-            <ol class="story-rail__list">
+
+            <!-- A real timeline: one continuous line down the whole rail, a
+                 phase heading with the years it covers, and a pip per chapter
+                 that fills in when you are inside it. -->
+            <ol class="story-rail__phases">
               <li
-                v-for="chapter in chapters"
-                :key="chapter.id"
+                v-for="group in phases"
+                :key="group.phase"
+                class="story-phase"
               >
-                <a
-                  :href="`#${chapter.id}`"
-                  class="story-rail__link"
-                  :class="{ 'story-rail__link--on': active === chapter.id }"
-                  :aria-current="active === chapter.id ? 'true' : undefined"
-                >
+                <div class="story-phase__head">
+                  <span class="story-phase__name">{{ group.phase }}</span>
                   <span
-                    v-if="chapter.year"
-                    class="story-rail__year"
-                  >{{ chapter.year }}</span>
-                  <span class="story-rail__label">{{ chapter.label }}</span>
-                </a>
+                    v-if="group.years"
+                    class="story-phase__years"
+                  >{{ group.years }}</span>
+                </div>
+
+                <ol class="story-phase__items">
+                  <li
+                    v-for="chapter in group.items"
+                    :key="chapter.id"
+                  >
+                    <a
+                      :href="`#${chapter.id}`"
+                      class="story-rail__link"
+                      :class="{ 'story-rail__link--on': active === chapter.id }"
+                      :aria-current="active === chapter.id ? 'true' : undefined"
+                    >
+                      <span class="story-rail__pip" />
+                      <span class="story-rail__label">{{ chapter.label }}</span>
+                      <span
+                        v-if="chapter.year"
+                        class="story-rail__year"
+                      >{{ chapter.year }}</span>
+                    </a>
+                  </li>
+                </ol>
               </li>
             </ol>
 
@@ -430,7 +529,7 @@ onMounted(() => {
    golden split the system allows. */
 @media (min-width: 1024px) {
   .story-body__grid {
-    grid-template-columns: 15rem minmax(0, 1fr);
+    grid-template-columns: 17rem minmax(0, 1fr);
     gap: var(--spacing-phi-7);
   }
 }
@@ -456,23 +555,85 @@ onMounted(() => {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--ui-text-dimmed);
-  padding-inline: 0.625rem;
 }
 
-.story-rail__list {
-  margin-top: 0.75rem;
-  border-left: 1px solid var(--ui-border);
+/* The spine. One line down the whole rail rather than one per group, so the
+   phases read as divisions of a single run of time instead of five lists. */
+.story-rail__phases {
+  position: relative;
+  margin-top: var(--spacing-phi-4);
+  padding-left: 0.875rem;
+}
+
+.story-rail__phases::before {
+  content: '';
+  position: absolute;
+  left: 3px;
+  top: 0.5rem;
+  bottom: 0.5rem;
+  width: 1px;
+  background: var(--ui-border);
+}
+
+.story-phase + .story-phase {
+  margin-top: var(--spacing-phi-5);
+}
+
+.story-phase__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  /* Pulled back over the spine so the phase label interrupts the line, which is
+     what makes it read as a division of it. */
+  margin-left: -0.875rem;
+  padding-left: 0.875rem;
+  background: var(--ui-bg);
+}
+
+.story-phase__name {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--ui-text-highlighted);
+}
+
+.story-phase__years {
+  font-size: 0.625rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--ui-text-dimmed);
+  white-space: nowrap;
+}
+
+.story-phase__items {
+  margin-top: 0.375rem;
 }
 
 .story-rail__link {
-  display: block;
-  padding: 0.375rem 0.625rem;
-  margin-left: -1px;
-  border-left: 2px solid transparent;
+  position: relative;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.3125rem 0.5rem 0.3125rem 0;
+  border-radius: var(--radius-xs);
   font-size: 0.8125rem;
   line-height: 1.35;
   color: var(--ui-text-muted);
   transition: color 0.15s var(--ease-out-im), background-color 0.15s var(--ease-out-im);
+}
+
+/* The pip sits ON the spine, which is 0.875rem to the left of the link box. */
+.story-rail__pip {
+  position: absolute;
+  left: -0.875rem;
+  top: 0.6875rem;
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  border: 1px solid var(--ui-border-accented);
+  background: var(--ui-bg);
+  transition: background-color 0.15s var(--ease-out-im), border-color 0.15s var(--ease-out-im);
 }
 
 .story-rail__link:hover {
@@ -483,16 +644,24 @@ onMounted(() => {
 /* "You are here", the system's one CURRENT state: a fill and a bolder label.
    Nothing grows and nothing lifts. */
 .story-rail__link--on {
-  border-left-color: var(--color-guide-600);
   color: var(--ui-text-highlighted);
   font-weight: 600;
 }
 
+.story-rail__link--on .story-rail__pip {
+  background: var(--color-guide-600);
+  border-color: var(--color-guide-600);
+}
+
+.story-rail__label {
+  min-width: 0;
+}
+
 .story-rail__year {
-  display: block;
   font-size: 0.625rem;
   font-variant-numeric: tabular-nums;
   color: var(--ui-text-dimmed);
+  white-space: nowrap;
 }
 
 .story-prose {
