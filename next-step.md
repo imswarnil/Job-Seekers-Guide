@@ -34,26 +34,46 @@ numeric prefix). 174 lesson files, 143 lessons in the path, ~29 hours of reading
 
 | Track | State |
 | --- | --- |
-| orientation, english, terminal | Full: chapters, glossaries, interview Q&A, exercises |
-| operating-systems, computer-networks, dbms, data-structures | Full |
-| java, sql | Full, and the deepest — these are the two the course rests on |
-| html, css, javascript | Two chapters each, worked projects |
-| data-visualisation, toolchain, typescript, react, nextjs, nosql, supabase, hosting | One chapter each, the decision each track exists to teach |
-| ai, interview | Full |
+| Before you begin, English, The machine | Full: chapters, glossaries, interview Q&A, exercises |
+| Operating systems, Networks, Databases, Data structures | Full |
+| Java, SQL | Full, and the deepest. SQL now ends on The API, where the two join |
+| HTML, CSS, JavaScript | Two chapters each, worked projects, glossary and interview Q&A |
+| Charts, The toolchain, TypeScript, React, Next.js, NoSQL, Auth, Going live | The decision each track exists to teach, plus a glossary |
+| AI | Full: what a model does, how one is made, what it costs, retrieval, tools and MCP, the limits, the toolkit |
+| The interview | Full |
+
+**172 lessons, 22 subjects, ~34 hours of reading.** Every title is short; the
+nuance lives in the description, which is what cards and search show.
 
 ## What is left
 
-1. **Bookends for the tracks written at one chapter.** The web and tooling
-   tracks have their lessons and not their glossary, interview Q&A and exercises
-   files. The pattern is in `06.data-structures` and `07.java`.
-2. **More chapters for the web tracks.** Each currently teaches the decision
-   that track exists for. `content-plan.md` Parts C lists the rest.
-3. **The 210 em dashes** in lessons written before this branch, mostly the
+1. **Nuxt Studio needs its OAuth app.** `/_studio` returns
+   `404 No authentication provider found` until `STUDIO_GITHUB_CLIENT_ID` and
+   `STUDIO_GITHUB_CLIENT_SECRET` are in `.env`. There is no token-only route and
+   no development bypass — the handler looks only for a client id, whatever
+   `setup.md` used to say. Creating the OAuth app needs your GitHub account, so
+   it is the one step nobody else can do for you. `setup.md` §1 has it.
+2. **Interview-question files** for the eight shorter tracks. They have their
+   glossary; HTML, CSS and JavaScript also have their Q&A, and the rest do not.
+3. **More chapters for the web and build tracks.** Each currently teaches the
+   one decision that track exists for. `content-plan.md` Part C lists the rest.
+4. **The 258 em dashes** in lessons written before this branch, mostly the
    terminal track. `pnpm check:lessons` lists them. Fix by hand: a script makes
    the prose worse, which is why they were left.
-4. **The University Management App itself.** Every track now references it and
-   the build lessons are specified rather than written. `content-plan.md` §26 is
-   the spec.
+5. **The University Management App's build lessons.** Every track references it
+   and the `project` lessons give plans and acceptance criteria rather than
+   finished code, which is deliberate. `content-plan.md` §26 is the spec.
+6. **Media for the story.** Five `::story-media` placeholders are reserving
+   their exact space; adding a `src` is the only change needed and nothing
+   moves.
+
+## Not done, and why
+
+**The tracks were not re-sequenced.** The order already runs scratch →
+foundations → language → web → tools → build → AI → job, and the stage grouping
+now says so. Moving Java ahead of the CS foundations would mean rewriting the
+handover paragraph at the end of roughly twenty tracks, because every lesson ends
+on a hook the next one answers. It is a deliberate half-day, not a rename.
 
 ## Rules that were established while writing
 
