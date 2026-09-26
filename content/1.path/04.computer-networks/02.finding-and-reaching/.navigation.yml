@@ -1,0 +1,3 @@
+title: Finding and reaching a machine
+icon: i-lucide-map-pin
+description: IP addresses, ports, DNS and the TCP handshake. How a name becomes a number, and how two machines agree they are talking before either says anything.

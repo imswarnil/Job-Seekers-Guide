@@ -1,0 +1,3 @@
+title: When it breaks
+icon: i-lucide-unplug
+description: Timeouts, retries, latency against bandwidth, and the failure nobody designs for: a request that succeeded and a response that never arrived.
