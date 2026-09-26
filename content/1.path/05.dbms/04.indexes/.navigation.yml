@@ -1,0 +1,3 @@
+title: Indexes
+icon: i-lucide-list-tree
+description: How ten million rows become eleven, why an index sometimes does nothing at all, and how to read the plan that tells you which of those is happening.
