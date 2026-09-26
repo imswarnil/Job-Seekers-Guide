@@ -6,9 +6,11 @@ duration: 4 weeks
 stage: ai
 icon: i-lucide-sparkles
 outcomes:
-  - Explain what a model, a token, a context window and an embedding actually are
+  - Explain what a model is doing, how one is trained, and what each stage costs
+  - Estimate what a feature costs to run before you build it
   - Build a feature that turns a plain-English question into a query and shows its working
-  - Put a human in the loop everywhere a mistake would matter
+  - Answer from your own documents, with citations, and know when to decline
+  - Give a model safe access to a real system with tool calling and MCP
   - Say plainly where these systems fail, and design around it
 prerequisites:
   - hosting

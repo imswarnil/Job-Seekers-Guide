@@ -11,6 +11,7 @@ outcomes:
   - Tell the difference between a query that runs and a query that is right
   - Change data safely, on purpose, with a way back
   - Build the reporting layer every University Management App dashboard will later read
+  - Join Java and SQL into a REST API, with the rules in one place
 prerequisites:
   - java
 ---

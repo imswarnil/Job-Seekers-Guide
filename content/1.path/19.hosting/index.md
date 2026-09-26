@@ -10,6 +10,7 @@ outcomes:
   - Buy a domain, point it correctly, and explain every record you created
   - Deploy from a Git push, with previews before production
   - Keep environments and secrets separate, and roll back when it goes wrong
+  - Give every pull request its own URL and its own branch of the database
 prerequisites:
   - supabase
 ---
