@@ -1,0 +1,3 @@
+title: Who is asking, and what may they see
+icon: i-lucide-shield-check
+description: Authentication against authorisation, sessions and tokens, and row-level security — the permission model that lives in the database rather than in your code.

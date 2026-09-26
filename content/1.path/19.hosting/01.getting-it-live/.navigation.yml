@@ -1,0 +1,3 @@
+title: Getting it live
+icon: i-lucide-cloud-upload
+description: From your laptop to an address a stranger can open. DNS, TLS, environment variables, deploys that can be undone, and knowing when it is broken.
