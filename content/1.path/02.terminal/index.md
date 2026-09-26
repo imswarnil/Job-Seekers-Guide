@@ -13,11 +13,13 @@ outcomes:
   - Keep every version of your work with Git, and get back anything you lose
 prerequisites:
   - orientation
+  - english
 ---
 
-You know what the work is and you have decided you want it. What you do not have
-is any idea how the machine in front of you works — and everything after this
-rests on that.
+You can read a specification, write something a busy person can act on, and say
+ninety seconds about yourself that open the right doors. What you do not have is
+any idea how the machine in front of you works, and everything after this rests
+on that.
 
 I started here because I had to. Not out of purity — out of embarrassment.
 
