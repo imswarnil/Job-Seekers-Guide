@@ -1,0 +1,3 @@
+title: The build
+icon: i-lucide-package
+description: What a package manager, a build tool and a lock file are actually for, and the dependency decision that is a security decision.
