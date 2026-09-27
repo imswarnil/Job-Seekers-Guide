@@ -21,7 +21,7 @@ useHead({
 })
 
 useSeoMeta({
-  titleTemplate: '%s — Job Seekers Guide',
+  titleTemplate: '%s · Job Seekers Guide',
   twitterCard: 'summary_large_image'
 })
 

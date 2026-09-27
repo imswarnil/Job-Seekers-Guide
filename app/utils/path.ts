@@ -30,9 +30,10 @@ export type Stage
     | 'language'
     | 'web'
     | 'tooling'
-    | 'applied'
-    | 'ai'
-    | 'interview'
+    | 'build'
+    | 'written'
+    | 'rounds'
+    | 'upskill'
 
 export interface Lesson {
   title: string
@@ -127,12 +128,12 @@ export interface StageMeta {
 export const stages: Record<Stage, StageMeta> = {
   introduction: {
     label: 'Start',
-    blurb: 'From nothing. What the job actually is and whether it is for you, the English that decides the first round, and what the machine in front of you is really doing.',
+    blurb: 'College is over, nobody has told you what the job is, and the advice you are getting is from people who have never done it. What a developer actually does, how the industry got this shape, and an honest answer to whether it is for you.',
     icon: 'i-lucide-compass'
   },
   foundation: {
     label: 'Foundations',
-    blurb: 'The four subjects a degree would have given you: the machine, the wire, the data and the cost of moving it around. This is the layer a model cannot supervise for you, which is exactly why it is worth the weeks.',
+    blurb: 'The five subjects a degree should have given you: the machine, the operating system, the wire, the data, and the cost of moving it around. This is the layer a model cannot supervise for you, which is exactly why it is worth the weeks.',
     icon: 'i-lucide-blocks'
   },
   language: {
@@ -142,28 +143,33 @@ export const stages: Record<Stage, StageMeta> = {
   },
   web: {
     label: 'The web',
-    blurb: 'Structure, style, behaviour, and the pictures that make a table of numbers mean something. The part of the university system a person actually opens.',
+    blurb: 'Structure, style, behaviour, types, components and the pictures that make a table of numbers mean something. The part of the university system a person actually opens.',
     icon: 'i-lucide-globe'
   },
   tooling: {
     label: 'Tools',
-    blurb: 'The package manager, the build, the types, the review. What a professional project switches on before the first line, and what you switch on before you build yours.',
+    blurb: 'The package manager, the build, the review. What a professional project switches on before the first line, and what you switch on before you build yours.',
     icon: 'i-lucide-wrench'
   },
-  applied: {
+  build: {
     label: 'The build',
-    blurb: 'Components, a framework, a real backend, permissions and a URL a stranger can open. The University Management App stops being a plan and becomes a thing people use.',
+    blurb: 'One system, built end to end and put on the internet: the University Management App. Everything before this was so that you could build it, and it is the thing you will be talking about in every round that follows.',
     icon: 'i-lucide-hammer'
   },
-  ai: {
-    label: 'AI',
-    blurb: 'How a model works, how one is trained, what it costs, and how to give it safe access to a real system. Last, because you can only supervise what you already understand.',
-    icon: 'i-lucide-sparkles'
+  written: {
+    label: 'The written round',
+    blurb: 'The gate that rejects most people before anybody reads their code: quantitative aptitude, logical reasoning, data interpretation and English, against a clock. It is the round that eliminated me, four years running.',
+    icon: 'i-lucide-clipboard-list'
   },
-  interview: {
-    label: 'The job',
-    blurb: 'The finished system, the rounds, the questions, and the two minutes that decide more than the technical round does.',
+  rounds: {
+    label: 'The rounds',
+    blurb: 'Past the written gate: the technical round, the HR round, and the two minutes of talking about yourself that decide more than the code does. Then reading the offer you get.',
     icon: 'i-lucide-messages-square'
+  },
+  upskill: {
+    label: 'Upskilling',
+    blurb: 'What you add once you are employable, not before: the other kind of database, a managed backend, and how models actually work. Last, because you can only supervise what you already understand.',
+    icon: 'i-lucide-sparkles'
   }
 }
 
@@ -172,7 +178,7 @@ export const stageLabels: Record<Stage, string> = Object.fromEntries(
 ) as Record<Stage, string>
 
 /** The order stages are shown in on `/start`, when a subject declares one. */
-export const stageOrder: Stage[] = ['introduction', 'foundation', 'language', 'web', 'tooling', 'applied', 'ai', 'interview']
+export const stageOrder: Stage[] = ['introduction', 'foundation', 'language', 'web', 'tooling', 'build', 'written', 'rounds', 'upskill']
 
 /**
  * A directory that has an `index.md` shows up both as the directory item and, in
@@ -320,7 +326,7 @@ export function byStage(path: LearningPath): StageGroup[] {
 
   const untagged = path.subjects.filter(subject => !subject.stage)
   if (untagged.length) {
-    groups.push(group('applied', {
+    groups.push(group('build', {
       label: 'Also on the path',
       blurb: 'Subjects that have not been placed in a section yet.',
       icon: 'i-lucide-book-open'

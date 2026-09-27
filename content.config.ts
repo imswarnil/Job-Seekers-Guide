@@ -6,7 +6,7 @@ const sizeEnum = z.enum(['xs', 'sm', 'md', 'lg', 'xl'])
 const orientationEnum = z.enum(['vertical', 'horizontal'])
 
 /** Display grouping on `/path`. Never ordering — order is the folder numbering. */
-const stageEnum = z.enum(['introduction', 'foundation', 'language', 'web', 'tooling', 'applied', 'ai', 'interview'])
+const stageEnum = z.enum(['introduction', 'foundation', 'language', 'web', 'tooling', 'build', 'written', 'rounds', 'upskill'])
 const kindEnum = z.enum(['lesson', 'practice', 'project', 'quiz', 'reading'])
 const changeEnum = z.enum(['feature', 'fix', 'content', 'other'])
 
