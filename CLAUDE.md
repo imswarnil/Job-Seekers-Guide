@@ -346,26 +346,38 @@ lesson still appears in the rail. Do not rely on it to hide work in progress.
 
 ---
 
-## 8. Bookending a chapter
+## 8. Bookending a track
 
-Every chapter reads: **overview → lessons → glossary → interview Q&A →
-exercises** (`content-plan.md` §24).
+**The bookends are per TRACK, not per chapter**, and they live at the end of the
+track's last chapter, in this order: **glossary → interview Q&A → exercises**.
+
+This is a deliberate change from the per-chapter rule in `content-plan.md` §24.
+A glossary for a two-lesson chapter is four words long and repeats the one
+before it; a glossary for a whole track is the thing somebody revises from the
+morning of an interview. `02.terminal` still has them per chapter, because its
+three chapters are each the size of another track. That is the test: bookend per
+chapter only when a chapter is large enough to earn its own.
 
 - **The overview** is the module's `.navigation.yml` description plus the track's
   `index.md`. Say what this chapter covers, why it exists, and how it hangs off
   the previous chapter's final hook.
-- **The glossary** is the last-but-two file, `kind: reading`. Only this chapter's
-  new words, one plain-English line each.
+- **The glossary** is the last-but-two file, `kind: reading`. Every new word in
+  the track, one plain-English line each, grouped by theme. End it with the two
+  or three pairs people confuse, because that is what an interviewer probes.
 - **The interview Q&A** is the last-but-one file, `kind: quiz`. The questions
-  this chapter's material produces, in an `::accordion`, each answer short,
-  confident, and **proved with code**.
+  this track's material produces, in an `::accordion`, each answer short,
+  confident, and **proved with code**. `20.interview` is the one exception with
+  no such file: the entire track is interview questions.
 - **The exercises** are the last file, `kind: practice`. Challenge-flavoured, with
   stakes — "can you do this in one query with no subquery?", "this runs but the
   number is wrong, find out why". Never a boring drill. Always the university.
   The reader attempts first; solutions sit inside an `::accordion`.
 
 All three still obey the chain: they resolve the hook before them and set the
-hook after them.
+hook after them. **Adding a bookend moves the handover.** The lesson that used
+to end the track hands over to the glossary instead, and the exercises file
+carries the original hook into the next track. Re-weld both ends in the same
+change.
 
 Terminal-heavy chapters end their exercises file with a command cheat-sheet — a
 table, one line per command, everything the chapter used.
