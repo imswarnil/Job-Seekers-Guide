@@ -1,6 +1,6 @@
 ---
 title: The interview
-description: Every lesson in this course has been quietly training for this. Here it is all lined up — the finished system, the questions, the rounds, and honestly where you go afterwards.
+description: Every lesson in this course has been quietly training for this. Here it is all lined up. The finished system, the questions, the rounds, and honestly where you go afterwards.
 code: JSG-21
 duration: 3 weeks
 stage: interview
@@ -36,7 +36,7 @@ cannot be rehearsed from a blog post.
 
 ::flow{numbered direction="vertical"}
   :::flow-step{label="Assembling the finished system" icon="i-lucide-blocks"}
-  the University Management App end to end — every module, every layer, documented, tested and
+  the University Management App end to end, every module, every layer, documented, tested and
   deployed, with each part tagged to the lesson that built it.
   :::
   :::flow-step{label="Talking about what you built" icon="i-lucide-mic" highlight}
@@ -44,7 +44,7 @@ cannot be rehearsed from a blog post.
   the trade-offs you accepted, and the one bug story that proves you were there.
   :::
   :::flow-step{label="The rounds" icon="i-lucide-list-checks"}
-  Coding, SQL, front-end, system design and behavioural — each answered with work
+  Coding, SQL, front-end, system design and behavioural, each answered with work
   you have already done, in an interview vault grouped by track.
   :::
   :::flow-step{label="What comes next" icon="i-lucide-compass"}

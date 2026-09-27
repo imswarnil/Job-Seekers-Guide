@@ -20,8 +20,8 @@ the difference.
 
 ## Why this track exists
 
-Because the industry settled on it, and because the idea underneath it — describe
-the result, not the steps — is worth having even if you never write another line
+Because the industry settled on it, and because the idea underneath it, describe
+the result, not the steps, is worth having even if you never write another line
 of React.
 
 ::warning{icon="i-lucide-alert-triangle"}
@@ -50,6 +50,6 @@ once and used everywhere, a pipeline you can move a candidate through, and a
 dashboard assembled from pieces rather than pasted together.
 
 ::callout{icon="i-lucide-arrow-right"}
-It is a real interface now — and routing, server rendering, data loading and the
+It is a real interface now, and routing, server rendering, data loading and the
 build are all still yours to hand-roll.
 ::

@@ -15,7 +15,7 @@ prerequisites:
   - supabase
 ---
 
-It all works at `localhost:3000` — a place only you can go. This is the track
+It all works at `localhost:3000`: a place only you can go. This is the track
 that turns it into a link you can send to a stranger, and later, put at the top
 of a CV.
 
@@ -37,8 +37,8 @@ spent a day certain something was.
 
 ::flow{numbered direction="vertical"}
   :::flow-step{label="What live actually means" icon="i-lucide-radio"}
-  How a website reaches a stranger, DNS properly — registrars, nameservers, A,
-  CNAME, TXT and MX records, TTLs — plus `dig` and `nslookup` at the terminal, and
+  How a website reaches a stranger, DNS properly, registrars, nameservers, A,
+  CNAME, TXT and MX records, TTLs, plus `dig` and `nslookup` at the terminal, and
   what HTTPS is doing.
   :::
   :::flow-step{label="Shipping" icon="i-lucide-rocket" highlight}

@@ -1,6 +1,6 @@
 ---
 title: TypeScript
-description: JavaScript will let you pass a string where a number belongs and find out in production. TypeScript catches it while you type — and nearly every serious job posting for the web now expects it.
+description: JavaScript will let you pass a string where a number belongs and find out in production. TypeScript catches it while you type, and nearly every serious job posting for the web now expects it.
 code: JSG-14
 duration: 2 weeks
 stage: tooling
@@ -22,7 +22,7 @@ you saved the file.
 
 You spent sixteen weeks in Java, where every value has a declared type and the
 compiler argues with you. TypeScript is that argument, added back to a language
-that gave it up — and it is the same instinct you already built.
+that gave it up, and it is the same instinct you already built.
 
 ::pros-cons
 ---

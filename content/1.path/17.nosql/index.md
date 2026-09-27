@@ -1,6 +1,6 @@
 ---
 title: NoSQL
-description: You know relational databases deeply, which is exactly the right moment to meet the alternative — because now you can judge it instead of following a trend.
+description: You know relational databases deeply, which is exactly the right moment to meet the alternative, because now you can judge it instead of following a trend.
 code: JSG-17
 duration: 1 week
 stage: applied
@@ -21,7 +21,7 @@ about it.
 ## Why this track is short, and why it is here
 
 Because you already know the relational model properly. Meeting NoSQL now means
-meeting it as a set of trade-offs rather than as a trend — which is exactly the
+meeting it as a set of trade-offs rather than as a trend, which is exactly the
 position an interviewer is testing for when they ask.
 
 ::compare{caption="The same question, asked of two different candidates."}
@@ -40,7 +40,7 @@ position an interviewer is testing for when they ask.
 
 ::flow{numbered direction="vertical"}
   :::flow-step{label="What NoSQL means" icon="i-lucide-boxes"}
-  Document, key-value, wide-column and graph — four unrelated things sharing a
+  Document, key-value, wide-column and graph: four unrelated things sharing a
   bad name.
   :::
   :::flow-step{label="Documents versus rows" icon="i-lucide-file-json" highlight}
@@ -55,8 +55,8 @@ position an interviewer is testing for when they ask.
 
 ## What the University Management App becomes
 
-Unchanged, deliberately. This track ends with a written decision — which parts of
-the system would benefit from a document store and which absolutely would not —
+Unchanged, deliberately. This track ends with a written decision, which parts of
+the system would benefit from a document store and which absolutely would not:
 and that written decision is worth more in an interview than a migration.
 
 ::callout{icon="i-lucide-arrow-right"}

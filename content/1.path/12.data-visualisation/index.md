@@ -15,7 +15,7 @@ prerequisites:
 ---
 
 Nobody reads twenty-three thousand attendance rows. They look at one picture and
-decide something — and if the picture is wrong, they decide the wrong thing
+decide something, and if the picture is wrong, they decide the wrong thing
 confidently.
 
 ## Why this track exists
@@ -37,7 +37,7 @@ sorted bar chart made it obvious in under a second.
 ::flow{numbered direction="vertical"}
   :::flow-step{label="Drawing on the web" icon="i-lucide-pen-tool"}
   Which chart answers which question, the charts that lie, SVG from scratch, and
-  scales — turning a number into a position on a screen.
+  scales, turning a number into a position on a screen.
   :::
   :::flow-step{label="Charts that ship" icon="i-lucide-chart-line" highlight}
   A charting library used deliberately, axes and labels that mean something,
@@ -49,7 +49,7 @@ sorted bar chart made it obvious in under a second.
 
 The dashboards: the admissions funnel, fee collection by month with a running
 total, placements per department, attendance against performance, and the
-at-risk list — each one reading a view you wrote in the SQL track.
+at-risk list, each one reading a view you wrote in the SQL track.
 
 ::callout{icon="i-lucide-arrow-right"}
 The dashboards work. They are also one HTML file of eleven hundred lines, with

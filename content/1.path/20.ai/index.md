@@ -17,7 +17,7 @@ prerequisites:
 ---
 
 It is live, and it is completely literal. A dean should not have to write SQL to
-find out how this intake is going — and now you know enough to build the thing
+find out how this intake is going, and now you know enough to build the thing
 that answers them without handing the university's records to a stranger.
 
 ## Why this track is last
@@ -31,7 +31,7 @@ course.
 ::warning{icon="i-lucide-alert-triangle"}
 Three rules ship with every feature in this track, and they are part of the
 build, not an essay at the end: the model never writes to the database
-unattended; the human always sees the source — the query, the fields, the
+unattended; the human always sees the source: the query, the fields, the
 factors; and student data is handled with real access control and a clear note on
 what is sent where.
 ::

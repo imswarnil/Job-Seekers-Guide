@@ -142,6 +142,7 @@ const chips = SUBJECTS.map((name, index) => {
             height="196"
             rx="4"
             fill="url(#cv-cover)"
+            class="cv__board"
           />
           <rect
             x="10"
@@ -303,7 +304,7 @@ const chips = SUBJECTS.map((name, index) => {
   border-radius: 2.6cqw;
   background: color-mix(in oklab, var(--tech) 16%, #fff);
   border: 1px solid color-mix(in oklab, var(--tech) 34%, transparent);
-  box-shadow: 0 1cqw 3cqw rgb(16 19 64 / 0.12);
+  box-shadow: 0 1cqw 3cqw rgb(0 0 0 / 0.1);
   opacity: 0;
   animation: cv-converge var(--cycle) cubic-bezier(0.5, 0, 0.2, 1) infinite;
   /* Staggered so they arrive one after another. Kept well under a second in
@@ -366,7 +367,7 @@ const chips = SUBJECTS.map((name, index) => {
   translate: -50% -50%;
   transform-style: preserve-3d;
   animation: cv-book var(--cycle) cubic-bezier(0.3, 0.8, 0.3, 1) infinite;
-  filter: drop-shadow(0 3cqw 5cqw rgb(16 19 64 / 0.28));
+  filter: drop-shadow(0 3cqw 5cqw rgb(0 0 0 / 0.3));
 }
 
 .cv__book-svg {
@@ -401,41 +402,59 @@ const chips = SUBJECTS.map((name, index) => {
    `fill` and `stroke` are CSS properties, so a class works on an SVG element
    exactly as it would on a div. Presentation attributes were only ever the
    shorthand. */
-/* The cover runs 500 → 700 rather than 700 → 950. The darker version read as
-   almost black with a red tint: a book you would not pick up, and it lost the
-   accent entirely at the spine where the gradient ended. Three lighter stops
-   keep it recognisably the brand colour across the whole board, and the type
-   still clears contrast comfortably against the darkest of them. */
-.cv__cover-1 { stop-color: var(--color-guide-500); }
-.cv__cover-2 { stop-color: var(--color-guide-600); }
-.cv__cover-3 { stop-color: var(--color-guide-700); }
+/* The board is NEUTRAL, and the red is an accent on it.
 
+   It was a red board for two rounds: 700 → 950 first, which read as almost
+   black with a red tint, then 500 → 700, which read as a brighter red slab.
+   Both were the same mistake. A whole board of the accent colour at this size
+   is the largest area of saturated colour on the front page, and no amount of
+   choosing a better red fixes that. The design system's own rule is an
+   achromatic ramp with a single accent, so this is a charcoal cloth board with
+   a red spine: the accent is now a narrow band, a ribbon, a rule and one word,
+   which is a few percent of the illustration instead of most of it. */
+.cv__cover-1 { stop-color: var(--color-ink-700); }
+.cv__cover-2 { stop-color: var(--color-ink-800); }
+.cv__cover-3 { stop-color: var(--color-ink-900); }
+
+/* A hairline, so a charcoal board still has an edge against a dark page, where
+   the board and the background are otherwise within a few percent of each
+   other. It reads as the light catching the edge of the board rather than as
+   an outline, which is why it is a mid grey and not a border colour. */
+.cv__board {
+  stroke: var(--color-ink-500);
+  stroke-width: 1.25;
+}
+
+/* Paper stays paper in both themes, and it is what separates the dark board
+   from whatever is behind it. */
 .cv__pages-back { fill: var(--color-ink-300); }
 .cv__pages      { fill: var(--color-ink-100); }
 
-/* The spine is the one dark element, and it is a shade of the accent rather
-   than black, so the board does not look like it is sitting on a hole. */
-.cv__spine { fill: var(--color-guide-800); }
+/* The spine is the accent, and the only wide piece of it. One vertical band of
+   red against charcoal is what a cloth-bound book actually looks like, and it
+   survives the 17-degree turn at the end of the loop, which is the moment the
+   spine is most visible. */
+.cv__spine { fill: var(--color-guide-600); }
 
-/* The rules, the underline and the mark are all lighter than the cover now
-   rather than darker, which is what makes them read as embossed on it. */
+/* Blind-stamped rather than gilt: the frame is a shade of the board, so the
+   red is not competing with itself. */
 .cv__rule {
   fill: none;
-  stroke: var(--color-guide-100);
-  opacity: 0.45;
+  stroke: var(--color-ink-400);
+  opacity: 0.4;
 }
 
-.cv__mark        { fill: var(--color-guide-200); opacity: 0.85; }
-.cv__mark-accent { fill: var(--color-ink-50); }
-.cv__lens        { stroke: var(--color-ink-50); }
+.cv__mark        { fill: var(--color-ink-400); opacity: 0.9; }
+.cv__mark-accent { fill: var(--color-guide-500); }
+.cv__lens        { stroke: var(--color-ink-300); }
 
 .cv__underline {
-  fill: var(--color-guide-100);
-  opacity: 0.55;
+  fill: var(--color-guide-500);
+  opacity: 0.9;
 }
 
 .cv__ribbon {
-  fill: var(--color-guide-300);
+  fill: var(--color-guide-500);
   opacity: 0.95;
 }
 
@@ -447,12 +466,12 @@ const chips = SUBJECTS.map((name, index) => {
   fill: var(--color-ink-50);
 }
 
-/* On a lighter cover, guide-400 on guide-600 is nearly invisible. The third
-   word is distinguished by being the only one that is NOT full white, which
-   reads as embossed rather than as a second colour. */
+/* The one word of the title that carries the accent. On charcoal, guide-400 is
+   light enough to read at 21px and clearly the same red as the spine, which is
+   the whole point of spending the accent here. */
 .cv__word--accent {
-  fill: var(--color-guide-100);
-  opacity: 0.85;
+  fill: var(--color-guide-400);
+  opacity: 1;
 }
 
 /* The lettering only resolves once the book has something in it. */

@@ -15,7 +15,7 @@ prerequisites:
 ---
 
 One file, eleven hundred lines, three copies of the same chart. That is not a
-discipline problem, it is a missing toolchain — and this is the shortest track in
+discipline problem, it is a missing toolchain, and this is the shortest track in
 the course.
 
 ## Why this track exists

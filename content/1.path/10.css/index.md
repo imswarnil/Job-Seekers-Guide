@@ -14,7 +14,7 @@ prerequisites:
   - html
 ---
 
-They opened it on a phone and it was unreadable. Not broken — the markup was
+They opened it on a phone and it was unreadable. Not broken: the markup was
 right. It just had no face, and a browser's default styling is a punishment.
 
 ## Why this track is longer than you expect
@@ -48,7 +48,7 @@ your CV is real.
   the ones that trap you.
   :::
   :::flow-step{label="Layout" icon="i-lucide-layout-grid" highlight}
-  The box model, display and flow, positioning, then Flexbox and Grid — the two
+  The box model, display and flow, positioning, then Flexbox and Grid: the two
   tools that make every layout question answerable.
   :::
   :::flow-step{label="Responsive, themed and alive" icon="i-lucide-smartphone"}
@@ -64,6 +64,6 @@ portals look like software rather than a document, and the whole thing survives
 being turned sideways.
 
 ::callout{icon="i-lucide-arrow-right"}
-It looks like a product now. Click anything — the search box, the filter, the
-"apply" button — and absolutely nothing happens.
+It looks like a product now. Click anything: the search box, the filter, the
+"apply" button, and absolutely nothing happens.
 ::

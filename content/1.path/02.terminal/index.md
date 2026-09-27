@@ -1,6 +1,6 @@
 ---
 title: The machine
-description: Before a single line of code — what a computer actually does, how to command one without touching a mouse, and how to keep a permanent, reversible history of everything you write.
+description: Before a single line of code, what a computer actually does, how to command one without touching a mouse, and how to keep a permanent, reversible history of everything you write.
 code: JSG-02
 duration: 3 weeks
 stage: introduction
@@ -21,7 +21,7 @@ ninety seconds about yourself that open the right doors. What you do not have is
 any idea how the machine in front of you works, and everything after this rests
 on that.
 
-I started here because I had to. Not out of purity — out of embarrassment.
+I started here because I had to. Not out of purity, out of embarrassment.
 
 My first week of trying to learn this, someone sent me a project and said "clone
 it and run it". I did not know what either word meant in that sentence. I spent
@@ -35,7 +35,7 @@ This track is those habits.
 ## Why this comes first
 
 You cannot build well on a machine you think is magic. And you cannot work like a
-professional through a graphical interface alone — not because the mouse is
+professional through a graphical interface alone, not because the mouse is
 shameful, but because every real instruction you will ever be given assumes a
 prompt. Install this. Run that. Push your branch. Check the logs on the server.
 
@@ -47,7 +47,7 @@ prompt. Install this. Run that. Push your branch. Check the logs on the server.
   :::
   :::compare-side{label="Starting here" verdict="right"}
   You are slower for three weeks. Then every error message afterwards is
-  addressed to somebody who knows what a process, a path and a permission are —
+  addressed to somebody who knows what a process, a path and a permission are:
   and error messages stop being weather and start being information.
   :::
 ::
@@ -72,7 +72,7 @@ JavaScript.
   into something none of them could do alone.
   :::
   :::feature{icon="i-lucide-shield" title="Understand refusal"}
-  Permissions, ownership, processes, and what `sudo` really means — so "permission
+  Permissions, ownership, processes, and what `sudo` really means, so "permission
   denied" becomes a sentence rather than a wall.
   :::
   :::feature{icon="i-lucide-git-branch" title="Never lose work again"}
@@ -85,7 +85,7 @@ JavaScript.
 
 ::flow{numbered direction="vertical" caption="Each chapter exists because the one before it ran out of road."}
   :::flow-step{label="What is actually happening in there" icon="i-lucide-cpu"}
-  Five lessons on the machine itself — from electricity being on or off, up to the
+  Five lessons on the machine itself, from electricity being on or off, up to the
   operating system deciding which program runs next. It ends with you knowing
   there is a faster way into the machine than clicking.
   :::
@@ -97,7 +97,7 @@ JavaScript.
   :::
   :::flow-step{label="Git and GitHub" icon="i-lucide-git-branch" highlight}
   A permanent, reversible history of every change you ever make, on your machine
-  and off it. It ends with your workshop ready — and nothing left to do but learn
+  and off it. It ends with your workshop ready, and nothing left to do but learn
   to speak to the machine, which is the next track.
   :::
 ::
@@ -117,7 +117,7 @@ before the command, not after it. Read those two twice.
 
 ## One system, the whole way through
 
-Everything in this course — every example, every exercise, every table and page —
+Everything in this course, every example, every exercise, every table and page:
 belongs to one system called the **University Management App**: the software a university would
 actually run, from a prospective student's first enquiry through admission,
 fees, attendance, results and placement.
@@ -128,6 +128,6 @@ a real domain that anybody can visit. There is never a second project.
 
 ::callout{icon="i-lucide-arrow-right"}
 The first lesson is not about a computer. It is about what you are signing up
-for, and what you get at the end of it — because I nearly quit twice, and both
+for, and what you get at the end of it, because I nearly quit twice, and both
 times it was because I had lost sight of that.
 ::

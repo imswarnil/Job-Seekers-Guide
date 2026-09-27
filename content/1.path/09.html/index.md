@@ -1,6 +1,6 @@
 ---
 title: HTML
-description: Everything you have built so far is invisible to everyone but you. HTML is the structure a browser can render — and the first version of it you write will be the university's actual enquiry form.
+description: Everything you have built so far is invisible to everyone but you. HTML is the structure a browser can render, and the first version of it you write will be the university's actual enquiry form.
 code: JSG-09
 duration: 3 weeks
 stage: web
@@ -15,7 +15,7 @@ prerequisites:
 ---
 
 You can store the university's data and ask it anything, and nobody but you can
-reach a single row of it. A browser can — if you give it something it knows how
+reach a single row of it. A browser can, if you give it something it knows how
 to render.
 
 ## Why this track exists
@@ -28,7 +28,7 @@ up in production the first time somebody uses your page with a keyboard.
 ::real-life{title="The form that lost a term's admissions" source="A university IT office"}
 An enquiry form built entirely from `div` elements and click handlers worked
 perfectly in testing. It could not be submitted with a keyboard, screen readers
-announced nothing, and the browser's autofill never triggered — so on mobile,
+announced nothing, and the browser's autofill never triggered, so on mobile,
 where most enquiries came from, people abandoned it halfway. Nothing was broken.
 Everything was meaningless.
 ::
@@ -41,7 +41,7 @@ Everything was meaningless.
   server, HTTP, status codes, and what "the front end" honestly means.
   :::
   :::flow-step{label="Structure and meaning" icon="i-lucide-code"}
-  Elements, attributes, text, links, images, lists, tables — and forms, properly:
+  Elements, attributes, text, links, images, lists, tables, and forms, properly:
   labels, input types, validation, and what the browser gives you for free.
   :::
   :::flow-step{label="Semantics and accessibility" icon="i-lucide-accessibility" highlight}
@@ -51,7 +51,7 @@ Everything was meaningless.
 ::
 
 The web-skills roadmap at `andreasbm.github.io/web-skills` is the map this track
-and the next three cover. Look at it once, then close it — a map is not a plan.
+and the next three cover. Look at it once, then close it: a map is not a plan.
 
 ## What the University Management App becomes
 
@@ -60,6 +60,6 @@ student, teacher and admin portals. Unstyled, ugly, and for the first time,
 something you can send to another human being.
 
 ::callout{icon="i-lucide-arrow-right"}
-You send the link to someone. They open it on a phone, and it is unreadable —
+You send the link to someone. They open it on a phone, and it is unreadable:
 black text, times new roman, a form running off the side of the screen.
 ::

@@ -1,6 +1,6 @@
 ---
 title: Auth and access
-description: The University Management App needs a database on the internet, real logins, file storage, and permissions the database itself enforces — not permissions your interface politely suggests.
+description: The University Management App needs a database on the internet, real logins, file storage, and permissions the database itself enforces, not permissions your interface politely suggests.
 code: JSG-18
 duration: 4 weeks
 stage: applied
@@ -40,7 +40,7 @@ rotate anything you leak.
   schema, and querying it from the app.
   :::
   :::flow-step{label="Identity and permissions" icon="i-lucide-lock" highlight}
-  Sign-up, sign-in, sessions, roles — then row-level security, where a student
+  Sign-up, sign-in, sessions, roles, then row-level security, where a student
   sees only their own results because the database says so.
   :::
   :::flow-step{label="Files, realtime and the finished backend" icon="i-lucide-hard-drive"}
