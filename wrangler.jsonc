@@ -42,7 +42,7 @@
     {
       "binding": "DB",
       "database_name": "jobseekers-content",
-      "database_id": "REPLACE_WITH_D1_DATABASE_ID"
+      "database_id": "bb31d0db-4bcd-4c0b-b881-5ef21f764b83"
     }
   ],
 
@@ -59,13 +59,15 @@
     "head_sampling_rate": 1
   },
 
-  // The custom domain. Uncomment when switching DNS away from GitHub Pages
-  // (docs/backend.md, "Go live"). Wrangler creates the DNS record and the
-  // certificate; the existing CNAME to GitHub Pages must be deleted first.
-  // "routes": [
-  //   { "pattern": "jobseekers.imswarnil.com", "custom_domain": true }
-  // ],
+  // The live domain. A Worker Route on the existing proxied DNS record (the
+  // same pattern as creator.imswarnil.com): the Worker answers every request,
+  // and the record's old GitHub Pages origin behind it is never reached. No
+  // DNS change was needed, so the switch had no downtime. To roll back,
+  // delete this route and redeploy; GitHub Pages serves again at once.
+  "routes": [
+    { "pattern": "jobseekers.imswarnil.com/*", "zone_name": "imswarnil.com" }
+  ],
 
-  // Until then the Worker answers on its workers.dev address.
+  // The workers.dev address stays on for testing.
   "workers_dev": true
 }

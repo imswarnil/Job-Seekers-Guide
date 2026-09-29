@@ -69,8 +69,15 @@ jobs:
       # the build wrote. Secrets are set once with `wrangler secret put` and are
       # not touched here. CLOUDFLARE_API_TOKEN needs "Edit Cloudflare Workers"
       # plus D1 and R2 edit on the account (docs/backend.md).
+      # Until the CLOUDFLARE_API_TOKEN repo secret exists, deploys are done by
+      # hand with `pnpm deploy`, and this step says so instead of failing.
       - name: Deploy
-        run: pnpm exec wrangler deploy
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ]; then
+            echo "::notice::CLOUDFLARE_API_TOKEN is not set, so this run only checked the build. Deploy with 'pnpm deploy'."
+            exit 0
+          fi
+          pnpm exec wrangler deploy
