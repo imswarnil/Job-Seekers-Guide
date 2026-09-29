@@ -17,6 +17,17 @@ const RESERVED = [
   'privacy',
   'terms',
   'contact',
+  'gear',
+  // The server-backed pages (see docs/backend.md).
+  'login',
+  'account',
+  'admin',
+  'stats',
+  'stories',
+  'guestbook',
+  'leaderboard',
+  'sponsor',
+  'support',
   // Build and framework prefixes.
   'api',
   '_nuxt',

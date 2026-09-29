@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { Subject } from '~/utils/path'
-import { findTech } from '~/utils/tech'
+import { trackStyle } from '~/utils/tech'
 
 const props = defineProps<{
   subject: Subject
@@ -18,15 +18,11 @@ const progress = computed(() => subjectProgress(props.subject))
 const open = ref(props.expanded)
 
 /**
- * The subject's own colour, from the tech registry.
- *
- * The icon used to sit inside a progress ring, which put twenty small circles
- * down the rail and made every subject look the same until you read the label.
- * The mark in its own brand colour is recognisable at a glance — Supabase is
- * green, Java is red — and the progress moved to a hairline under the row,
- * where it does not compete with it.
+ * The track's own colour, from the registry in app/utils/tech.ts. Every track
+ * has one, so the rail reads as a row of distinct stops, and the progress
+ * hairline under the row is drawn in it too.
  */
-const accent = computed(() => findTech(props.subject.slug)?.color)
+const accent = computed(() => trackStyle(props.subject.slug, props.subject.icon).color)
 
 watch(() => props.expanded, (value) => {
   if (value) {
@@ -87,11 +83,10 @@ watch(activeModule, () => {
       :aria-expanded="open"
       @click="open = !open"
     >
-      <UIcon
-        :name="subject.icon || 'i-lucide-book-open'"
-        class="size-[1.15rem] shrink-0"
-        :class="[accent ? 'rail-row__mark' : (expanded ? 'text-primary' : 'text-dimmed')]"
-        :style="accent ? { '--tech': accent } : undefined"
+      <TrackIcon
+        :slug="subject.slug"
+        :icon="subject.icon"
+        size="xs"
       />
 
       <span class="flex-1 min-w-0">
@@ -115,7 +110,7 @@ watch(activeModule, () => {
             v-if="progress.started"
             class="rail-row__bar"
             :data-done="progress.finished ? '' : undefined"
-            :style="{ '--pct': `${progress.percent}%` }"
+            :style="{ '--pct': `${progress.percent}%`, '--track': accent }"
           />
         </ClientOnly>
       </span>
@@ -228,20 +223,6 @@ watch(activeModule, () => {
 </template>
 
 <style scoped>
-/* The mark in the technology's own colour. `.dark` rather than `:global(.dark)`
-   — scoped CSS puts the scope attribute on the last compound only, so this
-   compiles to `.dark .rail-row__mark[data-v-…]` and matches the class on
-   `<html>`. Wrapping the ancestor in `:global()` does not survive the build. */
-.rail-row__mark {
-  color: var(--tech);
-}
-
-/* Several of the brand colours (MySQL, Oracle, SQLite, PostgreSQL) go to mud on
-   a dark surface, so they lift toward the page instead of sitting in it. */
-.dark .rail-row__mark {
-  color: color-mix(in oklab, var(--tech) 74%, white);
-}
-
 .rail-row__bar {
   display: block;
   height: 2px;
@@ -257,7 +238,7 @@ watch(activeModule, () => {
   height: 100%;
   width: var(--pct);
   border-radius: 999px;
-  background: var(--ui-primary);
+  background: var(--track, var(--ui-primary));
   transition: width var(--dgm-t-base) var(--dgm-ease);
 }
 

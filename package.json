@@ -5,18 +5,22 @@
   "scripts": {
     "build": "nuxt build",
     "dev": "nuxt dev",
-    "generate": "nuxt generate",
-    "preview": "nuxt preview",
+    "preview": "nuxt build && wrangler dev --port 3501",
     "postinstall": "nuxt prepare",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "check:lessons": "node scripts/check-lessons.mjs",
     "typecheck": "nuxt typecheck",
-    "svg:opt": "svgo --config svgo.config.mjs"
+    "svg:opt": "svgo --config svgo.config.mjs",
+    "deploy": "nuxt build && wrangler deploy",
+    "db:migrate": "node --env-file-if-exists=.env scripts/db-migrate.mjs",
+    "db:status": "node --env-file-if-exists=.env scripts/db-migrate.mjs --status"
   },
   "dependencies": {
     "@iconify-json/lucide": "^1.2.122",
     "@iconify-json/simple-icons": "^1.2.93",
+    "@neondatabase/auth": "0.5.0-beta",
+    "@neondatabase/serverless": "^1.1.0",
     "@nuxt/content": "^3.15.2",
     "@nuxt/image": "^2.1.0",
     "@nuxt/ui": "^4.10.0",
@@ -26,6 +30,7 @@
     "@standard-schema/spec": "^1.1.0",
     "@takumi-rs/core": "^1.8.7",
     "@vueuse/nuxt": "^14.4.0",
+    "dodopayments": "^2.52.0",
     "nuxt": "^4.5.2",
     "nuxt-og-image": "^6.7.6",
     "nuxt-schema-org": "^6.2.9",
@@ -39,7 +44,8 @@
     "eslint": "^10.8.1",
     "svgo": "^4.0.2",
     "typescript": "^6.0.3",
-    "vue-tsc": "^3.3.9"
+    "vue-tsc": "^3.3.9",
+    "wrangler": "^4.142.0"
   },
   "packageManager": "pnpm@11.20.0"
 }

@@ -1,0 +1,85 @@
+# Products I use. Shown on /gear and in the small shelf under lessons.
+#
+# PLACEHOLDERS. Every entry below is a stand-in written from memory of what
+# was on my desk in the PG. Before this goes live:
+#
+#   1. Paste your affiliate link into `url`. Leave it '' and the card shows
+#      "Link coming soon" with the button switched off. Never guess a link.
+#   2. Check `price` against today's listing, or delete the line.
+#   3. Optional: drop a photo into public/images/products/ and set
+#      `image: /images/products/<file>.jpg`. Without one, a tile in the
+#      category's colour stands in.
+#
+# `category` is one of: Stationery, Books, Laptop & desk, Software.
+# `tracks` (optional) lists the track slugs a product belongs beside, so the
+# shelf under a Java lesson shows the Java book first.
+
+items:
+  - name: A thick ruled notebook
+    category: Stationery
+    description: One notebook per subject. I wrote every formula, every rejected question and every answer I should have given, and read it on the bus to the next walk-in.
+    url: '' # paste your affiliate link here
+    price: About ₹150
+    badge: Used every day
+
+  - name: Blue and black gel pens
+    category: Stationery
+    description: The written round is on paper more often than you think. A pen that does not skip saves you seconds on every question.
+    url: '' # paste your affiliate link here
+    price: About ₹100 for ten
+
+  - name: A highlighter set
+    category: Stationery
+    description: Yellow for formulas, green for traps, pink for the questions I got wrong twice. Revision the night before became twenty minutes instead of two hours.
+    url: '' # paste your affiliate link here
+    tracks: [quantitative-aptitude, logical-reasoning, verbal-ability]
+
+  - name: Quantitative Aptitude by R.S. Aggarwal
+    category: Books
+    description: The book every PG in BTM had a copy of. I did it chapter by chapter, timed, and only then moved on to mock tests.
+    url: '' # paste your affiliate link here
+    badge: The one I recommend first
+    tracks: [quantitative-aptitude]
+
+  - name: A Modern Approach to Verbal and Non-Verbal Reasoning by R.S. Aggarwal
+    category: Books
+    description: Series, coding-decoding, blood relations and the visual questions. The same author, the same drill, for the reasoning section.
+    url: '' # paste your affiliate link here
+    tracks: [logical-reasoning]
+
+  - name: A beginner's Java book
+    category: Books
+    description: Something you can read cover to cover alongside the Java track here. Pick one edition and finish it rather than starting three.
+    url: '' # paste your affiliate link here
+    tracks: [java, oops, dsa]
+
+  - name: A laptop stand
+    category: Laptop & desk
+    description: Eight hours a day on a PG bed with a laptop on my knees gave me a neck I could not turn. A cheap stand fixed it within a week.
+    url: '' # paste your affiliate link here
+    price: About ₹500
+
+  - name: Wired earphones with a mic
+    category: Laptop & desk
+    description: For video lectures in a shared room and for the online interviews later. Wired, because a battery that dies in the HR round is not a risk worth taking.
+    url: '' # paste your affiliate link here
+    tracks: [interview]
+
+  - name: A steel water bottle
+    category: Laptop & desk
+    description: Walk-ins in Bangalore mean hours in a queue outside an office. Carry water. Nobody hands it out.
+    url: '' # paste your affiliate link here
+    tracks: [bangalore]
+
+  - name: A small LED desk lamp
+    category: Laptop & desk
+    description: The PG light went off at eleven. The lamp is how the Sunday study sessions carried on after that without waking my roommate.
+    url: '' # paste your affiliate link here
+    tracks: [bangalore]
+
+  - name: A code editor and a JDK
+    category: Software
+    description: Free. VS Code or IntelliJ Community, and a current JDK. You do not need to pay for anything to learn Java properly.
+    url: '' # paste a link here, or leave it empty
+    badge: Free
+    tracks: [java]

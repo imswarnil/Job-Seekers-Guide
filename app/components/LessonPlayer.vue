@@ -19,6 +19,9 @@ const { toggle: toggleRail } = useRail()
 
 const complete = computed(() => isComplete(route.path))
 
+/** Story chapters sell their own spot, apart from the lessons. */
+const sponsorSlot = computed(() => props.page.kind === 'story' ? 'story-footer' : 'lesson-footer')
+
 // Resume-where-you-left-off only works if somebody writes down where you were.
 function remember(path: string) {
   markVisited(path, subject.value?.path)
@@ -154,6 +157,17 @@ usePlayerShortcuts({
       :seconds="AUTO_ADVANCE_SECONDS"
       class="mt-8"
       @cancel="cancelAdvance"
+    />
+
+    <SponsorSlot
+      :name="sponsorSlot"
+      variant="banner"
+      class="mt-10"
+    />
+
+    <ProductShelf
+      :track="subject?.slug"
+      class="mt-10"
     />
   </div>
 </template>

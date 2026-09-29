@@ -64,8 +64,9 @@ questions it answers.
 
 No navbar, no footer menu, no marketing pages. A sidebar with the whole guide
 and your progress, search on `/` or `⌘K`, and the lesson you are reading with
-previous and next. Progress lives in your browser (`localStorage`); there is no
-account.
+previous and next. Progress lives in your browser (`localStorage`). Reading
+never needs an account; one is only needed to share a story, sign the
+guestbook, comment under a lesson or sponsor the guide.
 
 | Key | Does |
 | --- | --- |
@@ -74,6 +75,25 @@ account.
 | `←` `→` or `K` `J` | Previous / next lesson |
 | `M` | Mark the lesson finished |
 
+## The community around it
+
+The guide is free. These pages are what keep it alive and let the people it
+helped help the next person:
+
+| Page | What it does |
+| --- | --- |
+| `/stories` | Readers post their own story (from → to, company, package, photos or video). Others vote for the most inspiring. |
+| `/guestbook` | "What did you learn here?", with GIFs. |
+| `/sponsor` · `/leaderboard` | Sponsor spots across the site. The highest bid holds a spot with no expiry until someone outbids it; every sponsor is ranked on the leaderboard. |
+| `/support` | Pay what you want to keep the guide free (Dodo Payments). |
+| `/stats` | Live visitors, reach, countries, stories and jobs got, in the open. |
+| `/gear` | The notebooks, pens and books I actually used, with affiliate links. |
+| `/admin` | For me: analytics, moderation, payments, the database. |
+
+Lessons have comments (5 per person per page) and "Mark as finished"
+progress. Sign-in is Neon Auth (Google or email), and deleting your account
+deletes everything you wrote.
+
 ## Run it
 
 ```bash
@@ -81,8 +101,15 @@ pnpm install
 pnpm dev              # http://localhost:3000
 pnpm check:lessons    # structure, nesting and em dashes in every lesson
 pnpm lint
-pnpm generate         # the static site, into .output/public
+pnpm build            # the Cloudflare Worker, with every lesson prerendered
+pnpm db:migrate       # apply db/migrations to Neon (needs DATABASE_URL)
+pnpm deploy           # build and `wrangler deploy`
 ```
+
+Copy `.env.example` to `.env` for local settings; with none at all the site
+still builds and renders. The server side is explained in
+[`docs/backend.md`](docs/backend.md), the endpoints in
+[`docs/api-contract.md`](docs/api-contract.md).
 
 Node 22, pnpm 11.
 
@@ -90,9 +117,11 @@ Node 22, pnpm 11.
 
 - **Nuxt 4**, **Nuxt UI 4**, **Nuxt Content 3**, Tailwind CSS 4, on the Im
   Design System's type and colour.
-- **Static.** `pnpm generate` prerenders every page; GitHub Pages serves them
-  (`.github/workflows/deploy.yml`, on every push to `main`). No server, no
-  database, no Cloudflare, no Supabase.
+- **Prerendered, on Cloudflare Workers.** Every lesson is prerendered and served
+  as a static file; a Worker serves the API and the community pages (stories,
+  guestbook, comments, stats, sponsors, support). Neon Postgres for data, Neon
+  Auth for sign-in, Dodo Payments for money, first-party analytics only.
+  Deployed by `.github/workflows/deploy.yml` on every push to `main`.
 - **The folder tree is the guide.** `content/1.path/<track>/<chapter>/<lesson>.md`,
   and the numeric prefixes are the order. Reordering the guide is a `git mv`.
 - **Code runs in your browser** for JavaScript and SQL. Java is shown with its
@@ -132,7 +161,7 @@ Put the file in `public/images/story/` (or a video URL) and add
 `java` `dsa` `sql` `dbms` `oops` `operating-systems` `computer-networks`
 `aptitude` `logical-reasoning` `verbal-ability` `interview-preparation`
 `hr-interview` `salary-negotiation` `btm-layout` `jspiders` `career-guide`
-`nuxt` `nuxt-content` `github-pages`
+`nuxt` `nuxt-content` `cloudflare-workers` `neon`
 
 ## Licence and honesty
 

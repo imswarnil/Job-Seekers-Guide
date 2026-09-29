@@ -22,8 +22,8 @@ const exact: Record<string, string> = {
   '/docs': '/',
   '/run': '/',
   '/search': '/',
-  '/login': '/',
-  '/signup': '/',
+  // `/login` is a real page again (sign-in for stories and the guestbook).
+  '/signup': '/login',
   '/series': '/my-story'
 }
 

@@ -42,7 +42,37 @@ export default defineContentConfig({
 
         // Any level.
         icon: z.string().optional(),
+        /**
+         * A real photo, for a track's cards and header: a path under
+         * `public/images/tracks/` or a full URL. Leave it out and the track
+         * gets a generated thumbnail in its own colour, which is the default.
+         */
+        image: z.string().optional(),
         seo: seoSchema
+      })
+    }),
+
+    // "Products I use": the things on my desk while I studied, shown on /gear
+    // and in a small shelf under lessons. One file, `content/products.yml`,
+    // holding a list. Links are affiliate links and are pasted in by hand; an
+    // empty `url` renders as "Link coming soon".
+    products: defineCollection({
+      source: 'products.yml',
+      type: 'data',
+      schema: z.object({
+        items: z.array(z.object({
+          name: z.string(),
+          category: z.enum(['Stationery', 'Books', 'Laptop & desk', 'Software']),
+          description: z.string(),
+          /** A path under `public/images/products/`. Optional: a tile in the category's colour stands in. */
+          image: z.string().optional(),
+          /** The affiliate link. Empty until one is pasted in. */
+          url: z.string().default(''),
+          price: z.string().optional(),
+          badge: z.string().optional(),
+          /** Track slugs this belongs beside, so the shelf under a Java lesson shows the Java book first. */
+          tracks: z.array(z.string()).optional()
+        }))
       })
     })
   }

@@ -1,13 +1,15 @@
 <script setup lang="ts">
 import type { Lesson } from '~/utils/path'
+import { trackSlug, trackStyle } from '~/utils/tech'
 
 /**
  * A lesson's picture, generated rather than drawn.
  *
  * Three hundred lessons cannot each have a commissioned thumbnail, and three
  * hundred identical grey icons tell the reader nothing about where they are. So
- * the tile is derived from the lesson's own position in the path: the subject
- * decides the colour family, the module decides the pattern, and the kind
+ * the tile is derived from the lesson's own position in the path: the track
+ * decides the colour (the same one it has in the sidebar), the module decides
+ * the pattern, and the kind
  * decides the glyph. Lessons in a module look like siblings; lessons in a
  * different subject look like a different subject.
  *
@@ -34,11 +36,7 @@ function hash(input: string) {
   return Math.abs(h)
 }
 
-/* Two brand families rather than a free hue: eleven subjects in eleven
-   unrelated colours stops looking like one curriculum. */
-const family = computed(() =>
-  hash(props.lesson.subjectPath || props.lesson.path) % 2 === 0 ? 'indigo' : 'teal'
-)
+const color = computed(() => trackStyle(trackSlug(props.lesson.subjectPath || props.lesson.path)).color)
 
 const pattern = computed(() => {
   const key = props.lesson.modulePath || props.lesson.subjectPath || props.lesson.path
@@ -55,7 +53,7 @@ const glyph = computed(() => lessonIcon(props.lesson))
   <span
     class="thumb"
     :data-size="size"
-    :data-family="family"
+    :style="{ '--track': color }"
     :data-shade="shade"
     :data-pattern="pattern"
     :data-complete="complete ? '' : undefined"
@@ -88,28 +86,18 @@ const glyph = computed(() => lessonIcon(props.lesson))
   border-radius: var(--radius-sm);
 }
 
-.thumb[data-family='indigo'] {
-  --a: var(--color-guide-600);
-  --b: var(--color-guide-800);
-  --ink: var(--color-guide-100);
-}
-
-/* Named 'teal' when there were two brand colours. Kept as a name because the
-   families are chosen by a hash of the path and renaming them would reshuffle
-   every existing thumbnail; it is a deeper accent now rather than a second
-   hue. */
-.thumb[data-family='teal'] {
-  --a: var(--color-guide-800);
-  --b: var(--color-ink-950);
-  --ink: var(--color-guide-200);
+.thumb {
+  --a: var(--track);
+  --b: color-mix(in oklab, var(--track) 50%, #0a0a0a);
+  --ink: #fff;
 }
 
 .thumb[data-shade='1'] {
-  --a: color-mix(in oklab, var(--a) 78%, #000);
+  --a: color-mix(in oklab, var(--track) 80%, #000);
 }
 
 .thumb[data-shade='2'] {
-  --a: color-mix(in oklab, var(--a) 82%, var(--color-guide-900));
+  --a: color-mix(in oklab, var(--track) 85%, #fff);
 }
 
 .thumb[data-complete] {

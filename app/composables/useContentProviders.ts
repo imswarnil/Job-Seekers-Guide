@@ -9,13 +9,13 @@ export async function useProvideContent() {
   // the Nuxt instance is still available for the second.
   const navigationData = useAsyncData(
     'path-navigation',
-    () => queryCollectionNavigation('path', ['description', 'icon', 'duration', 'stage', 'minutes', 'kind'])
+    () => queryCollectionNavigation('path', ['description', 'icon', 'image', 'duration', 'stage', 'minutes', 'kind'])
   )
 
   const pagesData = useAsyncData(
     'path-pages',
     () => queryCollection('path')
-      .select('path', 'title', 'description', 'icon', 'duration', 'stage', 'minutes', 'kind')
+      .select('path', 'title', 'description', 'icon', 'image', 'duration', 'stage', 'minutes', 'kind')
       .all() as Promise<PageMeta[]>
   )
 

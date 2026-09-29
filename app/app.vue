@@ -25,10 +25,15 @@ useSeoMeta({
 
 const { navigation, files } = await useProvideContent()
 
+/** Shared with the home page, which fills it from `/?q=` so a search engine's
+ *  sitelinks search box lands on real results. */
+const searchTerm = useState('search-term', () => '')
+
 const searchLinks = [
   { label: 'Home', icon: 'i-lucide-house', to: '/' },
   { label: 'Start the guide', icon: 'i-lucide-train-front', to: '/bangalore' },
-  { label: 'My story', icon: 'i-lucide-footprints', to: '/my-story' }
+  { label: 'My story', icon: 'i-lucide-footprints', to: '/my-story' },
+  { label: 'Products I use', icon: 'i-lucide-backpack', to: '/gear' }
 ]
 </script>
 
@@ -42,6 +47,7 @@ const searchLinks = [
 
     <ClientOnly>
       <LazyUContentSearch
+        v-model:search-term="searchTerm"
         :files="files"
         :navigation="navigation"
         :links="searchLinks"

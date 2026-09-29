@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Lesson } from '~/utils/path'
+import { trackSlug } from '~/utils/tech'
 
 defineProps<{
   title: string
@@ -16,8 +17,13 @@ defineProps<{
       <NuxtLink
         v-if="lesson?.subjectPath"
         :to="lesson.subjectPath"
-        class="hover:text-primary transition-colors"
+        class="inline-flex items-center gap-1.5 hover:text-primary transition-colors"
       >
+        <TrackIcon
+          :slug="trackSlug(lesson.subjectPath)"
+          size="xs"
+          bare
+        />
         {{ lesson.subjectTitle }}
       </NuxtLink>
 

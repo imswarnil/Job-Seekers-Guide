@@ -1,12 +1,17 @@
 <script setup lang="ts">
+import { trackStyle } from '~/utils/tech'
+
 /**
  * The app's start screen. Not a landing page: there is nothing to sell. It
- * says what this is in one screen, lets you continue, shows the route the
- * guide follows, and lists the guide itself.
+ * says what this is in one screen, lets you continue, walks the route I took,
+ * and lists the guide itself with your progress through each track.
  */
 const { path } = usePath()
 const { state, pathProgress, subjectProgress, resume } = useProgress()
 const { open: openSearch } = useContentSearch()
+const searchTerm = useState('search-term', () => '')
+const { hero } = useAppConfig()
+const route = useRoute()
 
 const progress = computed(() => pathProgress(path.value))
 const next = computed(() => resume(path.value))
@@ -18,36 +23,47 @@ const totals = computed(() => ({
   hours: Math.round(path.value.minutes / 60)
 }))
 
-/**
- * The route, stop by stop. Each stop links to the part of the guide that
- * teaches what that stop took, so the story and the guide are one thing.
- */
-const route = [
-  { year: '2018', place: 'Mahroni', text: 'Graduated. Wanted YouTube, needed a job. My father wanted a government teacher.', to: '/my-story', icon: 'i-lucide-house' },
-  { year: '2018', place: 'The train', text: 'My sister backed me. One ticket to Bangalore.', to: '/bangalore', icon: 'i-lucide-train-front' },
-  { year: '2018', place: 'BTM Layout', text: 'A PG where every room was a job seeker.', to: '/bangalore', icon: 'i-lucide-bed-double' },
-  { year: '2019', place: 'JSpiders', text: 'Three days of demo classes, then three months of Java, SQL and web.', to: '/java', icon: 'i-lucide-code' },
-  { year: '2019', place: '33 walk-ins', text: 'Aptitude, English and CS in parallel. Rejected, again and again.', to: '/quantitative-aptitude', icon: 'i-lucide-clipboard-list' },
-  { year: '2019', place: 'The 34th', text: 'One of 700 to 1000 people. Selected.', to: '/interview', icon: 'i-lucide-badge-check' },
-  { year: '2019', place: '₹13,000 a month', text: 'A startup, a bond, six days a week. Sundays for study.', to: '/interview', icon: 'i-lucide-wallet' },
-  { year: '2019', place: 'Accenture', text: 'I wanted web development. I got Salesforce.', to: '/my-story', icon: 'i-lucide-building-2' },
-  { year: '2022', place: '5 offers', text: 'A friend was on 21 LPA. I switched: 15.5 LPA, Cognizant.', to: '/interview', icon: 'i-lucide-trending-up' },
-  { year: '2023', place: 'Twilio', text: '30+ LPA, Salesforce analytics in the GTM team.', to: '/my-story', icon: 'i-lucide-rocket' },
-  { year: 'Now', place: 'Europe', text: 'Education First sponsored my visa. And I wrote this down.', to: '/my-story', icon: 'i-lucide-plane' }
-]
+const videoId = computed(() => (hero?.youtubeId || '').trim())
+
+// The site search, reachable from a search engine: `/?q=joins` opens it with
+// the term typed in. The WebSite schema below advertises exactly this URL.
+onMounted(() => {
+  const q = route.query.q
+  if (typeof q === 'string' && q.trim()) {
+    searchTerm.value = q.trim()
+    openSearch.value = true
+  }
+})
 
 usePageSeo({
   title: 'From Mahroni to your first IT job',
   description: 'From Mahroni to Bangalore with no skills, 33 walk-ins, selected in the 34th. Where to live, how to learn, Java, DSA, SQL, CS subjects, the written round and the interview: the whole route, free.',
-  headline: 'By Swarnil'
+  headline: 'By Swarnil',
+  type: 'website'
 })
+
+useSchemaOrg([
+  defineWebSite({
+    potentialAction: [
+      defineSearchAction({ target: '/?q={search_term_string}' })
+    ]
+  })
+])
 </script>
 
 <template>
   <div class="home">
     <!-- ── The promise ─────────────────────────────────────────────── -->
-    <section class="home__band home__hero">
-      <div class="home__inner">
+    <section
+      class="home__band home__hero"
+      :data-video="videoId ? '' : undefined"
+    >
+      <HomeHeroVideo
+        v-if="videoId"
+        :id="videoId"
+      />
+
+      <div class="home__inner relative">
         <p class="kicker">
           <span class="dot" /> Bangalore Job Seekers Guide · by Swarnil
         </p>
@@ -135,52 +151,66 @@ usePageSeo({
         </dl>
 
         <ClientOnly>
+          <HomeLiveStats class="mt-6" />
+
           <PlayerProgress
             v-if="progress.started"
             :progress="progress"
-            :label="`${progress.completed} of ${progress.total} lessons finished`"
+            :label="`You have finished ${progress.completed} of ${progress.total} lessons`"
             class="mt-8 max-w-lg"
           />
         </ClientOnly>
+
+        <div class="mt-8 flex flex-wrap gap-2">
+          <NuxtLink
+            to="/stories/new"
+            class="nudge card-hover"
+          >
+            <UIcon
+              name="i-lucide-briefcase"
+              class="size-4 text-primary shrink-0"
+            />
+            Did you get a job with this guide? Tell me.
+          </NuxtLink>
+          <NuxtLink
+            to="/guestbook"
+            class="nudge card-hover"
+          >
+            <UIcon
+              name="i-lucide-pen-line"
+              class="size-4 text-primary shrink-0"
+            />
+            Learned something? Sign the guestbook.
+          </NuxtLink>
+        </div>
+
+        <p class="mt-4 text-sm text-dimmed">
+          <NuxtLink
+            to="/my-story"
+            class="underline underline-offset-4 hover:text-highlighted"
+          >I was inspired by the story</NuxtLink>. It is all there, chapter by chapter, with the numbers left in.
+        </p>
       </div>
     </section>
 
-    <!-- ── The route ───────────────────────────────────────────────── -->
-    <section class="home__band">
+    <div class="home__inner py-6">
+      <SponsorSlot
+        name="home-hero"
+        variant="banner"
+      />
+    </div>
+
+    <!-- ── My journey ──────────────────────────────────────────────── -->
+    <section class="home__band home__journey">
       <div class="home__inner">
         <h2 class="section-title">
-          The route
+          My journey
         </h2>
         <p class="section-lede">
-          Every stop is a part of the guide. The rejections are left in.
+          Every stop is a chapter of my story and a part of the guide. The rejections are left in.
         </p>
 
-        <ol class="route mt-8">
-          <li
-            v-for="(stop, index) in route"
-            :key="stop.place"
-            class="route__stop"
-          >
-            <NuxtLink
-              :to="stop.to"
-              class="route__link"
-            >
-              <span class="route__node">
-                <UIcon
-                  :name="stop.icon"
-                  class="size-4"
-                />
-              </span>
-              <span class="route__year">{{ stop.year }}</span>
-              <span class="route__place">{{ stop.place }}</span>
-              <span class="route__text">{{ stop.text }}</span>
-              <span
-                v-if="index === 5"
-                class="route__flag"
-              >the turn</span>
-            </NuxtLink>
-          </li>
-        </ol>
+        <HomeJourney class="mt-10" />
       </div>
     </section>
 
@@ -192,13 +222,13 @@ usePageSeo({
         </h2>
         <p class="section-lede">
           Read it top to bottom, or search for the thing you need tomorrow morning.
+          Your progress stays in this browser.
         </p>
 
-        <div class="mt-8 grid gap-6 lg:grid-cols-2">
+        <div class="mt-10 space-y-12">
           <section
             v-for="part in parts"
             :key="part.stage"
-            class="part"
           >
             <header class="flex items-start gap-3">
               <span class="part__icon">
@@ -211,44 +241,50 @@ usePageSeo({
                 <h3 class="font-display text-lg font-semibold text-highlighted">
                   {{ part.label }}
                 </h3>
-                <p class="text-sm text-muted mt-1 text-pretty">
+                <p class="text-sm text-muted mt-1 text-pretty max-w-3xl">
                   {{ part.blurb }}
                 </p>
               </div>
             </header>
 
-            <ul class="mt-4 divide-y divide-default">
+            <ul class="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
               <li
                 v-for="(subject, index) in part.subjects"
                 :key="subject.path"
               >
                 <NuxtLink
                   :to="subject.path"
-                  class="track"
+                  class="track card-hover"
+                  :style="{ '--track': trackStyle(subject.slug, subject.icon).color }"
                 >
-                  <span class="track__number">{{ String(part.offset + index + 1).padStart(2, '0') }}</span>
-                  <UIcon
-                    :name="subject.icon || 'i-lucide-book-open'"
-                    class="size-4 text-dimmed shrink-0"
+                  <TrackThumb
+                    :slug="subject.slug"
+                    :icon="subject.icon"
+                    :image="subject.image"
                   />
-                  <span class="flex-1 min-w-0">
-                    <span class="block truncate font-medium text-highlighted">{{ subject.title }}</span>
-                    <span class="block text-xs text-dimmed tabular-nums">
+                  <span class="track__body">
+                    <span class="track__number">{{ String(part.offset + index + 1).padStart(2, '0') }}</span>
+                    <span class="track__title">{{ subject.title }}</span>
+                    <span
+                      v-if="subject.description"
+                      class="track__text"
+                    >{{ subject.description }}</span>
+                    <span class="track__meta">
                       {{ subject.lessons.length }} lessons<template v-if="subject.minutes"> · {{ formatMinutes(subject.minutes) }}</template>
                     </span>
+                    <ClientOnly>
+                      <span
+                        class="track__bar"
+                        :data-done="subjectProgress(subject).finished || undefined"
+                        :style="{ '--pct': `${subjectProgress(subject).percent}%` }"
+                        :title="`${subjectProgress(subject).completed} of ${subjectProgress(subject).total} finished`"
+                      />
+                      <span
+                        v-if="subjectProgress(subject).started"
+                        class="track__progress"
+                      >{{ subjectProgress(subject).completed }} of {{ subjectProgress(subject).total }} finished</span>
+                    </ClientOnly>
                   </span>
-                  <ClientOnly>
-                    <PlayerProgress
-                      v-if="subjectProgress(subject).started"
-                      :progress="subjectProgress(subject)"
-                      variant="ring"
-                      :size="20"
-                    />
-                  </ClientOnly>
-                  <UIcon
-                    name="i-lucide-chevron-right"
-                    class="size-4 text-dimmed shrink-0"
-                  />
                 </NuxtLink>
               </li>
             </ul>
@@ -271,19 +307,63 @@ usePageSeo({
           </footer>
         </blockquote>
 
+        <AuthorCard
+          variant="wide"
+          class="mt-10"
+        />
+      </div>
+    </section>
+
+    <!-- ── What was on my desk ────────────────────────────────────── -->
+    <section class="home__band">
+      <div class="home__inner">
+        <ProductShelf title="What was on my desk in the PG" />
+      </div>
+    </section>
+
+    <!-- ── What next ───────────────────────────────────────────────── -->
+    <section class="home__band home__next">
+      <div class="home__inner">
+        <p class="kicker">
+          <span class="dot" /> What next
+        </p>
+        <h2 class="mt-4 font-display text-2xl sm:text-3xl font-bold tracking-tight text-highlighted text-balance max-w-3xl">
+          I do not know what happens next either.
+        </h2>
+        <div class="mt-5 max-w-3xl space-y-4 text-muted text-pretty">
+          <p>
+            I live in Europe now. The walk-in queues I stood in are not the same
+            queues you will stand in: AI is changing what a fresher is hired to
+            do, and it is changing my job as well.
+          </p>
+          <p>
+            I am as clueless as anyone about where it lands. What I do know is
+            that the person who understands the basics can tell when the machine
+            is wrong, and that is still worth being. The story carries on, and I
+            write the next part of it at imswarnil.com.
+          </p>
+        </div>
         <div class="mt-8 flex flex-wrap gap-3">
           <UButton
-            to="/bangalore"
-            label="Start with the move"
-            trailing-icon="i-lucide-arrow-right"
+            to="https://imswarnil.com"
+            target="_blank"
+            rel="noopener"
+            label="Follow the story at imswarnil.com"
+            trailing-icon="i-lucide-arrow-up-right"
           />
           <UButton
-            to="/my-story"
-            label="Read the whole story"
+            to="/bangalore"
+            label="Or start the guide"
             color="neutral"
             variant="subtle"
           />
         </div>
+
+        <SponsorSlot
+          name="home-footer"
+          variant="banner"
+          class="mt-12"
+        />
       </div>
     </section>
   </div>
@@ -296,6 +376,8 @@ usePageSeo({
 }
 
 .home__hero {
+  position: relative;
+  overflow: hidden;
   padding-block: 4rem 3.5rem;
   background:
     radial-gradient(60rem 24rem at 0% 0%, color-mix(in oklab, var(--ui-primary) 9%, transparent), transparent 70%);
@@ -304,6 +386,27 @@ usePageSeo({
 @media (min-width: 1024px) {
   .home__hero {
     padding-top: 5.5rem;
+  }
+}
+
+/* With a video behind it the hero is dark in both colour modes, so its text
+   and controls switch to light. Wide screens only: on a phone there is no
+   video and the hero is the ordinary page. */
+@media (min-width: 768px) {
+  .home__hero[data-video] {
+    color-scheme: dark;
+    --ui-text: #fafafa;
+    --ui-text-highlighted: #fff;
+    --ui-text-muted: rgb(255 255 255 / 0.8);
+    --ui-text-dimmed: rgb(255 255 255 / 0.62);
+    --ui-bg: rgb(10 10 10 / 0.4);
+    --ui-bg-elevated: rgb(255 255 255 / 0.1);
+    --ui-bg-accented: rgb(255 255 255 / 0.16);
+    --ui-border: rgb(255 255 255 / 0.18);
+    --ui-border-accented: rgb(255 255 255 / 0.32);
+    --ui-primary: var(--color-guide-400);
+    border-bottom-color: transparent;
+    padding-block: 7rem 5rem;
   }
 }
 
@@ -359,6 +462,19 @@ usePageSeo({
   font-variant-numeric: tabular-nums;
 }
 
+.nudge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.875rem;
+  border: 1px solid var(--ui-border);
+  border-radius: 2px;
+  background: var(--ui-bg);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--ui-text-highlighted);
+}
+
 .section-title {
   font-family: var(--font-display);
   font-size: 1.5rem;
@@ -367,110 +483,24 @@ usePageSeo({
   color: var(--ui-text-highlighted);
 }
 
+@media (min-width: 640px) {
+  .section-title {
+    font-size: 1.875rem;
+  }
+}
+
 .section-lede {
   margin-top: 0.375rem;
   color: var(--ui-text-muted);
 }
 
-/* ── The route: a vertical line on phones, a grid of stops on wide screens. */
-.route {
-  display: grid;
-  gap: 0.75rem;
-}
-
-@media (min-width: 640px) {
-  .route {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@media (min-width: 1280px) {
-  .route {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-}
-
-.route__link {
-  position: relative;
-  display: grid;
-  grid-template-columns: auto 1fr;
-  grid-template-areas:
-    'node year'
-    'node place'
-    'node text';
-  column-gap: 0.75rem;
-  height: 100%;
-  padding: 0.875rem 1rem;
-  border: 1px solid var(--ui-border);
-  border-radius: var(--radius-lg);
-  background: var(--ui-bg);
-  transition: border-color var(--dgm-t-fast) var(--dgm-ease), transform var(--dgm-t-fast) var(--dgm-ease);
-}
-
-.route__link:hover {
-  border-color: var(--ui-border-accented);
-  transform: translateY(-1px);
-}
-
-.route__node {
-  grid-area: node;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 2rem;
-  height: 2rem;
-  border-radius: 999px;
-  background: var(--ui-bg-elevated);
-  color: var(--ui-text-muted);
-}
-
-.route__stop:nth-child(6) .route__node {
-  background: var(--ui-primary);
-  color: var(--ui-bg);
-}
-
-.route__year {
-  grid-area: year;
-  font-size: 0.6875rem;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--ui-text-dimmed);
-}
-
-.route__place {
-  grid-area: place;
-  font-family: var(--font-display);
-  font-weight: 600;
-  color: var(--ui-text-highlighted);
-}
-
-.route__text {
-  grid-area: text;
-  margin-top: 0.25rem;
-  font-size: 0.875rem;
-  color: var(--ui-text-muted);
-}
-
-.route__flag {
-  position: absolute;
-  top: 0.75rem;
-  right: 0.875rem;
-  font-size: 0.625rem;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--ui-primary);
+.home__journey {
+  background:
+    radial-gradient(40rem 20rem at 100% 0%, color-mix(in oklab, var(--ui-primary) 6%, transparent), transparent 70%),
+    var(--ui-bg-muted);
 }
 
 /* ── The parts ─────────────────────────────────────────────────────── */
-.part {
-  padding: 1.25rem;
-  border: 1px solid var(--ui-border);
-  border-radius: var(--radius-lg);
-  background: var(--ui-bg);
-}
-
 .part__icon {
   display: flex;
   align-items: center;
@@ -485,28 +515,89 @@ usePageSeo({
 
 .track {
   display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.625rem 0.5rem;
-  margin-inline: -0.5rem;
-  border-radius: var(--radius-md);
-  transition: background-color var(--dgm-t-fast) var(--dgm-ease);
+  flex-direction: column;
+  height: 100%;
+  padding: 0.5rem;
+  border: 1px solid var(--ui-border);
+  border-radius: 0;
+  background: var(--ui-bg);
 }
 
-.track:hover {
-  background: var(--ui-bg-elevated);
+.track__body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding: 0.75rem 0.5rem 0.375rem;
 }
 
 .track__number {
-  width: 1.5rem;
   font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: var(--ui-text-dimmed);
+  font-variant-numeric: tabular-nums;
+}
+
+.track__title {
+  margin-top: 0.125rem;
+  font-family: var(--font-display);
+  font-weight: 600;
+  color: var(--ui-text-highlighted);
+}
+
+.track__text {
+  display: -webkit-box;
+  margin-top: 0.375rem;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--ui-text-muted);
+}
+
+.track__meta {
+  margin-top: auto;
+  padding-top: 0.75rem;
   font-size: 0.75rem;
   color: var(--ui-text-dimmed);
   font-variant-numeric: tabular-nums;
 }
 
+.track__bar {
+  display: block;
+  height: 4px;
+  margin-top: 0.5rem;
+  border-radius: 999px;
+  background: var(--ui-bg-accented);
+  overflow: hidden;
+}
+
+.track__bar::after {
+  content: '';
+  display: block;
+  width: var(--pct);
+  height: 100%;
+  border-radius: 999px;
+  background: var(--track);
+  transition: width var(--dgm-t-base) var(--dgm-ease);
+}
+
+.track__bar[data-done]::after {
+  background: var(--ui-success);
+}
+
+.track__progress {
+  margin-top: 0.375rem;
+  font-size: 0.6875rem;
+  color: var(--ui-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
 .home__why {
-  border-bottom: 0;
   background: var(--ui-bg-elevated);
+}
+
+.home__next {
+  border-bottom: 0;
 }
 </style>

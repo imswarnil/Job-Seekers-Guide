@@ -25,7 +25,7 @@ defineProps<{
     <NuxtLink
       v-if="previous"
       :to="previous.path"
-      class="pagination__card pagination__card--prev"
+      class="pagination__card pagination__card--prev card-hover"
     >
       <span class="pagination__label">
         <UIcon
@@ -62,7 +62,7 @@ defineProps<{
     <NuxtLink
       v-if="next"
       :to="next.path"
-      class="pagination__card pagination__card--next"
+      class="pagination__card pagination__card--next card-hover"
     >
       <span class="pagination__label">
         <!-- Crossing into a new subject is the moment the path stops feeling
@@ -80,7 +80,7 @@ defineProps<{
     <NuxtLink
       v-else
       to="/"
-      class="pagination__card pagination__card--next"
+      class="pagination__card pagination__card--next card-hover"
     >
       <span class="pagination__label">
         Finished
@@ -115,16 +115,8 @@ defineProps<{
   gap: 0.25rem;
   padding: 1rem 1.25rem;
   border: 1px solid var(--ui-border);
-  border-radius: var(--radius-lg);
+  border-radius: 0;
   background: var(--ui-bg);
-  transition:
-    border-color var(--dgm-t-fast) var(--dgm-ease),
-    transform var(--dgm-t-fast) var(--dgm-ease);
-}
-
-.pagination__card:hover {
-  border-color: var(--ui-primary);
-  transform: translateY(-1px);
 }
 
 .pagination__card--next {

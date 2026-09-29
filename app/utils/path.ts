@@ -50,6 +50,8 @@ export interface Subject {
   slug: string
   description?: string
   icon?: string
+  /** A real photo for the track's cards and header. Absent means a generated thumbnail. */
+  image?: string
   code?: string
   duration?: string
   stage?: Stage
@@ -76,6 +78,7 @@ export interface PageMeta {
   title?: string
   description?: string
   icon?: string
+  image?: string
   code?: string
   duration?: string
   stage?: Stage
@@ -232,6 +235,7 @@ export function toPath(
       slug: subjectPath.split('/').filter(Boolean).pop() || '',
       description: subjectItem.description ?? subjectMeta?.description,
       icon: subjectItem.icon ?? subjectMeta?.icon,
+      image: subjectItem.image ?? subjectMeta?.image,
       code: subjectItem.code ?? subjectMeta?.code,
       duration: subjectItem.duration ?? subjectMeta?.duration,
       stage: subjectItem.stage ?? subjectMeta?.stage,

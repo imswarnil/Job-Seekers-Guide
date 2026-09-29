@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { PathCollectionItem } from '@nuxt/content'
+import { trackStyle } from '~/utils/tech'
 
 defineProps<{
   page?: PathCollectionItem
@@ -29,6 +30,12 @@ const start = computed(() =>
           name="i-lucide-arrow-left"
           class="size-3.5"
         />
+        <TrackIcon
+          :slug="subject.slug"
+          :icon="subject.icon"
+          size="xs"
+          bare
+        />
         {{ subject.title }}
       </NuxtLink>
 
@@ -36,7 +43,8 @@ const start = computed(() =>
         <UIcon
           v-if="module?.icon"
           :name="module.icon"
-          class="size-6 text-primary shrink-0"
+          class="size-6 track-ink shrink-0"
+          :style="{ '--track': trackStyle(subject?.slug, subject?.icon).color }"
         />
         <h1 class="font-display text-3xl xl:text-4xl font-bold text-highlighted tracking-tight text-balance">
           {{ page?.title || module?.title }}

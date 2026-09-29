@@ -1,0 +1,71 @@
+// Cloudflare Worker for jobseekers.imswarnil.com.
+//
+// `pnpm build` merges this file into .output/server/wrangler.json (adding
+// `main` and the static `assets` directory, which is why neither is set here)
+// and writes .wrangler/deploy/config.json so that `wrangler deploy` from the
+// repository root deploys the built output. See docs/backend.md.
+//
+// Everything else the server reads is set with `wrangler secret put <NAME>`,
+// including the settings that are not strictly secret, so there is one place to
+// look and a var can never shadow a secret of the same name:
+//   DATABASE_URL, NEON_AUTH_BASE_URL, NEON_AUTH_JWKS_URL,
+//   NEON_AUTH_SECRET_SERVER_KEY (or NEON_AUTH_COOKIE_SECRET), ADMIN_EMAILS,
+//   MY_DODO_API_KEY, DODO_WEBHOOK_SECRET, DODO_DONATION_PRODUCT_ID,
+//   DODO_SPONSOR_PRODUCT_ID, GIPHY_API_KEY (optional)
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "jobseekers",
+  // The "Swarnil" account, which holds the imswarnil.com zone. Pinned so a
+  // cached login for another account can never receive this deploy.
+  "account_id": "389ebc0d5a66f36d522736d3dac41aae",
+  "compatibility_date": "2026-06-30",
+  "compatibility_flags": ["nodejs_compat"],
+
+  // Plain, non-secret settings. Values here are public by nature.
+  "vars": {
+    "NUXT_PUBLIC_SITE_URL": "https://jobseekers.imswarnil.com",
+    // Flip to "live_mode" only after going through docs/backend.md, "Go live".
+    "DODO_ENV": "test_mode"
+  },
+
+  // Nitro fills in `binding` and `directory`. Prerendered pages are folders
+  // with an index.html; serve /java/strings from it directly, and send
+  // /java/strings/ to /java/strings, which is the path the app routes on.
+  "assets": {
+    "html_handling": "drop-trailing-slash"
+  },
+
+  // Nuxt Content's runtime database (client-side navigation queries it). The
+  // module fills it from the build's SQL dump on first use. Create it with
+  // `wrangler d1 create jobseekers-content` and paste the id below.
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "jobseekers-content",
+      "database_id": "REPLACE_WITH_D1_DATABASE_ID"
+    }
+  ],
+
+  // Story photos and videos. `wrangler r2 bucket create jobseekers-uploads`.
+  "r2_buckets": [
+    {
+      "binding": "UPLOADS",
+      "bucket_name": "jobseekers-uploads"
+    }
+  ],
+
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1
+  },
+
+  // The custom domain. Uncomment when switching DNS away from GitHub Pages
+  // (docs/backend.md, "Go live"). Wrangler creates the DNS record and the
+  // certificate; the existing CNAME to GitHub Pages must be deleted first.
+  // "routes": [
+  //   { "pattern": "jobseekers.imswarnil.com", "custom_domain": true }
+  // ],
+
+  // Until then the Worker answers on its workers.dev address.
+  "workers_dev": true
+}

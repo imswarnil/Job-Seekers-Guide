@@ -112,35 +112,44 @@
 
 @media (min-width: 1280px) {
   .shell__aside {
-    display: block;
+    display: flex;
+    flex-direction: column;
   }
 }
 
+/* The column scrolls with the page, as one piece. It used to be a single
+   sticky box with its own scrollbar, which hid the author card and the page
+   actions behind an inner scroll and, at its worst, squeezed the contents to
+   nothing. Now everything in it is simply visible, and only the block marked
+   `shell-sticky` (the sponsor spot and the ad) holds its place once the reader
+   reaches it. The inner column fills the aside's full height, which is what
+   gives that sticky block somewhere to travel. */
 .shell__aside-inner {
-  position: sticky;
-  top: 2rem;
+  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 1.75rem;
-  max-height: calc(100vh - 3rem);
-  overscroll-behavior: contain;
+  gap: 1.5rem;
 }
 
-/* The contents takes whatever height is left and scrolls inside itself. When
-   the whole column scrolled as one, a long contents pushed the ad and the page
-   actions below the fold and was itself cut off half way down — so the reader
-   could see neither the end of the lesson's own outline nor anything under it. */
+.shell__aside-inner :slotted(*) {
+  flex-shrink: 0;
+}
+
+/* A short lesson's contents shows in full. Only a very long one is capped,
+   and only then does it scroll inside itself. */
 .shell__aside-inner :slotted(.shell-toc) {
-  flex: 1 1 auto;
-  min-height: 0;
+  max-height: 70vh;
   overflow-y: auto;
   overscroll-behavior: contain;
-  /* Room for the scrollbar so the text does not sit under it. */
-  padding-right: 0.25rem;
+  scrollbar-width: thin;
 }
 
-.shell__aside-inner :slotted(:not(.shell-toc)) {
-  flex-shrink: 0;
+.shell__aside-inner :slotted(.shell-sticky) {
+  position: sticky;
+  top: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
 .shell__pagination {

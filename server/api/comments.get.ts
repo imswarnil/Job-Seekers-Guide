@@ -1,0 +1,33 @@
+import { z } from 'zod'
+
+const schema = z.object({ path: sitePath })
+
+const COMMENTS_PER_PAGE = 5
+
+/**
+ * Comments under one lesson, oldest first, plus how many of their five the
+ * viewer has used on this page (0 when signed out).
+ */
+export default defineEventHandler(async (event) => {
+  const { path } = queryValid(event, schema)
+  const user = await getSessionUser(event)
+  setResponseHeader(event, 'cache-control', 'private, no-store')
+
+  return await softRead(event, { items: [] as unknown[], used: 0, limit: COMMENTS_PER_PAGE }, async (sql) => {
+    const rows = await q<{ id: string, body: string, ts: string, user_id: string, name: string | null, image: string | null }>(sql, `
+      select c.id, c.body, c.ts, c.user_id, p.name, p.image
+      from comments c left join profiles p on p.id = c.user_id
+      where c.path = $1 order by c.ts asc limit 300`, [path])
+    return {
+      items: rows.map(r => ({
+        id: Number(r.id),
+        body: r.body,
+        createdAt: r.ts,
+        author: { name: r.name || 'A reader', image: r.image },
+        mine: Boolean(user && r.user_id === user.id)
+      })),
+      used: user ? rows.filter(r => r.user_id === user.id).length : 0,
+      limit: COMMENTS_PER_PAGE
+    }
+  })
+})

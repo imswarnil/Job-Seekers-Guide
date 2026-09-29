@@ -79,6 +79,16 @@ export default defineAppConfig({
     topmate: 'https://topmate.io/swarnil'
   },
 
+  /** The home page's opening screen. */
+  hero: {
+    /**
+     * A YouTube video id (the eleven characters after `v=`), played muted and
+     * looping behind the headline on wide screens. Empty keeps the gradient.
+     * Paste a real id from your own channel; never a guessed one.
+     */
+    youtubeId: ''
+  },
+
   /** Lesson player behaviour. */
   player: {
     /** Move to the next lesson on its own after one is marked finished. */

@@ -84,6 +84,14 @@ usePageSeo({
       />
     </template>
 
+    <!-- Below xl the column beside the lesson is gone, so the contents
+         moves above the prose as one collapsible line. -->
+    <TocCompact
+      v-if="view === 'lesson' && toc.length"
+      :links="toc"
+      class="xl:hidden"
+    />
+
     <LessonPlayer
       v-if="view === 'lesson' && page"
       :page="page"
@@ -97,9 +105,16 @@ usePageSeo({
       :page="page || undefined"
     />
 
+    <!-- Questions and notes from readers (server builder's insertion). Loaded
+         in the browser only, so the lesson itself stays fully prerendered. -->
+    <ClientOnly v-if="view === 'lesson' && page">
+      <LessonComments :path="route.path" />
+    </ClientOnly>
+
     <template #aside>
-      <!-- `shell-toc` is the hook PlayerShell uses to let the contents scroll
-           on its own rather than pushing everything under it off screen. -->
+      <!-- The order is the order of importance: where you are in this page,
+           who wrote it, how to fix it, and only then anything paid. Nothing
+           here scrolls inside a box except a very long contents. -->
       <div
         v-if="toc.length"
         class="shell-toc"
@@ -111,17 +126,26 @@ usePageSeo({
         />
       </div>
 
-      <AdSlot
-        placement="sidebar"
-        variant="card"
-      />
+      <AuthorCard />
 
-      <!-- Who wrote the lesson the reader is looking at, and how. It sits under
-           the ad rather than above it so a paid slot never sits on top of the
-           claim it makes. -->
+      <!-- The third-party "a human wrote this" certificate. -->
       <AuthorBadge />
 
       <PageActions :file="file" />
+
+      <!-- The one block in the column that holds its place: once the reader
+           has scrolled down to it, it stays in view for the rest of the page. -->
+      <div class="shell-sticky">
+        <SponsorSlot
+          v-if="view === 'lesson'"
+          name="lesson-aside"
+        />
+
+        <AdSlot
+          placement="sidebar"
+          variant="card"
+        />
+      </div>
     </template>
 
     <template

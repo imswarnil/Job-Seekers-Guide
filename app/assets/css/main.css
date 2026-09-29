@@ -1,7 +1,6 @@
 @import "tailwindcss";
 @import "@nuxt/ui";
 @import "./diagram.css";
-@import "./illustration.css";
 
 @source "../../../content/**/*";
 
@@ -139,13 +138,20 @@
   --color-ink-900: oklch(20.5% 0 0);
   --color-ink-950: oklch(14.5% 0 0);
 
-  /* ---- Radius ------------------------------------------------------------ */
-  --radius-xs: 0.25rem;
-  --radius-sm: 0.375rem;
-  --radius-md: 0.5rem;
-  --radius-lg: 0.75rem;
-  --radius-xl: 1rem;
-  --radius-2xl: 1.5rem;
+  /* ---- Radius ------------------------------------------------------------
+     Square. Cards, panels and tiles have no curve at all; controls (buttons,
+     inputs, badges, the search box) keep a 2px softening so a focus ring does
+     not look chipped. A card is told apart from the page by a crisp 1px
+     border, and shows it is clickable with the offset shadow in `.card-hover`
+     below, not by being rounded. `rounded-full` is untouched: a dot, an avatar
+     or a journey node is still round. */
+  --radius-xs: 0;
+  --radius-sm: 2px;
+  --radius-md: 2px;
+  --radius-lg: 0;
+  --radius-xl: 0;
+  --radius-2xl: 0;
+  --radius-3xl: 0;
 
   /* ---- Shadows -----------------------------------------------------------
      Neutral-black now that the greys are neutral; the old ones were tinted
@@ -185,6 +191,10 @@
 }
 
 :root {
+  /* Nuxt UI derives its component radii from this. 2px, to match the
+     controls above. */
+  --ui-radius: 2px;
+
   /* The system's own names, for the handful of places that want a surface or a
      rule rather than a Tailwind colour. Same values Nuxt UI resolves to — they
      exist so a component can read one variable instead of a colour-mix. */
@@ -293,4 +303,56 @@ h1, .text-display {
    these and they should all space them the same. */
 .ad-auto {
   margin-block: 2.618rem;
+}
+
+/* Track colour. A component sets `--track` from app/utils/tech.ts and these
+   draw with it. The brand colours are picked for a light page, so in dark mode
+   they lift toward white rather than sinking into the surface. */
+.track-ink {
+  color: var(--track);
+}
+
+.dark .track-ink {
+  color: color-mix(in oklab, var(--track) 68%, white);
+}
+
+.track-tile {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--track);
+  background: color-mix(in oklab, var(--track) 13%, transparent);
+  border: 1px solid color-mix(in oklab, var(--track) 24%, transparent);
+}
+
+.dark .track-tile {
+  color: color-mix(in oklab, var(--track) 68%, white);
+  background: color-mix(in oklab, var(--track) 22%, transparent);
+  border-color: color-mix(in oklab, var(--track) 36%, transparent);
+}
+
+/* The hover every clickable card shares, now that cards are square: the border
+   darkens and a solid shadow in the card's own colour (`--track`, else the
+   accent) steps out from behind it. Loud enough to read as "this is a link"
+   without a curve or a lift doing the work. */
+.card-hover {
+  transition:
+    border-color var(--dgm-t-fast) var(--dgm-ease),
+    box-shadow var(--dgm-t-fast) var(--dgm-ease),
+    transform var(--dgm-t-fast) var(--dgm-ease);
+}
+
+.card-hover:hover,
+.card-hover:focus-visible {
+  border-color: var(--ui-text-highlighted);
+  box-shadow: 4px 4px 0 0 var(--track, var(--ui-primary));
+  transform: translate(-2px, -2px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-hover:hover,
+  .card-hover:focus-visible {
+    transform: none;
+  }
 }

@@ -1,4 +1,4 @@
-name: Deploy to GitHub Pages
+name: Deploy to Cloudflare Workers
 
 on:
   push:
@@ -7,21 +7,22 @@ on:
   # having to make an empty commit.
   workflow_dispatch:
 
-# Pages needs these; the default GITHUB_TOKEN has none of them.
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 # One deploy at a time. `cancel-in-progress: false` because cancelling a
-# half-finished deploy can leave the site serving a partial upload.
+# half-finished upload can leave the Worker on a mix of old and new assets.
 concurrency:
-  group: pages
+  group: deploy
   cancel-in-progress: false
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
+
+    environment:
+      name: production
+      url: https://jobseekers.imswarnil.com
 
     env:
       # Canonicals, og:url, the sitemap and absolute OG image URLs are all
@@ -42,45 +43,34 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      # These run before the build rather than in a separate job on purpose: a
-      # type error or a subject folder that collides with a reserved slug should
-      # stop the deploy, not appear next to a green tick.
+      # These run before the build on purpose: a type error, a broken lesson or
+      # a subject folder that collides with a reserved slug should stop the
+      # deploy, not appear next to a green tick.
       - run: pnpm check:lessons
       - run: pnpm lint
       - run: pnpm typecheck
 
-      - run: pnpm generate
+      - run: pnpm build
 
-      # Every page must be a real file. If prerendering silently produced only
-      # the landing page, the site would deploy and 404 everywhere else.
+      # Every guide page must be a real prerendered file. If prerendering
+      # silently produced only the landing page, the Worker would deploy and
+      # render everything else on demand from an empty D1.
       - name: Check the build is not empty
         run: |
           pages=$(find .output/public -name index.html | wc -l | tr -d ' ')
           echo "Prerendered $pages pages."
           if [ "$pages" -lt 20 ]; then
-            echo "::error::Only $pages pages were prerendered — expected at least 20. The crawler probably failed to reach the path."
+            echo "::error::Only $pages pages were prerendered, expected at least 20. The crawler probably failed to reach the path."
             exit 1
           fi
-          test -f .output/public/CNAME || { echo "::error::CNAME missing — the custom domain will be dropped."; exit 1; }
-          test -f .output/public/404.html || { echo "::error::404.html missing — legacy URL redirects rely on it."; exit 1; }
+          test -f .output/server/wrangler.json || { echo "::error::.output/server/wrangler.json missing: the cloudflare_module preset did not run."; exit 1; }
 
-      - uses: actions/configure-pages@v6
-
-      # This and `deploy-pages` below have to move together. They speak to each
-      # other through the artifact format, and a mismatched pair fails at the
-      # download step, after a green build.
-      - uses: actions/upload-pages-artifact@v5
-        with:
-          path: .output/public
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-
-    steps:
-      - id: deployment
-        uses: actions/deploy-pages@v5
+      # Deploys .output via the redirect in .wrangler/deploy/config.json that
+      # the build wrote. Secrets are set once with `wrangler secret put` and are
+      # not touched here. CLOUDFLARE_API_TOKEN needs "Edit Cloudflare Workers"
+      # plus D1 and R2 edit on the account (docs/backend.md).
+      - name: Deploy
+        run: pnpm exec wrangler deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
