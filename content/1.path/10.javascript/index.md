@@ -1,72 +1,63 @@
 ---
 title: JavaScript
-description: HTML is the body, CSS is the face, JavaScript is the nervous system. You already know how to program, so this track moves fast on the basics and slow on the two things that genuinely bite.
-code: JSG-11
-duration: 8 weeks
+description: The language of the browser, to the depth a fresher web interview asks. You already know Java, so this moves fast on loops and slow on the parts that bite. Scope, closures, this, equality and asynchronous code.
+code: JSG-10
+duration: 4 weeks
 stage: web
 icon: i-simple-icons-javascript
 outcomes:
-  - Read and write modern JavaScript without guessing at what `this` refers to
-  - Change a live page in response to what somebody does
-  - Fetch data over the network and handle it going wrong
-  - Explain the event loop well enough to debug something asynchronous
+  - You can explain var, let and const, hoisting and the temporal dead zone with a worked example
+  - You can predict the output of the classic == and typeof questions, and say why
+  - You can write and explain a closure, and fix the loop-with-var bug
+  - You can say what this points at in a method, a callback and an arrow function
+  - You can use map, filter, reduce and friends on real data without mutating by accident
+  - You can change a live page and handle events with one delegated listener
+  - You can write fetch with async and await that handles a 404, and explain the event loop
 prerequisites:
   - css
 ---
 
-The page looks like a product and clicking anything does nothing. Nothing is
-listening. That is the job of the third language the browser speaks.
+The page looks right and clicking anything does nothing. Nothing is listening.
+That is the job of the third language the browser speaks, and the one every
+web interview spends the most time on.
 
 ## Why this track exists
 
-React, Next.js and everything after them are JavaScript with extra rules. Learn
-the language properly here and the frameworks stop being magic; skip it and you
-will spend two years pattern-matching other people's React and never quite
-knowing why something re-ran.
+I studied Java, SQL and web technologies at JSpiders in Bangalore for about
+three months, and of the three web languages JavaScript is the only real
+programming language. It is also where fresher web interviews get hard. Nobody
+asks you to write a `<table>`. They show you four lines and ask what they print.
 
 You already know how to program from the Java track, so variables and loops go
-quickly. Two things get the time they deserve, because they are what actually
-catch people out.
+quickly. The time goes on the parts that behave nothing like Java, because those
+are exactly what an interviewer tests.
 
 ::feature-list{columns="2"}
-  :::feature{icon="i-lucide-mouse-pointer-click" title="The DOM"}
-  The page is a tree of objects your code can reach into. Events travel through
-  that tree, and understanding how is the difference between one listener and
-  fifty.
+  :::feature{icon="i-lucide-braces" title="The language"}
+  `var`, `let` and `const`, types that change, `==` versus `===`, and functions
+  that are values you can pass around.
   :::
-  :::feature{icon="i-lucide-clock" title="Asynchronous code"}
-  The single most common interview trap in the language: a function that returns a
-  Promise instead of a value, and a loop that finishes before the thing it was
-  waiting for.
+  :::feature{icon="i-lucide-brackets" title="Scope, closures and this"}
+  The three topics that decide most JavaScript interviews. Each gets its own
+  lesson and its own output-prediction questions.
   :::
-::
-
-## The chapters
-
-::flow{numbered direction="vertical"}
-  :::flow-step{label="The language" icon="i-lucide-code-2"}
-  Variables and the loose type system, functions, arrays and objects, array
-  methods, destructuring, modules, and the ways JavaScript is not Java despite the
-  name.
+  :::feature{icon="i-lucide-list-tree" title="Objects and arrays"}
+  The shapes all data takes, and the array methods you will write every day at
+  work: `map`, `filter`, `reduce`, `find`, `sort`.
   :::
-  :::flow-step{label="The DOM" icon="i-lucide-mouse-pointer-click"}
-  Selecting elements, changing them, events, bubbling and delegation, forms and
-  live validation, and rendering a list of students from data.
-  :::
-  :::flow-step{label="Asynchronous JavaScript" icon="i-lucide-timer" highlight}
-  Callbacks, promises, `async`/`await`, `fetch`, error and loading states, and the
-  event loop drawn rather than described.
+  :::feature{icon="i-lucide-timer" title="The browser and async"}
+  The DOM, events and delegation, then promises, `async`/`await`, `fetch`, and
+  the event loop, drawn rather than described.
   :::
 ::
 
-## What the University Management App becomes
+## How to use it
 
-Interactive. Live validation on the enquiry form, instant search over the student
-directory, filters that work without a page reload, and data fetched and
-rendered rather than typed into the HTML by hand.
+Every lesson has code you can run in the page, and an output block showing what
+it prints. Predict the output before you look. That habit is the whole
+interview, and it is the one I wish somebody had drilled into me in 2018.
 
 ::callout{icon="i-lucide-arrow-right"}
-The registrar opens the page you built, looks at twenty-three thousand
-attendance rows, and asks the question you cannot answer with a table: is it
-getting better or worse?
+Start with the short list of what is different after Java, then take the
+differences one at a time.
 ::

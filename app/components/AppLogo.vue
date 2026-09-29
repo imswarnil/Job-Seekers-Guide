@@ -2,8 +2,10 @@
 import { logoMark } from '~/utils/logo'
 
 defineProps<{
-  /** Mark only, no wordmark — for tight spaces and the mobile header. */
+  /** Mark only, no wordmark. */
   markOnly?: boolean
+  /** One line, for the narrow-screen bar. */
+  compact?: boolean
 }>()
 </script>
 
@@ -51,9 +53,15 @@ defineProps<{
 
     <span
       v-if="!markOnly"
-      class="font-display font-semibold text-lg tracking-tight text-highlighted whitespace-nowrap"
+      class="min-w-0 leading-tight"
     >
-      Job Seekers <span class="text-primary">Guide</span>
+      <span class="block font-display font-semibold tracking-tight text-highlighted whitespace-nowrap">
+        Job Seekers <span class="text-primary">Guide</span>
+      </span>
+      <span
+        v-if="!compact"
+        class="block text-[0.6875rem] uppercase tracking-[0.16em] text-dimmed"
+      >Bangalore edition</span>
     </span>
   </span>
 </template>

@@ -1,0 +1,3 @@
+title: Graphs
+icon: i-lucide-network
+description: Anything connected to anything. Storing a graph, walking it breadth first and depth first, finding cycles, ordering prerequisites and finding the shortest path.

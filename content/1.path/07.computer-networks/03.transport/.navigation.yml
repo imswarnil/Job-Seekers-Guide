@@ -1,0 +1,3 @@
+title: Transport
+icon: i-lucide-arrow-down-up
+description: TCP against UDP, and the handshake two machines perform before either says anything useful.

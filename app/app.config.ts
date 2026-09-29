@@ -1,7 +1,7 @@
 /**
  * Runtime configuration that is safe to edit without touching code.
  *
- * Nuxt Content ships the schema derived from this file to Nuxt Studio, so every
+ * Nuxt Content ships the schema derived from this file to the editor, so every
  * field below appears as a labelled control in the visual editor — which is why
  * the ad switches and the player defaults live here and not in `nuxt.config.ts`.
  * Turning ads off should not require a deploy.
@@ -68,11 +68,11 @@ export default defineAppConfig({
   /** Site-wide identity. */
   brand: {
     /** Shown in the header, the footer and every social card. */
-    name: 'Job Seekers Guide',
+    name: 'Bangalore Job Seekers Guide',
     /** One sentence. Used as the fallback meta description. */
-    tagline: 'One ordered path from no experience to a first software job.',
+    tagline: 'From Mahroni to Bangalore to a first IT job: the whole route, written down.',
     /** Repository the content is authored in. Empty hides the link. */
-    github: 'https://github.com',
+    github: 'https://github.com/imswarnil/job-seekers-guide',
     /** Channel companion videos are published to. Empty hides the link. */
     youtube: '',
     /** Booking link on the Questions page. Empty hides the button. */
@@ -85,20 +85,8 @@ export default defineAppConfig({
     autoAdvance: false,
     /** Seconds to wait before that happens. Any keypress cancels it. */
     autoAdvanceSeconds: 8,
-    /** Show the path rail by default on wide screens. */
+    /** Show the sidebar by default on wide screens. */
     showRailByDefault: true
-  },
-
-  /**
-   * Where the newsletter form posts.
-   *
-   * The site is static, so there is no endpoint of our own to post to — set
-   * this to a provider's form URL (Buttondown, ConvertKit, Formspark, a Worker,
-   * whatever) and the form starts working. Empty means the component renders a
-   * disabled state rather than quietly discarding addresses.
-   */
-  newsletter: {
-    action: ''
   },
 
   /**

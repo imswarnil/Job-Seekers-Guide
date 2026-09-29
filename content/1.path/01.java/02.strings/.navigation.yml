@@ -1,0 +1,3 @@
+title: Strings
+icon: i-lucide-type
+description: Text as objects: the String pool, immutability, why == lies, StringBuilder against StringBuffer and the String methods you will use every day.

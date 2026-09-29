@@ -21,8 +21,6 @@ function adapterFor(lang: RunnerLang): Promise<{ default: RunnerAdapter }> {
       return import('~/utils/runners/python')
     case 'sql':
       return import('~/utils/runners/sql')
-    case 'java':
-      return import('~/utils/runners/java')
   }
 }
 

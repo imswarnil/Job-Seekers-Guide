@@ -5,7 +5,7 @@ description: Draw or review a teaching diagram for a lesson — a sequence, a me
 
 # Drawing a diagram
 
-The standing habit from `plan/content-writing-guidelines.md` §13: **draw it
+The standing habit from `CLAUDE.md` §4: **draw it
 whenever a picture teaches faster than a paragraph.** Anything spatial gets
 drawn — memory and references, the call stack, a data structure's shape, how a
 join matches rows, the order a query is evaluated in, an index versus a full
@@ -36,7 +36,7 @@ than a correct table.
 
 ## The rules that apply to every diagram
 
-From §13 and `CLAUDE.md` §6, and they are not stylistic preferences:
+From `CLAUDE.md` §4, and they are not stylistic preferences:
 
 - **One idea per diagram.** Two ideas means two diagrams.
 - **Exactly one accent per diagram** — one `highlight` on a `::flow`, one
@@ -48,8 +48,8 @@ From §13 and `CLAUDE.md` §6, and they are not stylistic preferences:
 - **Every part labelled.** An unlabelled box teaches nothing.
 - **Never invent a URL** for an image or a video.
 
-Colour language for this site is in `.studio/brand.md`: indigo carries structure,
-teal is the accent, amber is rationed to milestones.
+Colour language: neutral greys carry structure, the one red accent is the thing
+being taught, amber is rationed to milestones.
 
 ## When no component fits — `::diagram`
 

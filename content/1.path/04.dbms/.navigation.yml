@@ -1,3 +1,3 @@
-title: Databases
-icon: i-lucide-database
-description: "The theory under every database: why tables are shaped the way they are, what a transaction guarantees, and how an index finds one row in ten million."
+title: DBMS
+icon: i-lucide-server
+description: The theory under every database. Keys, the ER model, normalisation, transactions, locking and indexes, the subject a technical round asks right after the SQL queries.

@@ -1,425 +1,229 @@
-# Writing the curriculum
+# Bangalore Job Seekers Guide
 
-This file governs **the course** — everything under `content/1.path/`. It does not
-govern `content/6.story/` (the book), `content/5.series/` (the episodes) or the
-marketing pages; those have their own voice and are left alone.
+This repository is **one app**: the guide Swarnil wished he had in 2018, when he
+graduated, took the train from Mahroni to Bangalore with no skills and no plan,
+and spent the next year learning, walking into 33 walk-ins and getting selected
+in the 34th. It is his journey written down as a path somebody else can follow.
 
-Three files govern a lesson, and they do not overlap:
+It is **not** a course that builds a project. Nothing here builds an app. It is a
+guide: where to go, where to live, how to learn, what to study, how to clear the
+written round, how to answer in the interview, and the story of how it went.
 
-| File | Governs | Wins on |
+`to-do.md` is the working plan and its status. Read it before starting work.
+
+---
+
+## 1. The shape of the app
+
+There is no marketing site, no navbar, no footer menu. There is:
+
+- a **sidebar** (the whole guide, in order, with progress),
+- **search** (`/` or `⌘K`, over every lesson),
+- the **lesson** you are reading, with previous / next.
+
+The home page (`/`) is the app's start screen: the promise, "continue where you
+left off", and the parts of the guide as a list. Nothing else.
+
+The guide lives in `content/1.path/`, three levels deep: **track → chapter →
+lesson**. The folder numbers are the order. There is no manifest.
+
+| # | Track (URL) | Part |
 | --- | --- | --- |
-| `plan/content-writing-guidelines.md` | The narrator, the eleven beats, the teaching habits, the practice rule, tone | **How it reads** |
-| `content-plan.md` | Every track, chapter and lesson, in order, with the hook each one ends on | **What is taught, in what order** |
-| `CLAUDE.md` (this file) | Folders, front matter, component names, the checks | **What actually renders** |
+| 00 | `/bangalore` — Moving to Bangalore | The move |
+| 01 | `/java` — Java, in depth | Learn to code |
+| 02 | `/dsa` — DSA using Java | Learn to code |
+| 03 | `/sql` — SQL | Learn to code |
+| 04 | `/dbms` — DBMS | Computer science |
+| 05 | `/oops` — OOPs | Computer science |
+| 06 | `/operating-systems` | Computer science |
+| 07 | `/computer-networks` | Computer science |
+| 08–10 | `/html`, `/css`, `/javascript` | Web basics |
+| 11 | `/other-subjects` — SDLC, testing, Git, Linux, cloud | Computer science |
+| 12 | `/quantitative-aptitude` | The written round |
+| 13 | `/logical-reasoning` | The written round |
+| 14 | `/verbal-ability` | The written round |
+| 15 | `/interview` — tell me about yourself, technical, HR, negotiation | The interview |
+| 16 | `/my-story` — the whole journey, chapter by chapter | My story |
 
-When they disagree: voice and pedagogy go to
-`plan/content-writing-guidelines.md`; substance and ordering go to
-`content-plan.md`; mechanics go to this file, because a pedagogy document cannot
-invent a component that does not exist.
+The part each track belongs to is its `stage` front matter:
+`move | code | cs | web | written | interview | story`. Stages are display
+grouping only; the folder number is the order, and a stage must never run
+backwards relative to the folder numbers.
 
-Read all three before writing a lesson rather than working from memory of them.
-The `write-lesson` skill in `.claude/skills/` does this for you and carries the
-checklist; `draw-diagram` covers pictures.
-
----
-
-## 1. The narrator
-
-Every lesson is written by **one person: Swarnil, named. He is writing now,
-with hindsight, but his journey began in 2017 and he says so.** Not a
-professor, not a documentation team. He is one step ahead of the reader on the
-same path, turning around to say *"this is the part that confused me, and
-here's what finally made it click."*
-
-His timeline is real, and the prose can refer to specific years in it: he
-started in 2017 having never opened a terminal, got his first paid job in 2019
-at Rs 13,000 a month, and is now a Salesforce engineer in Europe. He is not
-anonymous any more. "In 2018 I spent a month stuck on joins" is exactly the
-kind of sentence this course wants.
-
-**He is writing from the years he could not get a job, with hindsight.** The
-frame is a journal kept by somebody who failed every written round for four
-years and then learned this properly, not a retrospective by somebody who has
-arrived. That is why a lesson names the specific thing that beat him rather than
-the general principle: "I was rejected in round one eleven times and concluded
-something about my intelligence; what was true was that I had never practised
-reading a passage against a clock." Every track has at least one of those, and
-they are the reason the course is not interchangeable with a syllabus.
-
-- **First person, to one reader.** "I", and "you". Never "students", never "we"
-  meaning the reader, never "one".
-- **Assume nothing.** Not "assume little" — the reader has never opened a
-  terminal.
-- **Name your own confusion.** "I thought a variable was a box for three months.
-  It isn't, quite, and here's where that model breaks."
-- **Warn before the hard parts, out loud**, so the reader never thinks the
-  problem is them. Objects, generics, joins, window functions, async, the
-  component model, server versus client, row-level security.
-- **Define every new word the first time**, in the same breath, in plain English.
-- **Say the number.** "Four weeks", "about 40%", "nine seconds".
-- **Say what to skip**, and what skipping costs.
-- **Be honest.** Wrong code gets called wrong, with the reason. No fake praise.
-  Never claim outcomes — no placement percentages, no guaranteed packages.
-- **British spelling**, to match the rest of the site.
-
-**Banned words and habits:** "simply", "just", "obviously", "as we all know",
-"it is important to note", exclamation marks, hype, and the word **"capstone"**
-(say "the finished system", "putting it all together", or "the assembly lesson").
-
-**The em dash is banned. This is a hard rule, not a style preference.** No `—`
-in lesson prose, ever, and no `--` pretending to be one. It is the loudest tell
-that a machine wrote the page, and this course lives on sounding like one real
-person. Replace it with a full stop and a new sentence (usually the best fix),
-a comma, a colon, or brackets used sparingly. The en dash `–` stays legal in
-numeric ranges only: "Weeks 1–4", "2017–2019". Command-line flags such as
-`--force` inside code blocks are code, not prose, and are fine.
-
-`pnpm check:lessons` reports every one it finds, so a new lesson has no excuse
-for containing any. It reports rather than fails on them, because the lessons
-written before that check existed contain a great many, and mechanically
-substituting punctuation across finished prose makes it worse. Those are a
-backlog to fix by hand, not a rule that has been quietly dropped.
-
-The thesis, proved over and over rather than asserted:
-
-> None of this is hard. It's a lot of small ideas stacked in the right order.
+Hosting: **GitHub Pages**, static (`pnpm generate`), deployed by
+`.github/workflows/deploy.yml` on push to `main`. No database, no Supabase, no
+Neon, no Cloudflare, no server. Progress is `localStorage`. Code runners that
+work in the browser (JavaScript, SQL) stay; nothing may call a backend.
 
 ---
 
-## 2. The chain — the rule that outranks everything
+## 2. The narrator
 
-**Every lesson ends on a cliffhanger. The first line of the next lesson answers
-it, before anything else.**
+Every page is written by **one person: Swarnil, named**, first person, to one
+reader. He is writing now, with hindsight, from Europe. His facts, which every
+page must agree with:
 
-This is a chain, not a list. Today's lesson is the thing yesterday's lesson made
-the reader *need*. The exact hook for every lesson is written in
-`content-plan.md`, Part Three. Use it.
+- Small town, **Mahroni** (Uttar Pradesh). Engineering (CSE) at LNCT Bhopal,
+  2014–2018. Average student, did not study well, never cleared a written round
+  in college.
+- After college he wanted to be a **YouTuber** but needed a job. His **father**
+  wanted him to become a **government teacher**. His **sister** backed him, and
+  together they decided he would move to **Bangalore**.
+- Took the **train from Mahroni to Bangalore** (he has video and photos).
+- Gave a few interviews, realised he **knew nothing** and had to upskill.
+  Decided then to **document the job search**, so that when he got a job the
+  record would become a path for someone like him. This guide is that promise.
+- Stayed in **BTM Layout**, in a PG, because it is where job seekers live.
+- Sat **3-day demo classes** at training institutes to compare them, chose
+  **JSpiders**, and studied **Java, SQL and web technologies** there for about
+  **3 months**. In parallel he studied the important CS subjects, **aptitude**
+  and **English** on his own.
+- Went to **33+ walk-ins**. At the **34th**, out of **700–1000** candidates, he
+  was selected.
+- First job at a **startup**: **1.8 LPA, ₹13,000 a month**, with a **bond**, six
+  days a week, no Saturday off, no orientation, no training ("watch these Udemy
+  courses"). Happy, not satisfied. Studied on Sundays and kept interviewing.
+- **Two months later**, selected at **Accenture**: proper orientation, friends,
+  assigned the **Salesforce** stream, trained, put on a project. He wanted web
+  development and got Salesforce. That is how corporate works: you might get
+  what you want if you fight for it.
+- After **3 years** at about **5 LPA**, he met a friend who had been a job seeker
+  with him. The friend had switched and was on **21 LPA**. He decided to switch.
+- **Cracked 5 companies**, best offer **15.5 LPA**, joined **Cognizant**. Left
+  after **9 months**: micromanagement and how people were treated.
+- Kept interviewing, **cracked PwC and Twilio**, joined **Twilio at 30+ LPA** as
+  a **Salesforce analytics** engineer in the **GTM** team, and learned GTM
+  engineering.
+- After **3+ years** at Twilio, **Education First (EF)** in Europe called, and
+  **sponsored his visa**. He moved.
 
-- **First beat, always:** one or two sentences resolving the previous hook. No
-  heading, no throat-clearing — it is the first paragraph on the page.
-- **Last beat, always:** the next hook, unresolved, in the `## Next` block
-  (§5 below).
-- **Prev/next spans the whole path**, not the subject. The last lesson of a
-  chapter hooks into the first lesson of the next chapter; the last lesson of a
-  track hooks into the first lesson of the next track.
+Voice rules (these are not optional):
 
-If you add, split or reorder a lesson, you have taken on the job of re-welding
-both ends of the chain. Do it in the same change.
-
----
-
-## 3. One idea per lesson
-
-A beginner drowns when two new ideas arrive at once.
-
-- One lesson teaches one idea. A Flexbox lesson teaches Flexbox — not Grid, not
-  JavaScript "while we're here".
-- Related sub-parts may share a lesson if they are one theme, taught in
-  sequence. "AND, OR, NOT and precedence" is one theme. "Filtering and joining"
-  is two chapters.
-- **Split rather than mingle.** Splitting a mapped lesson into two files is
-  always allowed; the second one carries the mapped cliffhanger so the chain
-  survives.
-
-> The test: if a confused reader asked "what is *this* lesson about?" they must
-> answer in one short phrase. If the honest answer is "two things", split it.
-
----
-
-## 4. The university rule
-
-**Every example, variable, table, component, page, chart and exercise belongs to
-the university world, and once we can build, to the University Management App.**
-
-The cast, used everywhere: `Applicant`, `Application`, `Program`, `Department`,
-`Student`, `Faculty`, `Subject`, `ExamResult`, `Attendance`, `FeePayment`,
-`Placement`, `Alumni`, `Enquiry`, and the status ladder
-`RECEIVED` → `UNDER_REVIEW` → `SHORTLISTED` / `REJECTED` → `ACCEPTED`.
-
-Even throwaway values belong to the world: `score`, `applicantName`, `cutoff`,
-`seats`, `deadline`, `attendancePct`. Never `x`, `temp`, `data`, `foo`.
-
-**Banned, always:** `Animal`/`Dog`/`Shape`/`Car`/`Person` demos, `foo`/`bar`,
-the generic tutorial schemas (`employees`, `customers`, `orders`, `products`),
-and to-do apps, blogs, e-commerce stores and weather apps as project examples.
-
-The University Management App — the one system the whole course builds — is
-specified in `content-plan.md` §26. There is never a second project and never a
-throwaway app. Before writing a build lesson, restate to yourself what already
-exists in the University Management App and do not contradict it.
+- First person, "I" and "you". Never "students", never "we" meaning the reader.
+- **Assume nothing.** Define every new word the first time, in plain English.
+- **Say the number.** Rupees, months, hours, percentages.
+- **Be honest.** No guaranteed jobs, no placement percentages, no hype. Prices
+  and institute details are "what it was when I went, check today's".
+- **British spelling.**
+- **Banned:** "simply", "just", "obviously", "as we all know", "it is important
+  to note", exclamation marks, and the word "capstone".
+- **The em dash `—` is banned** in prose, hard rule. Use a full stop, comma,
+  colon or brackets. The en dash `–` is allowed in numeric ranges only
+  ("2014–2018", "3–4 weeks"). `pnpm check:lessons` reports them.
+- Examples in technical tracks use a **college / university** domain
+  (`Student`, `Course`, `Department`, `Faculty`, `ExamResult`, `Attendance`,
+  `FeePayment`, `Placement`). Never `foo`/`bar`, never `Animal`/`Dog`/`Car`.
+  There is **no project being built**: never say "the app you are building".
 
 ---
 
-## 5. The shape of a lesson on this platform
+## 3. What a lesson looks like
 
-`content-plan.md` §7 lists eleven beats. On this site they land as these
-headings, in this order. Beats 1 and 11 are not optional. The rest flex — a
-practice lesson leans on "Your turn", an interview lesson is mostly Q&A.
+Every lesson has front matter:
 
-```md
-(no heading — one or two sentences resolving the previous cliffhanger, then a
-line bridging into today)
-
-## Why this matters in a job          ← beats 2-3: what breaks without this
-
-## <the idea, named plainly>          ← beat 4: analogy first, then the
-                                        technical version. Draw it.
-
-## <watch it happen>                  ← beat 5: a small runnable example, broken
-                                        version first where that teaches
-
-## What confuses people here          ← beat 6: name the trap before they fall in
-
-::real-life                           ← beat 7: a registrar, a dean, a lecturer
-
-## What you can do now                ← beat 8: plus the actual output
-
-## Your turn                          ← beat 9: the exercise; solutions behind
-                                        an ::accordion, never before the attempt
-
-## Check yourself                     ← beat 10: exactly two questions, one of
-                                        them the kind an interviewer asks
-
-## The interview question this answers ← the house block: the question phrased
-                                        the way it is really asked, then what a
-                                        good answer contains
-
-## Next                               ← beat 11: the cliffhanger, last thing on
-                                        the page
+```yaml
+---
+title: Short and plain
+description: One sentence for a stranger. Shown in search and on cards.
+minutes: 12        # 200 words a minute, plus a minute per diagram
+kind: lesson       # lesson | guide | practice | quiz | reading | story
+---
 ```
 
-The two middle headings are named for their content, not for the beat — "The
-idea, analogy first" is a scaffold, not a title a reader should ever see.
+Every track's `index.md` has `title`, `description`, `icon`, `stage`,
+`duration`, `outcomes` (a list, "You can …"). Every chapter folder has a
+`.navigation.yml` with `title`, `icon`, `description`.
 
-The `## Next` block is written as:
+**Technical lessons** (`kind: lesson`), in this order of headings:
+
+1. No heading: one or two sentences picking up from the previous lesson.
+2. `## Why this matters in a job` — where it shows up at work and in interviews.
+3. `## <the idea, named plainly>` — analogy first, then the real thing.
+4. `## Syntax` or `## How it works` — the syntax, then a **complete runnable
+   example** in a fenced block **with a filename** (so it gets the language
+   icon and the copy button), and its **real output** in a second block:
+
+   ````md
+   ```java [StudentMarks.java]
+   public class StudentMarks { ... }
+   ```
+
+   ```text [Output]
+   Average: 71.5
+   ```
+   ````
+
+5. `## Real use case` — where this is used in a real codebase, with code.
+6. `## What confuses people here` — the trap, named before they fall in.
+7. `## Interview questions` — 3–6 questions inside `::accordion`, each answer
+   short and proved with code where it can be.
+8. `## Next` — one `::callout{icon="i-lucide-arrow-right"}` saying what comes
+   next and why the reader needs it.
+
+**Guide pages** (`kind: guide`: the move, the written round, the interview
+advice) are checklists and decisions, not lectures:
+
+1. No heading: what this page answers.
+2. `## Why it matters` — which rounds / which situations, with numbers.
+3. `## What to study` (or `## What to do`) — a checklist, in priority order.
+4. Formulas / templates / scripts / tables, whatever the topic needs.
+5. `## A worked example` where there is anything to work.
+6. `## Common mistakes`.
+7. `## How to practise` — daily target, time per question, where to practise.
+8. `## Next`.
+
+**Story chapters** (`kind: story`) are narrative, first person, with year and
+place, and **media placeholders** where Swarnil has photos or video:
 
 ```md
-## Next
-
-::callout{icon="i-lucide-arrow-right"}
-The hook, stated as the reader's own problem, in one or two sentences. Left
-unresolved.
+::story-media{kind="video" label="The train from Mahroni to Bangalore, 2018"}
+What the clip shows, one line.
 ::
 ```
 
-### Lesson kinds
+`kind` is `image` (3:2) or `video` (16:9). Leave `src` out; adding it later is
+the only change needed. Every story chapter ends with `## What this taught me`
+(two or three lines a job seeker can use) and `## Next`.
 
-Tag every lesson with `kind` in the front matter, and write to the tag:
-
-| `kind`     | Spec tag   | What it means |
-| ---------- | ---------- | ------------- |
-| `lesson`   | `[C]`      | A concept. Idea before syntax, always. |
-| `practice` | `[P]` `[T]`| Problems and hints first. **Let the reader attempt before revealing anything.** Solutions go inside `::accordion`, and show two versions: the beginner one (correct but clumsy) and the one an experienced developer writes, with a plain-words note on why. |
-| `practice` | `[D]`      | Debugging. Show the broken thing and the real error, then walk through *finding* it: read the message, shrink the problem, print, then reach for the real tool. |
-| `project`  | `[A]`      | Advances the University Management App. Give the **plan and the acceptance criteria** — files, functions, routes, columns, what "done" looks like — **not the finished code.** The only exceptions are the assembly lesson at the end of a track and the finished-system lesson at the very end. |
-| `quiz`     | `[Q]`      | Interview. Every answer proved with code, not just defined. |
-| `reading`  | —          | Glossaries, maps, orientation. |
-
-### Terminal-first
-
-The reader lives in the terminal from the first week. Every install, run, build
-and deploy is a real command with its real output, in a fenced ```bash block —
-never "install it and continue". Explain the command, not just print it. **When
-a command fails, teach the failure** — permission denied, command not found,
-port already in use, `git push` rejected. Those are the moments beginners quit.
-
-### Correct, not just runnable
-
-A thing that runs is not a thing that's right, and this is taught as its own
-discipline (`content-plan.md` §12). Where a lesson has a silently-wrong version,
-show it with `::compare` — `verdict="wrong"` on the left, `verdict="right"` on
-the right, and one line on *why the first is silently wrong*.
-
-### Safety
-
-Anywhere data can be destroyed — `rm -rf`, `git reset --hard`, `push --force`,
-`UPDATE` with no `WHERE`, a leaked key — the `::warning` or `::caution` block
-comes **before** the reader is in a position to do the damage, never after.
+**Last lesson of a track** hands over to the first lesson of the next track in
+its `## Next` block, by name.
 
 ---
 
-## 6. The components
+## 4. Components
 
-The full author-facing reference, with a runnable example of each, is
-`.studio/components.md`, and the rendered version is the lesson
-`/orientation/how-this-course-works/how-to-read-these-lessons`. Nuxt UI's own blocks
-are available too: `::callout`, `::note`, `::tip`, `::warning`, `::caution`,
-`::tabs`, `::steps`, `::accordion`, `::card-group`, `::field`.
+Nuxt UI prose blocks: `::callout`, `::note`, `::tip`, `::warning`, `::caution`,
+`::tabs` / `:::tabs-item{label="…"}`, `::steps`, `::accordion` /
+`:::accordion-item{label="…"}`, `::card-group` / `:::card`, `::field`.
 
-**A component every screen or two. A lesson that is a wall of prose has failed,
-however good the prose is.** Reach for these by beat:
+House blocks (in `app/components/content/`): `::compare` with `:::compare-side`
+(`verdict="wrong" | "right"`), `::flow` / `:::flow-step`, `::memory`,
+`::timeline` / `:::timeline-item` (`state` = `done | current | todo`),
+`::feature-list` / `:::feature`, `::pros-cons` (YAML front matter),
+`::persona` (YAML front matter), `::real-life`, `::side-note{kind=…}`,
+`::code-trace`, `::pull-quote`, `::story-media`, `::diagram`, `::youtube`
+(never invent an id).
 
-**Nesting: a child needs one more colon than its parent, and its closing fence
-must match.** A `::callout` inside a `::story-chapter` is `:::callout`, closed
-with `:::`. Closing any of them with a code fence swallows everything until the
-next one. And check the syntax before using a component: `::pros-cons` and
-`::persona` take YAML front matter rather than attributes, `::memory` with
-`kind="table"` renders one row per frame, and `::timeline-item` states are
-`done`, `current` and `todo`.
+`::runner` runs **javascript, sql, html, css, python** in the browser. There is
+**no Java runner** (it needed a server): Java is a fenced ```java block plus its
+output block.
 
-| Beat | Reach for |
-| --- | --- |
-| The idea, drawn | `::flow` for anything with an order · `::memory` for boxes and pointers · `::feature-list` for parallel small points · `::timeline` for things in time |
-| A shape none of those cover | `::diagram` — your own SVG, in the house frame. `currentColor` plus one `data-accent`; always a `viewBox` and an `aria-label` |
-| Walking through code | `::code-trace` — never write "on line three" in prose |
-| Broken → fixed, wrong → right | `::compare` with `verdict="wrong"` / `verdict="right"` |
-| The honest trade-off | `::pros-cons` — never assert a technology choice, argue it |
-| Where it shows up in a job | `::real-life` — the single highest-value block on the platform |
-| Somebody's actual situation | `::persona` |
-| Run it yourself | `::runner` — `html`, `css`, `javascript`, `python`, `sql`, `java` |
-| The trap, the gotcha, the danger | `::warning`, `::caution`, `::tip`, `::note` |
-| What *kind* of concern it is | `::side-note{kind="accessibility\|performance\|security\|go-deeper"}` — the axis the four above do not cover |
-| Solutions, interview answers | `::accordion` |
-| A prompt worth having | `::ai-prompt` — always fill in `#why` |
-| A video | `::youtube` — **never invent an ID**; leave the block out and note what it should show |
+**Nesting:** a child needs one more colon than its parent (`:::accordion-item`
+inside `::accordion`) and closes with the same number. Never close a component
+with a code fence. `pnpm check:lessons` catches both.
 
-Rules that hold across all of them:
-
-- **One accent per diagram.** One `highlight` on a `::flow`, one `active` cell in
-  a `::memory`. If two things are important, that is two diagrams.
-- **Every code sample is paired with its result** — the printed output, the
-  rendered page, the returned rows. If the result is illustrative rather than
-  from a real run, say so.
-- **Never invent a URL** for a video or an image.
-- `::runner` for anything the reader can usefully run in the tab. Nothing
-  downloads on a lesson with no runner in it.
+A component every screen or two. A wall of prose has failed.
 
 ---
 
-## 7. Files, folders and front matter
+## 5. Commands
 
-The folder tree **is** the curriculum, and the numeric prefixes **are** the
-order. There is no manifest. Reordering the course is `git mv`.
-
-```
-content/1.path/
-  1.terminal/                     → /terminal                 a track (subject)
-    .navigation.yml               title, icon, description
-    index.md                      the track overview
-    2.the-terminal/               → /terminal/the-terminal     a chapter (module)
-      .navigation.yml             title, icon, description
-      1.your-first-session.md     → /terminal/the-terminal/your-first-session
+```bash
+pnpm dev              # http://localhost:3000
+pnpm check:lessons    # structure + em dashes
+pnpm lint
+pnpm generate         # the static site, into .output/public
 ```
 
-Three levels, and depth alone decides the view: subject → module → lesson. A
-module folder does not need an `index.md`; its `.navigation.yml` supplies the
-title, icon and description the module page renders.
-
-Slugs are the URL. Keep them short and human — `/java/collections/generics`, not
-`/java/1-collections/1-generics`. Check `modules/reserved-slugs.ts` before naming
-a track: a handful of top-level slugs are taken by the site itself.
-
-**Track (subject) front matter:**
-
-```yaml
----
-title: SQL — learn to store and ask
-description: One sentence for a stranger. It appears on cards, in search and on the social image.
-code: JSG-SQL-201          # badge on the card
-duration: 10 weeks
-stage: language            # orientation | foundation | language | applied | projects | job-search
-icon: i-lucide-database
-outcomes:
-  - Written as "you can …" — what the reader can do that they could not before
-prerequisites:
-  - terminal               # slugs of earlier tracks
----
-```
-
-`stage` only groups the cards on `/start`; it never orders them. Because the
-groups render in a fixed order, **a track's stage must not run backwards
-relative to its folder number** or the path will display out of sequence.
-
-**Lesson front matter:**
-
-```yaml
----
-title: What a computer actually does
-description: One sentence, for a stranger.
-minutes: 12                # 200 words a minute, plus a minute per diagram
-kind: lesson               # lesson | practice | project | quiz | reading
----
-```
-
-`draft: true` exists in the schema but nothing filters on it yet — an unfinished
-lesson still appears in the rail. Do not rely on it to hide work in progress.
-
----
-
-## 8. Bookending a track
-
-**The bookends are per TRACK, not per chapter**, and they live at the end of the
-track's last chapter, in this order: **glossary → interview Q&A → exercises**.
-
-This is a deliberate change from the per-chapter rule in `content-plan.md` §24.
-A glossary for a two-lesson chapter is four words long and repeats the one
-before it; a glossary for a whole track is the thing somebody revises from the
-morning of an interview. `02.terminal` still has them per chapter, because its
-three chapters are each the size of another track. That is the test: bookend per
-chapter only when a chapter is large enough to earn its own.
-
-- **The overview** is the module's `.navigation.yml` description plus the track's
-  `index.md`. Say what this chapter covers, why it exists, and how it hangs off
-  the previous chapter's final hook.
-- **The glossary** is the last-but-two file, `kind: reading`. Every new word in
-  the track, one plain-English line each, grouped by theme. End it with the two
-  or three pairs people confuse, because that is what an interviewer probes.
-- **The interview Q&A** is the last-but-one file, `kind: quiz`. The questions
-  this track's material produces, in an `::accordion`, each answer short,
-  confident, and **proved with code**. `20.interview` is the one exception with
-  no such file: the entire track is interview questions.
-- **The exercises** are the last file, `kind: practice`. Challenge-flavoured, with
-  stakes — "can you do this in one query with no subquery?", "this runs but the
-  number is wrong, find out why". Never a boring drill. Always the university.
-  The reader attempts first; solutions sit inside an `::accordion`.
-
-All three still obey the chain: they resolve the hook before them and set the
-hook after them. **Adding a bookend moves the handover.** The lesson that used
-to end the track hands over to the glossary instead, and the exercises file
-carries the original hook into the next track. Re-weld both ends in the same
-change.
-
-Terminal-heavy chapters end their exercises file with a command cheat-sheet — a
-table, one line per command, everything the chapter used.
-
----
-
-## 9. AI in the course
-
-Stated once in the reader's voice and then held: the value moved from typing the
-code to knowing whether the code is right, and you cannot supervise what you do
-not understand.
-
-- **Java and SQL tracks: no AI at all.** Fundamentals only, on purpose.
-- **Web tracks:** AI as a working tool for the reader — scaffolding, boilerplate,
-  a first pass at CSS — always paired with "read every line, run it, and fix what
-  it got wrong", especially accessibility, security and edge cases.
-- **The AI track:** AI as something the reader builds, and only there.
-
-Never move an AI feature earlier. Every time you praise its usefulness, name a
-limit: it hallucinates APIs, it forgets your schema, it produces confident wrong
-numbers, it cannot know your business rules.
-
----
-
-## 10. Before you call a lesson done
-
-- [ ] The first line resolves the previous cliffhanger; the `## Next` block sets
-      the following one.
-- [ ] Exactly one idea. Nothing from a later chapter smuggled in.
-- [ ] Every example is the university. No banned generic names, no demo apps.
-- [ ] It reads like the narrator sharing notes, not like documentation.
-- [ ] Every new word is defined the first time it appears.
-- [ ] The code or query actually runs, and its real result is shown.
-- [ ] Broken-first or wrong-first is used where it teaches something.
-- [ ] The trap is named — syntax, correctness, gotcha or safety.
-- [ ] Terminal commands are real, explained, and their failure modes covered.
-- [ ] A diagram wherever a picture teaches faster than a paragraph.
-- [ ] Exactly two "Check yourself" questions; one is interviewer-style.
-- [ ] Components throughout. It is never a wall of text.
-- [ ] `minutes` is an honest estimate, and `kind` matches how it is written.
-- [ ] No "simply", no "just", no exclamation marks, no "capstone".
-- [ ] `pnpm check:lessons` passes. It catches the two failures that render as a
-      wall of raw YAML and fail nothing else: an MDC block closed with ``` instead
-      of `::`, and a nested component opened with two colons instead of three.
-- [ ] `pnpm lint` passes and the page renders.
+Before calling anything done: `pnpm check:lessons`, `pnpm lint`, `pnpm generate`
+all pass, and the page renders.

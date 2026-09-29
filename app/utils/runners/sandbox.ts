@@ -16,36 +16,120 @@ const TIMEOUT_MS = 5000
 
 /**
  * The prelude every sandboxed document gets: console redirected to
- * postMessage, errors caught, and a `done` signal at the end. The token is
- * handed in so that a stale frame from a previous run cannot post into this one.
+ * postMessage, errors caught, and a `done` signal once the code has settled.
+ * The token is handed in so that a stale frame from a previous run cannot post
+ * into this one.
+ *
+ * "Settled" is not "the last line ran". A lesson about promises, timers or
+ * fetch prints its output later, so the harness counts pending timers and
+ * requests and only says `done` once none are left (or the parent's timeout
+ * gives up on it). With no `body`, the harness is being put in front of the
+ * author's own markup, and it waits for the page to load before counting.
  */
-export function harness(token: string, body: string) {
+export function harness(token: string, body = '') {
+  // `await` at the top level needs an async wrapper. Only then, because an
+  // async function changes nothing else a beginner would notice, but a plain
+  // function is closer still to a script.
+  const wrapped = /\bawait\b/.test(body)
+    ? `return (async function () {\n${body}\n})()`
+    : body
+
   return `<script>
 (function () {
   var TOKEN = ${JSON.stringify(token)};
-  function send(type, args) {
-    parent.postMessage({
-      token: TOKEN,
-      type: type,
-      text: Array.prototype.map.call(args, function (a) {
-        if (typeof a === 'string') return a
-        try { return JSON.stringify(a, null, 2) } catch (e) { return String(a) }
-      }).join(' ')
-    }, '*')
+
+  // Print a value the way a browser console does: undefined is "undefined",
+  // NaN is "NaN", a function is its source. JSON only for objects and arrays.
+  function show(a) {
+    if (typeof a === 'string') return a;
+    if (a === undefined || a === null || typeof a === 'number' || typeof a === 'boolean' || typeof a === 'bigint' || typeof a === 'symbol' || typeof a === 'function') return String(a);
+    if (a instanceof Error) return a.stack || String(a);
+    try {
+      var text = JSON.stringify(a, function (key, value) {
+        if (value === undefined) return 'undefined';
+        if (typeof value === 'number' && !isFinite(value)) return String(value);
+        if (typeof value === 'function') return 'function ' + (value.name || '') + '()';
+        return value;
+      }, 2);
+      return text === undefined ? String(a) : text;
+    } catch (e) { return String(a) }
   }
+
+  function send(type, args) {
+    parent.postMessage({ token: TOKEN, type: type, text: Array.prototype.map.call(args, show).join(' ') }, '*');
+  }
+
   console.log = function () { send('log', arguments) };
   console.info = console.log;
   console.debug = console.log;
   console.warn = function () { send('log', arguments) };
   console.error = function () { send('error', arguments) };
   window.onerror = function (message) { send('error', [message]); return true };
-  window.addEventListener('unhandledrejection', function (e) { send('error', [String(e.reason)]) });
-  try {
-${body}
-  } catch (e) {
-    send('error', [e && e.stack ? e.stack : String(e)])
+  window.addEventListener('unhandledrejection', function (e) { send('error', ['Uncaught (in promise) ' + show(e.reason)]) });
+
+  // Count the work that will finish later.
+  var pending = 0;
+  var live = {};
+  var realSetTimeout = window.setTimeout;
+  var realClearTimeout = window.clearTimeout;
+  var realSetInterval = window.setInterval;
+  var realClearInterval = window.clearInterval;
+
+  function settle(id) { if (live[id]) { delete live[id]; pending-- } }
+
+  window.setTimeout = function (fn, ms) {
+    var args = Array.prototype.slice.call(arguments, 2);
+    var id = realSetTimeout(function () {
+      settle(id);
+      if (typeof fn === 'function') fn.apply(null, args);
+    }, ms);
+    live[id] = true; pending++;
+    return id;
+  };
+  window.clearTimeout = function (id) { settle(id); realClearTimeout(id) };
+  window.setInterval = function () {
+    var id = realSetInterval.apply(null, arguments);
+    live[id] = true; pending++;
+    return id;
+  };
+  window.clearInterval = function (id) { settle(id); realClearInterval(id) };
+
+  if (window.fetch) {
+    var realFetch = window.fetch;
+    window.fetch = function () {
+      pending++;
+      return realFetch.apply(this, arguments).finally(function () { pending-- });
+    };
   }
-  parent.postMessage({ token: TOKEN, type: 'done' }, '*')
+
+  // Done once nothing is pending across two consecutive macrotasks, so any
+  // promise callbacks queued by the last timer have had their turn.
+  function finish() { parent.postMessage({ token: TOKEN, type: 'done' }, '*') }
+  function watch() {
+    realSetTimeout(function () {
+      if (pending > 0) return watch();
+      realSetTimeout(function () { pending > 0 ? watch() : finish() }, 0);
+    }, 15);
+  }
+
+  var result;
+  try {
+    result = (function () {
+${wrapped}
+    })();
+  } catch (e) {
+    send('error', [e && e.stack ? e.stack : String(e)]);
+  }
+
+  function start() {
+    if (result && typeof result.then === 'function') {
+      result.then(watch, function (e) { send('error', [e && e.stack ? e.stack : String(e)]); watch() });
+    } else {
+      watch();
+    }
+  }
+
+  ${body ? 'start()' : 'document.readyState === "complete" ? start() : window.addEventListener("load", start)'};
 })()
 </script>`
 }

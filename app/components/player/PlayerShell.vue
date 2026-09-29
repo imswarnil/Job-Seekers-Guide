@@ -1,176 +1,67 @@
 <script setup lang="ts">
-defineProps<{
-  current?: string
-  /** Hide the rail entirely — pages that render their own contents. */
-  bare?: boolean
-}>()
-
-const { isNarrow, open, collapsed, toggle, close } = useRail()
+/**
+ * The reading surface: a full-width header band, the page with its contents
+ * beside it, and previous / next at the foot. The sidebar belongs to the
+ * layout, not to this, so every page in the app sits in the same frame.
+ */
 </script>
 
 <template>
-  <div
-    class="shell"
-    :data-rail="!bare && collapsed ? 'collapsed' : undefined"
-  >
-    <!-- The rail is a column, not a layout, so the same component serves the
-         lesson player, the subject page and the mobile slideover. -->
-    <aside
-      v-if="!bare"
-      class="shell__rail"
-      :class="collapsed && 'shell__rail--collapsed'"
-    >
-      <div
-        class="shell__rail-inner"
-        :class="collapsed && 'invisible'"
-      >
-        <PlayerRail :current="current" />
+  <div class="shell">
+    <header class="shell__hero">
+      <div class="shell__inner">
+        <div
+          v-if="$slots.toolbar"
+          class="mb-4"
+        >
+          <slot name="toolbar" />
+        </div>
+
+        <slot name="hero" />
       </div>
-    </aside>
+    </header>
 
-    <div class="shell__main">
-      <!-- Full width: the header owns the whole content column, edge to edge,
-           rather than being squeezed into the reading measure. -->
-      <header class="shell__hero">
-        <div class="shell__inner">
-          <div class="flex items-center gap-2 mb-4">
-            <UButton
-              v-if="!bare"
-              :icon="collapsed ? 'i-lucide-panel-left-open' : 'i-lucide-panel-left-close'"
-              color="neutral"
-              variant="ghost"
-              size="sm"
-              :aria-label="collapsed ? 'Show the path' : 'Hide the path'"
-              class="hidden lg:inline-flex -ms-2"
-              @click="toggle"
-            />
-
-            <UButton
-              v-if="!bare"
-              icon="i-lucide-panel-left"
-              color="neutral"
-              variant="ghost"
-              size="sm"
-              aria-label="Show the path"
-              class="lg:hidden -ms-2"
-              @click="open = true"
-            />
-
-            <slot name="toolbar" />
-          </div>
-
-          <slot name="hero" />
+    <div class="shell__body">
+      <div class="shell__inner shell__columns">
+        <div class="min-w-0">
+          <slot />
         </div>
-      </header>
 
-      <!-- Two columns: prose, and everything that is about the page rather than
-           in it — contents, ads, page actions. -->
-      <div class="shell__body">
-        <div class="shell__inner shell__columns">
-          <div class="min-w-0">
-            <slot />
+        <aside
+          v-if="$slots.aside"
+          class="shell__aside"
+        >
+          <div class="shell__aside-inner">
+            <slot name="aside" />
           </div>
-
-          <aside
-            v-if="$slots.aside"
-            class="shell__aside"
-          >
-            <div class="shell__aside-inner">
-              <slot name="aside" />
-            </div>
-          </aside>
-        </div>
+        </aside>
       </div>
-
-      <!-- Full width again: the end of the page should look like the end of the
-           page, not like another paragraph. -->
-      <footer
-        v-if="$slots.pagination"
-        class="shell__pagination"
-      >
-        <div class="shell__inner">
-          <slot name="pagination" />
-        </div>
-      </footer>
     </div>
 
-    <ClientOnly>
-      <USlideover
-        v-if="!bare && isNarrow"
-        v-model:open="open"
-        side="left"
-        title="The path"
-      >
-        <template #body>
-          <PlayerRail
-            :current="current"
-            @navigate="close"
-          />
-        </template>
-      </USlideover>
-    </ClientOnly>
+    <footer
+      v-if="$slots.pagination"
+      class="shell__pagination"
+    >
+      <div class="shell__inner">
+        <slot name="pagination" />
+      </div>
+    </footer>
   </div>
 </template>
 
 <style scoped>
 .shell {
-  display: flex;
-  min-height: calc(100vh - var(--ui-header-height));
-}
-
-.shell__rail {
-  display: none;
-  flex-shrink: 0;
-  border-right: 1px solid var(--ui-border);
-  width: 18rem;
-  transition: width var(--dgm-t-base) var(--dgm-ease);
-}
-
-@media (min-width: 1024px) {
-  .shell__rail {
-    display: block;
-  }
-}
-
-@media (min-width: 1536px) {
-  .shell__rail {
-    width: 20rem;
-  }
-}
-
-.shell__rail--collapsed {
-  width: 0;
-}
-
-.shell__rail-inner {
-  position: sticky;
-  top: var(--ui-header-height);
-  height: calc(100vh - var(--ui-header-height));
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  padding: 1.5rem 1rem;
-}
-
-.shell__main {
-  flex: 1;
-  min-width: 0;
+  min-height: 100vh;
 }
 
 /* One inner wrapper, one max width, used by all three bands — so the hero, the
    prose and the pagination line up down the left edge instead of each finding
    their own margin. */
 .shell__inner {
-  max-width: 88rem;
+  max-width: 76rem;
   margin-inline: auto;
   padding-inline: 1rem;
   transition: max-width var(--dgm-t-base) var(--dgm-ease);
-}
-
-/* Hiding the rail gives its width back to the content rather than to the
-   margins. Capped all the same: past this the prose stops being readable and
-   the page is just wide. */
-.shell[data-rail='collapsed'] .shell__inner {
-  max-width: 100rem;
 }
 
 @media (min-width: 640px) {
@@ -188,6 +79,13 @@ const { isNarrow, open, collapsed, toggle, close } = useRail()
 .shell__hero {
   padding-block: 1.5rem 2rem;
   border-bottom: 1px solid var(--ui-border);
+}
+
+/* Room for the sidebar's fold button, pinned in the top-left corner. */
+@media (min-width: 1024px) {
+  .shell__hero {
+    padding-top: 3.75rem;
+  }
 }
 
 .shell__body {
@@ -220,11 +118,11 @@ const { isNarrow, open, collapsed, toggle, close } = useRail()
 
 .shell__aside-inner {
   position: sticky;
-  top: calc(var(--ui-header-height) + 2rem);
+  top: 2rem;
   display: flex;
   flex-direction: column;
   gap: 1.75rem;
-  max-height: calc(100vh - var(--ui-header-height) - 3rem);
+  max-height: calc(100vh - 3rem);
   overscroll-behavior: contain;
 }
 

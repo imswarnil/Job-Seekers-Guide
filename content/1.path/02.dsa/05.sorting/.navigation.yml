@@ -1,0 +1,3 @@
+title: Sorting
+icon: i-lucide-arrow-down-wide-narrow
+description: Six sorts written out in full, from bubble to counting sort. What each costs, which ones are stable, and what Java actually calls when you write Arrays.sort.

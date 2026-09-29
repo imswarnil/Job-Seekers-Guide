@@ -1,77 +1,77 @@
 /**
- * Legacy URLs, redirected in the browser.
+ * Old URLs, redirected in the browser.
  *
- * There are three redirect mechanisms in this repo and they exist for different
- * hosts, which is worth stating plainly because it looks like duplication:
+ * GitHub Pages cannot send a 301. It serves `404.html` for any path it has no
+ * file for and leaves the requested URL in the address bar, so the app boots,
+ * this middleware sees where the reader was trying to go, and sends them on.
  *
- *   · `routeRules` in nuxt.config.ts — real 301s, on a host that runs Nitro.
- *   · `public/_redirects` — real 301s on Cloudflare, and the only one of the
- *     three that can express the `/courses/*` → `/*` splat server-side.
- *   · this file — GitHub Pages, which honours neither of the above.
- *
- * GitHub Pages serves `404.html` for any path it has no file for, and it leaves
- * the requested URL in the address bar. So the app boots, this middleware sees
- * where the reader actually asked to go, and sends them on. It is a client-side
- * redirect rather than a 301, which is the correct trade for a set of URLs that
- * were never published under this domain — they are insurance for old links, not
- * a live migration.
+ * Two generations of URL land here: the pages of the old marketing site, and
+ * the tracks of the old course that were removed or renamed when it became the
+ * Bangalore guide on 2026-09-29.
  */
 
 /** Exact matches, checked first. */
 const exact: Record<string, string> = {
-  '/path': '/start',
-  // The story was three sections — an overview, a web series and a book — and
-  // is now one page. Every shape those URLs took lands on it.
-  '/series': '/my-story',
-  '/series/read': '/my-story',
-  '/my-story/watch': '/my-story',
-  '/my-story/book': '/my-story',
-  '/courses': '/start',
-  // About stopped being a page and became a band of the front page. The URL was
-  // published, so it keeps working — it just lands on the anchor now.
-  '/about': '/#about',
-  '/terminal/how-this-course-works': '/orientation/how-this-course-works',
-  '/docs': '/#about',
-  '/blog': '/changelog'
+  '/start': '/',
+  '/path': '/',
+  '/courses': '/',
+  '/faq': '/',
+  '/about': '/',
+  '/changelog': '/',
+  '/blog': '/',
+  '/docs': '/',
+  '/run': '/',
+  '/search': '/',
+  '/login': '/',
+  '/signup': '/',
+  '/series': '/my-story'
 }
 
 /**
- * Prefix rules. The first match wins, so the specific `/docs/...` sections are
- * listed before the catch-all `/docs/`.
+ * Old track prefixes. A track that was renamed goes to its new home; a track
+ * that was removed goes to the nearest thing that replaced it, or home.
  */
-const prefixes: [string, string | ((rest: string) => string)][] = [
-  // A course lesson kept its whole shape when courses became the path; only the
-  // section prefix was dropped. `/courses/java/collections/generics` → `/java/…`
-  ['/courses/', rest => `/${rest}`],
-  // Old episode and chapter URLs. The exact matches above are checked first.
+const prefixes: [string, string][] = [
+  ['/courses/', '/'],
   ['/series/', '/my-story'],
-  ['/my-story/watch/', '/my-story'],
-  ['/my-story/book/', '/my-story'],
-  // "How this course works" was a chapter of the terminal track until the
-  // orientation track was put in front of it. Same lessons, one level across.
-  ['/terminal/how-this-course-works/', rest => `/orientation/how-this-course-works/${rest}`],
-  ['/docs/getting-started/', '/#about'],
-  ['/docs/curriculum/', '/start'],
-  ['/docs/help/', '/faq'],
-  ['/docs/authoring/', '/#about'],
-  ['/docs/', '/#about'],
-  ['/blog/', '/changelog']
+  ['/docs/', '/'],
+  ['/blog/', '/'],
+  ['/changelog/', '/'],
+  ['/orientation', '/bangalore'],
+  ['/terminal', '/other-subjects'],
+  ['/data-structures', '/dsa'],
+  ['/aptitude', '/quantitative-aptitude'],
+  ['/english', '/verbal-ability'],
+  ['/typescript', '/javascript'],
+  ['/react', '/javascript'],
+  ['/nextjs', '/javascript'],
+  ['/data-visualisation', '/'],
+  ['/toolchain', '/other-subjects'],
+  ['/project', '/'],
+  ['/hosting', '/other-subjects'],
+  ['/nosql', '/dbms'],
+  ['/supabase', '/dbms'],
+  ['/ai', '/']
 ]
 
 export default defineNuxtRouteMiddleware((to) => {
+  // GitHub Pages serves every page as a folder with an index.html, and answers
+  // `/java/strings` with a redirect to `/java/strings/`. Content paths have no
+  // trailing slash, so without this every lesson reached that way was a 404.
+  if (to.path.length > 1 && to.path.endsWith('/')) {
+    return navigateTo({ path: to.path.replace(/\/+$/, ''), query: to.query, hash: to.hash }, { replace: true })
+  }
+
   const target = exact[to.path]
   if (target) {
     return navigateTo(target, { redirectCode: 301, replace: true })
   }
 
   for (const [prefix, destination] of prefixes) {
-    if (to.path.startsWith(prefix)) {
-      const rest = to.path.slice(prefix.length)
-      const next = typeof destination === 'function' ? destination(rest) : destination
-
-      // A rule that resolves to where we already are would loop.
-      if (next !== to.path) {
-        return navigateTo(next, { redirectCode: 301, replace: true })
+    // Match the whole segment, so `/ai` does not catch `/aptitude`.
+    if (to.path === prefix || to.path.startsWith(prefix.endsWith('/') ? prefix : `${prefix}/`)) {
+      if (destination !== to.path) {
+        return navigateTo(destination, { redirectCode: 301, replace: true })
       }
     }
   }

@@ -1,0 +1,3 @@
+title: Design and safety
+icon: i-lucide-shield-check
+description: Constraints that refuse bad data, views that save a query under a name, indexes that make it fast, and transactions that make two writes one.

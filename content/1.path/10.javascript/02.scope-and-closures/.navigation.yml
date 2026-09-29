@@ -1,0 +1,3 @@
+title: Scope, closures and this
+icon: i-lucide-brackets
+description: Where a variable can be seen, why some of them exist before their line runs, how a function remembers, and what this actually points at.

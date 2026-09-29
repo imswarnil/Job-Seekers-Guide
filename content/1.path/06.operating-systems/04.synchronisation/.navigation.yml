@@ -1,0 +1,3 @@
+title: Synchronisation
+icon: i-lucide-lock
+description: Race conditions, the critical section and its three requirements, mutexes, semaphores, and the producer-consumer problem every interviewer asks you to explain.

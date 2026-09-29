@@ -1,0 +1,3 @@
+title: Java 8 and after
+icon: i-lucide-sparkles
+description: Lambdas, functional interfaces, method references, streams, collectors and groupingBy, Optional and the java.time API.

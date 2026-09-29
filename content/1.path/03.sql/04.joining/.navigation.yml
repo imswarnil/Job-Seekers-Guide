@@ -1,0 +1,3 @@
+title: Joining
+icon: i-lucide-combine
+description: Questions that need more than one table. Inner and outer joins, a table joined to itself, queries inside queries, and stacking results with UNION.

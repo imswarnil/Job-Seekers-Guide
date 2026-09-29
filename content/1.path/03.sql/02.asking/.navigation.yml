@@ -1,0 +1,3 @@
+title: Asking
+icon: i-lucide-search
+description: SELECT and WHERE, sorting, limiting and removing duplicates, patterns and ranges, and NULL, which behaves differently from every other value and quietly breaks reports.

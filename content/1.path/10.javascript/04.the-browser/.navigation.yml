@@ -1,0 +1,3 @@
+title: The browser
+icon: i-lucide-globe
+description: The DOM, the live tree of the page your code can read and change, and events, how a click travels through it and how one listener can serve a whole table.

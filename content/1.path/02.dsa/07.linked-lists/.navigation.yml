@@ -1,0 +1,3 @@
+title: Linked lists
+icon: i-lucide-link
+description: Items scattered through memory, each holding the address of the next. Writing one by hand, and the pointer problems every interviewer reaches for.

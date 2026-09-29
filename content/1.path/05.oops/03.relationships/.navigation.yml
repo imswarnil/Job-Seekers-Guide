@@ -1,0 +1,3 @@
+title: Relationships between classes
+icon: i-lucide-network
+description: Abstract class against interface, and the has-a relationships (association, aggregation, composition) that most real designs are made of.

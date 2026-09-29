@@ -1,0 +1,3 @@
+title: Analysing
+icon: i-lucide-chart-line
+description: Window functions for ranking and comparing rows without collapsing them, and CASE for turning numbers into the labels a report needs.

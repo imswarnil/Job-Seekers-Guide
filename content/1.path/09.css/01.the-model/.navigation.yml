@@ -1,3 +1,3 @@
-title: The box model
-icon: i-lucide-box-select
-description: The box model, the cascade and specificity. The three things that explain why your style is being ignored, which is the question every beginner asks.
+title: Applying style
+icon: i-lucide-paintbrush
+description: How CSS reaches an element, which rule wins when two disagree, the box every element is, and the units that scale versus the ones that trap you.

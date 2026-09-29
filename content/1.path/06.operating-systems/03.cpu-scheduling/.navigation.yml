@@ -1,0 +1,3 @@
+title: CPU scheduling
+icon: i-lucide-list-ordered
+description: Who runs next. FCFS, SJF, SRTF, Round Robin and priority scheduling, each worked on the same four processes with a Gantt chart and the waiting-time arithmetic shown.

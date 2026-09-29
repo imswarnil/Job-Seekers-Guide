@@ -1,0 +1,3 @@
+title: Responsive design
+icon: i-lucide-smartphone
+description: One page from a 360px phone to a desktop, with the viewport tag, media queries and fluid sizes. Then custom properties, dark mode and transitions.

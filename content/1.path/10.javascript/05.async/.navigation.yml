@@ -1,0 +1,3 @@
+title: Asynchronous JavaScript
+icon: i-lucide-timer
+description: Why nothing in JavaScript waits, promises, async and await, fetch done properly, and the event loop drawn in plain words.

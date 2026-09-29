@@ -1,0 +1,3 @@
+title: Recursion and backtracking
+icon: i-lucide-repeat
+description: A method that calls itself, the call stack that makes it work, and backtracking, the recursion that tries every choice and undoes the ones that fail.

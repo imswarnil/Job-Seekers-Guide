@@ -50,8 +50,8 @@ defineProps<{
         />
       </div>
       <UButton
-        to="/start"
-        label="All subjects"
+        to="/"
+        label="The whole guide"
         icon="i-lucide-route"
         color="neutral"
         variant="ghost"
@@ -67,19 +67,19 @@ defineProps<{
       <span class="pagination__label">
         <!-- Crossing into a new subject is the moment the path stops feeling
              like a course, so it says so rather than showing a bare title. -->
-        {{ crossesSubject ? `Next subject · ${next.subjectTitle}` : 'Next' }}
+        {{ crossesSubject ? `Next track · ${next.subjectTitle}` : 'Next' }}
         <UIcon
           name="i-lucide-arrow-right"
           class="size-3.5"
         />
       </span>
       <span class="pagination__title">{{ next.title }}</span>
-      <span class="pagination__meta">{{ crossesSubject ? 'A new subject starts here' : next.moduleTitle }}</span>
+      <span class="pagination__meta">{{ crossesSubject ? 'A new track starts here' : next.moduleTitle }}</span>
     </NuxtLink>
 
     <NuxtLink
       v-else
-      to="/start"
+      to="/"
       class="pagination__card pagination__card--next"
     >
       <span class="pagination__label">
@@ -89,8 +89,8 @@ defineProps<{
           class="size-3.5"
         />
       </span>
-      <span class="pagination__title">That is the end of the path so far</span>
-      <span class="pagination__meta">More subjects are being written</span>
+      <span class="pagination__title">That is the end of the guide</span>
+      <span class="pagination__meta">Now go and get the job. Then write yours down.</span>
     </NuxtLink>
   </nav>
 </template>

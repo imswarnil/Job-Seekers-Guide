@@ -83,7 +83,7 @@ defineProps<{
           />
         </svg>
         <div class="h-px flex-1 bg-border" />
-        <span class="text-xl text-dimmed">Job Seekers Guide</span>
+        <span class="text-xl text-dimmed">Bangalore Job Seekers Guide</span>
       </div>
     </div>
   </div>

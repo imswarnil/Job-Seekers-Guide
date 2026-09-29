@@ -1,3 +1,3 @@
 title: Normalisation
 icon: i-lucide-copy-minus
-description: Normalisation taught as three problems rather than three forms. The anomalies that happen when a fact is stored twice, and when to break the rules on purpose.
+description: The anomalies that happen when a fact is stored twice, functional dependencies, and 1NF to BCNF with every decomposition worked by hand.

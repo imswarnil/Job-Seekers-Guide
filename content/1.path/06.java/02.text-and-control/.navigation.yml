@@ -1,3 +1,0 @@
-title: Text and control
-icon: i-lucide-repeat
-description: Strings and why == lies about them, building text without accidentally writing an O(n²) loop, conditionals, switch and the loops where every bug lives at the boundary.

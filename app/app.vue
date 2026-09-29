@@ -1,7 +1,7 @@
 <script setup lang="ts">
 const colorMode = useColorMode()
 
-const color = computed(() => colorMode.value === 'dark' ? '#0b0e1c' : 'white')
+const color = computed(() => colorMode.value === 'dark' ? '#0a0a0a' : '#ffffff')
 
 useHead({
   meta: [
@@ -10,22 +10,26 @@ useHead({
     { key: 'theme-color', name: 'theme-color', content: color }
   ],
   link: [
-    // SVG first for anything that understands it — it stays sharp on a retina
-    // tab strip and can carry the accent colour. The .ico is the fallback.
     { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' },
     { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }
   ],
   htmlAttrs: {
-    lang: 'en'
+    lang: 'en-IN'
   }
 })
 
 useSeoMeta({
-  titleTemplate: '%s · Job Seekers Guide',
+  titleTemplate: '%s · Bangalore Job Seekers Guide',
   twitterCard: 'summary_large_image'
 })
 
 const { navigation, files } = await useProvideContent()
+
+const searchLinks = [
+  { label: 'Home', icon: 'i-lucide-house', to: '/' },
+  { label: 'Start the guide', icon: 'i-lucide-train-front', to: '/bangalore' },
+  { label: 'My story', icon: 'i-lucide-footprints', to: '/my-story' }
+]
 </script>
 
 <template>
@@ -40,8 +44,9 @@ const { navigation, files } = await useProvideContent()
       <LazyUContentSearch
         :files="files"
         :navigation="navigation"
-        :links="navLinks"
+        :links="searchLinks"
         :fuse="{ resultLimit: 42 }"
+        placeholder="Search the guide: joins, percentages, tell me about yourself…"
       />
     </ClientOnly>
   </UApp>

@@ -6,7 +6,7 @@
  * in `useRunner`, so this file must stay free of runtime dependencies.
  */
 
-export type RunnerLang = 'html' | 'css' | 'javascript' | 'python' | 'sql' | 'java'
+export type RunnerLang = 'html' | 'css' | 'javascript' | 'python' | 'sql'
 
 export interface RunResult {
   stdout: string
@@ -29,8 +29,7 @@ export const runnerLabels: Record<RunnerLang, string> = {
   css: 'CSS',
   javascript: 'JavaScript',
   python: 'Python',
-  sql: 'SQL',
-  java: 'Java'
+  sql: 'SQL'
 }
 
 /** Which adapters need the network on first run, so the UI can warn honestly. */
@@ -39,6 +38,5 @@ export const runnerWeight: Record<RunnerLang, string> = {
   css: '',
   javascript: '',
   python: 'Downloads a ~12 MB Python runtime the first time. Cached afterwards.',
-  sql: 'Downloads a ~1.5 MB SQLite engine the first time. Cached afterwards.',
-  java: 'Runs on a server, because compiling Java in a browser is not a thing.'
+  sql: 'Downloads a ~1.5 MB SQLite engine the first time. Cached afterwards.'
 }

@@ -1,31 +1,41 @@
 ---
 title: HTML
-description: Everything you have built so far is invisible to everyone but you. HTML is the structure a browser can render, and the first version of it you write will be the university's actual enquiry form.
-code: JSG-09
-duration: 3 weeks
+description: "The document the server sends back when you ask for a page. Structure, semantic tags, forms and input types, tables, accessibility and the head: enough HTML to answer a fresher web interview without guessing."
+code: JSG-08
+duration: 1–2 weeks
 stage: web
 icon: i-simple-icons-html5
 outcomes:
-  - Explain what happens between typing an address and seeing a page
-  - Write markup that means something, rather than markup that merely looks right
-  - Build a real form that a real person could submit
-  - Make a page usable by somebody who never sees it
+  - You can write a complete HTML document and explain what the doctype, head and body each do
+  - You can choose between div, section, article and the other semantic tags, and say why it matters
+  - You can build a form with the right input types, labels and built-in validation, and explain GET versus POST
+  - You can mark up a data table properly, with headings, scope and a caption
+  - You can make a page usable with a keyboard and a screen reader, and name what an audit tool cannot catch
+  - You can explain the meta tags in the head, and defer versus async on a script
 prerequisites:
-  - sql
+  - computer-networks
 ---
 
-You can store the university's data and ask it anything, and nobody but you can
-reach a single row of it. A browser can, if you give it something it knows how
-to render.
+The networks track ended with a server answering your request with `200 OK`
+and a body of text. That text is almost always HTML, and this track is about
+what is in it.
 
 ## Why this track exists
 
-HTML is small. You can learn the tags in a weekend, which is exactly why most
-people learn it badly: they learn the tags and never learn what the tags *mean*.
-The difference shows up in interviews within about ninety seconds, and it shows
-up in production the first time somebody uses your page with a keyboard.
+At JSpiders the web module came after Java and SQL, and HTML was the part
+everybody in my batch treated as a holiday. The tags take a weekend to learn,
+which is exactly why most people learn them badly: they learn the tags and never
+learn what the tags *mean*. In walk-in interviews for web and full-stack roles in
+Bangalore, the first technical round very often opens with HTML, because it is
+fast to ask and it separates people within about ninety seconds. "What is
+semantic HTML?", "difference between GET and POST", "what does the viewport meta
+tag do", "defer or async?" are asked of freshers again and again.
 
-::real-life{title="The form that lost a term's admissions" source="A university IT office"}
+It also matters outside the interview. Salesforce, where I ended up, renders
+HTML in every page it builds, and a badly structured form costs real people real
+time.
+
+::real-life{title="The form that lost a term's admissions" source="A college admissions office"}
 An enquiry form built entirely from `div` elements and click handlers worked
 perfectly in testing. It could not be submitted with a keyboard, screen readers
 announced nothing, and the browser's autofill never triggered, so on mobile,
@@ -36,30 +46,27 @@ Everything was meaningless.
 ## The chapters
 
 ::flow{numbered direction="vertical"}
-  :::flow-step{label="How the web actually works" icon="i-lucide-globe"}
-  The browser, the address, the request, the response, the render. Client and
-  server, HTTP, status codes, and what "the front end" honestly means.
+  :::flow-step{label="Structure" icon="i-lucide-code-xml"}
+  What HTML is for, and how a browser reads a document: doctype, head, body,
+  elements, attributes, block and inline.
   :::
-  :::flow-step{label="Structure and meaning" icon="i-lucide-code"}
-  Elements, attributes, text, links, images, lists, tables, and forms, properly:
-  labels, input types, validation, and what the browser gives you for free.
+  :::flow-step{label="Content and semantics" icon="i-lucide-file-text"}
+  Text, links and images; the landmark tags; audio, video, iframes and data
+  attributes.
   :::
-  :::flow-step{label="Semantics and accessibility" icon="i-lucide-accessibility" highlight}
-  The document outline, landmarks, headings that mean something, keyboard order,
-  and the shape of a real page a stranger can use.
+  :::flow-step{label="Forms and tables" icon="i-lucide-list-checks" highlight}
+  How a form sends data, every input type, validation, and tables.
+  :::
+  :::flow-step{label="Accessibility and the head" icon="i-lucide-accessibility"}
+  Keyboard, screen reader, ARIA used sparingly; meta tags, scripts, and browser
+  storage.
+  :::
+  :::flow-step{label="Revision" icon="i-lucide-book-check"}
+  Glossary, twenty-five interview questions, and exercises.
   :::
 ::
 
-The web-skills roadmap at `andreasbm.github.io/web-skills` is the map this track
-and the next three cover. Look at it once, then close it: a map is not a plan.
-
-## What the University Management App becomes
-
-Real pages: the public enquiry form, the student directory, and the shells of the
-student, teacher and admin portals. Unstyled, ugly, and for the first time,
-something you can send to another human being.
-
 ::callout{icon="i-lucide-arrow-right"}
-You send the link to someone. They open it on a phone, and it is unreadable:
-black text, times new roman, a form running off the side of the screen.
+Start with the thing most people get wrong about HTML: it does not describe how
+a page looks.
 ::

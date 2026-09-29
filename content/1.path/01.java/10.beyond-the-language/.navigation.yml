@@ -1,0 +1,3 @@
+title: Files, JVM, JDBC and tests
+icon: i-lucide-server
+description: Reading and writing files, what the JVM does with memory, garbage collection and class loading, connecting to a database with JDBC, and JUnit.

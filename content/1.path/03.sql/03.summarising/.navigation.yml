@@ -1,0 +1,3 @@
+title: Summarising
+icon: i-lucide-sigma
+description: COUNT, SUM, AVG, MIN and MAX, then GROUP BY and HAVING, which turn thousands of rows into the one line per department somebody actually asked for.

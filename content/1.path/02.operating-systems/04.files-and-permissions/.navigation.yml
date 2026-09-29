@@ -1,3 +1,0 @@
-title: Files and permissions
-icon: i-lucide-folder-lock
-description: What a file actually is, who the operating system thinks you are, and why reading a million rows one at a time is a thousand times slower than reading them in blocks.

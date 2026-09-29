@@ -1,3 +1,0 @@
-title: Asking
-icon: i-lucide-search
-description: SELECT, WHERE, ORDER BY and LIMIT, the order a query is really evaluated in, and NULL, which behaves differently from every other value and quietly breaks reports.

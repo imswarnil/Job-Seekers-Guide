@@ -14,16 +14,8 @@ const chunks = useAutoAds(() => props.page?.body as never)
 
 const route = useRoute()
 
-const { path } = usePath()
 const { subject } = usePathPlayer(() => route.path)
 const { moduleProgress } = useProgress()
-
-/** Prerequisite slugs resolved into real subjects, so they can be linked. */
-const prerequisites = computed(() =>
-  (props.page?.prerequisites || [])
-    .map(slug => path.value.subjects.find(candidate => candidate.slug === slug))
-    .filter(Boolean)
-)
 
 /**
  * Modules start open, and stay however the reader leaves them.
@@ -55,31 +47,6 @@ function toggleAll() {
 
 <template>
   <div>
-    <UAlert
-      v-if="prerequisites.length"
-      icon="i-lucide-signpost"
-      color="neutral"
-      variant="subtle"
-      title="Comes after"
-      class="mb-8"
-    >
-      <template #description>
-        <span class="flex flex-wrap items-center gap-x-1.5 gap-y-1">
-          <template
-            v-for="(prerequisite, index) in prerequisites"
-            :key="prerequisite!.path"
-          >
-            <span v-if="index">·</span>
-            <NuxtLink
-              :to="prerequisite!.path"
-              class="text-primary hover:underline"
-            >{{ prerequisite!.title }}</NuxtLink>
-          </template>
-          <span class="text-muted">— nothing is locked, but this is the order it was written in.</span>
-        </span>
-      </template>
-    </UAlert>
-
     <div
       v-if="page?.outcomes?.length"
       class="mb-10"

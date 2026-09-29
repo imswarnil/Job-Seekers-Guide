@@ -96,6 +96,13 @@ for (const file of lessons(PATH_DIR)) {
       if (line.includes('"}') && /\s\w+"\}/.test(line) && !/=\s*"[^"]*"\}/.test(line)) {
         report(file, number, `stray quote in the attributes of ::${name}`)
       }
+      // MDC has no escape for a quote inside an attribute: `caption="the \"x\""`
+      // ends the value at the backslash and the whole block renders as text.
+      // Use curly quotes “ ” or single quotes inside the value instead.
+      const attributes = line.match(/\{(.*)\}\s*$/)?.[1]
+      if (attributes && !/^(\s*[:\w-]+(=("[^"]*"|'[^']*'))?)*\s*$/.test(attributes)) {
+        report(file, number, `broken quoting in the attributes of ::${name} (a " inside a value? use “ ” instead)`)
+      }
       const expected = ':'.repeat(open.length + 2)
       if (colons !== expected) {
         report(file, number,

@@ -22,8 +22,7 @@ export function usePlayerShortcuts(handlers: PlayerShortcutHandlers) {
     'k': handlers.previous || noop,
     'arrowleft': handlers.previous || noop,
     'm': handlers.toggleComplete || noop,
-    '[': handlers.toggleRail || noop,
-    'g-p': () => navigateTo('/start'),
+    'g-p': () => navigateTo('/'),
     'g-h': () => navigateTo('/')
   })
 }
@@ -33,7 +32,7 @@ export const playerShortcuts = [
   { keys: ['J'], label: 'Next lesson' },
   { keys: ['K'], label: 'Previous lesson' },
   { keys: ['M'], label: 'Mark finished' },
-  { keys: ['['], label: 'Show or hide the path' },
-  { keys: ['G', 'P'], label: 'Go to the whole path' },
+  { keys: ['['], label: 'Show or hide the sidebar' },
+  { keys: ['G', 'H'], label: 'Go home' },
   { keys: ['/'], label: 'Search' }
 ]

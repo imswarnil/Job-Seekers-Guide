@@ -1,23 +1,8 @@
 <script setup lang="ts">
 /**
- * Every page of the learning path.
- *
- * Subjects, modules and lessons all live at the root of the site, so one
- * catch-all serves all three and depth decides which. vue-router ranks static
- * segments above this, which is why `/faq` reaches `faq.vue` and never gets
- * here — and why `modules/reserved-slugs.ts` fails the build if somebody names a
- * subject after one of those pages. `/about` no longer has a page of its own;
- * it is caught earlier still, by the redirect in `middleware/legacy.global.ts`.
- *
- * The three-band layout (full-width hero, content + sidebar, full-width
- * pagination) lives in `player/PlayerShell.vue`; this file decides what goes in
- * each band.
+ * Every page of the guide: a track (`/java`), a chapter (`/java/collections`)
+ * or a lesson (`/java/collections/hashmap`). Depth decides which.
  */
-// The three bands below run to 88rem, and wider still with the rail hidden, so
-// a header pinned to the default container would stop well short of the content
-// under it and read as a misalignment. See AppHeader.vue.
-definePageMeta({ fluidHeader: true })
-
 const route = useRoute()
 
 const depth = computed(() => route.path.split('/').filter(Boolean).length)
@@ -50,7 +35,7 @@ if (!page.value && !known.value) {
 const view = computed(() => depth.value >= 3 ? 'lesson' : depth.value === 2 ? 'module' : 'subject')
 
 const title = computed(() =>
-  page.value?.seo?.title || page.value?.title || module.value?.title || subject.value?.title || 'Start here'
+  page.value?.seo?.title || page.value?.title || module.value?.title || subject.value?.title || 'The guide'
 )
 const description = computed(() =>
   page.value?.seo?.description || page.value?.description || module.value?.description || subject.value?.description
@@ -79,7 +64,7 @@ usePageSeo({
 </script>
 
 <template>
-  <PlayerShell :current="route.path">
+  <PlayerShell>
     <template #hero>
       <LessonHeader
         v-if="view === 'lesson' && page"

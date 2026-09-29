@@ -1,3 +1,3 @@
-title: Transactions
-icon: i-lucide-shield-check
-description: ACID, what each letter actually buys, the four isolation levels and the specific bug each one still allows. The subject that decides whether two people can book the same seat.
+title: Transactions and concurrency
+icon: i-lucide-arrow-left-right
+description: ACID, schedules and serialisability, locks and deadlock, and the isolation levels that decide whether two clerks can take the same seat.

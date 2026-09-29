@@ -6,13 +6,9 @@ import { runnerLabels, runnerWeight } from '~/utils/runners/types'
  * ::runner — runnable code inside a lesson.
  *
  * ```md
- * ::runner{lang="java" stdin="4200\n60"}
- * ```java
- * public class Main {
- *   public static void main(String[] args) {
- *     System.out.println(4200 / 60);
- *   }
- * }
+ * ::runner{lang="javascript"}
+ * ```js
+ * console.log(4200 / 60)
  * ```
  * ::
  * ```

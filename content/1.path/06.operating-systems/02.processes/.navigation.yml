@@ -1,0 +1,3 @@
+title: Processes and threads
+icon: i-lucide-layers
+description: What a running program actually is to the kernel, the five states it moves through, the record the kernel keeps on it, what a thread shares, and what a context switch costs.

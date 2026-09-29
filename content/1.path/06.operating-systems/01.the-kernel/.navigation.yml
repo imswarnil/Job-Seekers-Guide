@@ -1,0 +1,3 @@
+title: The kernel
+icon: i-lucide-shield-alert
+description: What an operating system actually is, the two modes a processor runs in, the system call that is the one doorway into the kernel, and how a machine starts.

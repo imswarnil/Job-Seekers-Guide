@@ -26,8 +26,8 @@ export default {
       build: token => `<!doctype html><html><head><meta charset="utf-8">`
         + `<meta name="viewport" content="width=device-width,initial-scale=1">`
         + `<style>body{font-family:system-ui,sans-serif;margin:1rem}</style>`
-        + `<style>${css}</style></head>`
-        + `<body>${markup || DEFAULT_MARKUP}${harness(token, '')}</body></html>`
+        + `<style>${css}</style>${harness(token)}</head>`
+        + `<body>${markup || DEFAULT_MARKUP}</body></html>`
     })
   }
 } satisfies RunnerAdapter

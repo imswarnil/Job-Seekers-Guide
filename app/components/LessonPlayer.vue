@@ -54,7 +54,7 @@ function cancelAdvance() {
 function advance() {
   cancelAdvance()
   setComplete(route.path, true)
-  return navigateTo(next.value?.path || '/start')
+  return navigateTo(next.value?.path || '/')
 }
 
 function startAdvance() {

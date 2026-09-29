@@ -155,7 +155,7 @@ watchEffect(async () => {
            option that costs the reader nothing. -->
       <NuxtLink
         v-if="live && loaded && ads.provider === 'house'"
-        to="/start"
+        to="/"
         class="ad__house"
       >
         <UIcon

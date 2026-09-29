@@ -12,8 +12,9 @@ export function useRail() {
 
   const isNarrow = useMediaQuery('(max-width: 1023px)')
 
-  /** Slideover, only used below `lg`. */
-  const open = ref(false)
+  /** Slideover, only used below `lg`. Shared, so the top bar and the layout
+   *  open and close the same one. */
+  const open = useState('rail-open', () => false)
 
   const collapsed = computed({
     get: () => state.value.railCollapsed,

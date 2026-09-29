@@ -1,0 +1,3 @@
+title: Exceptions
+icon: i-lucide-triangle-alert
+description: The exception hierarchy, checked against unchecked, try-with-resources, exceptions of your own, and the NullPointerException.

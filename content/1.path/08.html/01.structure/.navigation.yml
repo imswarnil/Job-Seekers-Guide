@@ -1,3 +1,3 @@
 title: Structure
 icon: i-lucide-code-xml
-description: What HTML is actually for, the elements that carry meaning, and why choosing the right one is an accessibility decision rather than a style preference.
+description: What HTML is actually for, and how a browser turns a file of text into a tree of elements it can draw.

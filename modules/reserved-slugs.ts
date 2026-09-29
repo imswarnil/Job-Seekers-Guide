@@ -13,22 +13,11 @@ import { defineNuxtModule } from 'nuxt/kit'
  * that silently does not exist costs however long it takes somebody to notice.
  */
 const RESERVED = [
-  'start',
-  'path',
-  // No page of its own any more, but still reserved: `/about` is a published
-  // URL that redirects to the front page, so a subject there would never load.
-  'about',
-  'my-story',
-  'series',
-  'run',
-  'faq',
-  'changelog',
-  'login',
-  'signup',
-  'search',
+  // Pages that exist in app/pages/.
   'privacy',
   'terms',
   'contact',
+  // Build and framework prefixes.
   'api',
   '_nuxt',
   '_ipx',

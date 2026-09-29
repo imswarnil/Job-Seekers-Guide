@@ -19,7 +19,7 @@ const resumeLabel = computed(() => {
   if (progress.value.finished) {
     return 'Review from the start'
   }
-  return progress.value.started ? 'Continue' : 'Start this subject'
+  return progress.value.started ? 'Continue' : 'Start this track'
 })
 </script>
 
@@ -27,18 +27,6 @@ const resumeLabel = computed(() => {
   <div class="lg:flex lg:items-start lg:justify-between lg:gap-12">
     <div class="min-w-0">
       <div class="flex items-center gap-2 flex-wrap mb-4">
-        <TechThumb
-          v-if="subject?.slug"
-          :name="subject.slug"
-          size="xs"
-          class="hidden"
-        />
-        <UBadge
-          v-if="page?.code"
-          :label="page.code"
-          color="neutral"
-          variant="subtle"
-        />
         <UBadge
           v-if="page?.stage"
           :label="stageLabels[page.stage as Stage]"
@@ -83,7 +71,7 @@ const resumeLabel = computed(() => {
         <template #fallback>
           <UButton
             :to="subject?.lessons[0]?.path"
-            label="Start this subject"
+            label="Start this track"
             trailing-icon="i-lucide-arrow-right"
             size="lg"
           />

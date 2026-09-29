@@ -1,0 +1,3 @@
+title: Two pointers, sliding window, hashing
+icon: i-lucide-scan
+description: The three patterns that turn most n² array and string problems into one pass. Two indices walking together, a window that slides, and a HashMap that remembers what it has seen.

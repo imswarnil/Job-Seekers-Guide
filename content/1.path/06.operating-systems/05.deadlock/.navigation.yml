@@ -1,0 +1,3 @@
+title: Deadlock
+icon: i-lucide-octagon-x
+description: The four conditions, the resource allocation graph, and the three things you can do about it: prevent it, avoid it with the banker's algorithm, or detect it and recover.

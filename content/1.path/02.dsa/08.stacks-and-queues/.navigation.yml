@@ -1,0 +1,3 @@
+title: Stacks and queues
+icon: i-lucide-layers
+description: Two structures defined by what they refuse to let you do. Implementing both with an array, the Java classes to actually use, and the classic problems they solve.

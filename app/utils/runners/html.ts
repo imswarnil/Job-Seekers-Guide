@@ -14,9 +14,22 @@ export default {
 
     return runInSandbox({
       visual: true,
+      // The harness goes first, so the console is shimmed before any
+      // <script> the author wrote runs.
       build: token => isDocument
-        ? source + harness(token, '')
-        : `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body>${source}${harness(token, '')}</body></html>`
+        ? injectFirst(source, harness(token))
+        : `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">${harness(token)}</head><body>${source}</body></html>`
     })
   }
 } satisfies RunnerAdapter
+
+/** Put the harness at the top of the author's own document. */
+function injectFirst(source: string, script: string) {
+  if (/<head[^>]*>/i.test(source)) {
+    return source.replace(/<head[^>]*>/i, match => match + script)
+  }
+  if (/<html[^>]*>/i.test(source)) {
+    return source.replace(/<html[^>]*>/i, match => match + script)
+  }
+  return script + source
+}

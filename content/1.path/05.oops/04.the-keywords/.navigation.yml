@@ -1,0 +1,3 @@
+title: The keywords
+icon: i-lucide-key-round
+description: Access modifiers, static and final, this and super, and the three Object methods (equals, hashCode, toString) that break collections when you get them wrong.

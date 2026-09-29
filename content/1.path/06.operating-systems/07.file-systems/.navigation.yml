@@ -1,0 +1,3 @@
+title: File systems
+icon: i-lucide-folder-lock
+description: What a file actually is, the inode behind every name, how blocks are laid out on a disk, and who the operating system thinks you are when you ask to open one.

@@ -1,3 +1,3 @@
 title: Indexes
 icon: i-lucide-list-tree
-description: How ten million rows become eleven, why an index sometimes does nothing at all, and how to read the plan that tells you which of those is happening.
+description: How a B+ tree finds one row in crores in three or four reads, and what clustered and non-clustered actually mean.

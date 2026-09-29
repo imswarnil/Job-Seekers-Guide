@@ -67,9 +67,18 @@ withDefaults(defineProps<{
   overflow: visible;
 }
 
-.diagram__ink :deep(text) {
+/* Set on the <svg> and inherited, never on <text> directly: CSS outranks an SVG
+   presentation attribute, so a rule on `text` would override every
+   `font-size="10"` an author wrote and push the words out of their boxes. */
+.diagram__ink :deep(svg:not([font-family])) {
   font-family: var(--ui-font-mono, ui-monospace, monospace);
+}
+
+.diagram__ink :deep(svg:not([font-size])) {
   font-size: 11px;
+}
+
+.diagram__ink :deep(text:not([fill])) {
   fill: var(--dgm-label);
 }
 

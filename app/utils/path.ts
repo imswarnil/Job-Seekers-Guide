@@ -16,24 +16,11 @@ import type { ContentNavigationItem } from '@nuxt/content'
  */
 
 /**
- * The sections of the curriculum.
- *
- * A stage is not a category — it is a stretch of the same road, and every
- * subject inside one sits next to its neighbours in folder order too. That
- * constraint is the whole reason the list is short: the moment a stage picks up
- * a subject from further down the tree, `/start` starts numbering 8, 14, 9, 10
- * and the page stops being a route.
+ * The parts of the guide, in the order they are read. A part is a stretch of
+ * the same road: every track inside one sits next to its neighbours in folder
+ * order too, so the sidebar never numbers 8, 14, 9.
  */
-export type Stage
-  = | 'introduction'
-    | 'foundation'
-    | 'language'
-    | 'web'
-    | 'tooling'
-    | 'build'
-    | 'written'
-    | 'rounds'
-    | 'upskill'
+export type Stage = 'move' | 'code' | 'cs' | 'web' | 'written' | 'interview' | 'story'
 
 export interface Lesson {
   title: string
@@ -104,8 +91,9 @@ const kindIcons: Record<string, string> = {
   lesson: 'i-lucide-book-open',
   reading: 'i-lucide-book-marked',
   practice: 'i-lucide-terminal',
-  project: 'i-lucide-hammer',
-  quiz: 'i-lucide-list-checks'
+  quiz: 'i-lucide-list-checks',
+  guide: 'i-lucide-map',
+  story: 'i-lucide-footprints'
 }
 
 export function lessonIcon(lesson: Pick<Lesson, 'kind' | 'icon'>): string {
@@ -120,56 +108,42 @@ export interface StageMeta {
   icon: string
 }
 
-/**
- * The sections, in the order they are read. This list is the only place the
- * shape of the curriculum is described in words — the subjects inside each one
- * come from the folder tree.
- */
+/** The parts, as the reader sees them. The tracks inside come from the folder tree. */
 export const stages: Record<Stage, StageMeta> = {
-  introduction: {
-    label: 'Start',
-    blurb: 'College is over, nobody has told you what the job is, and the advice you are getting is from people who have never done it. What a developer actually does, how the industry got this shape, and an honest answer to whether it is for you.',
-    icon: 'i-lucide-compass'
+  move: {
+    label: 'The move',
+    blurb: 'Which city, how to tell your family, where to live, how to learn, and how walk-ins work. Everything before the first line of code.',
+    icon: 'i-lucide-train-front'
   },
-  foundation: {
-    label: 'Foundations',
-    blurb: 'The five subjects a degree should have given you: the machine, the operating system, the wire, the data, and the cost of moving it around. This is the layer a model cannot supervise for you, which is exactly why it is worth the weeks.',
-    icon: 'i-lucide-blocks'
-  },
-  language: {
-    label: 'The language',
-    blurb: 'You learn to program once and to ask a database questions once. Everything after is a dialect of one or the other, and the two joined together are an API.',
+  code: {
+    label: 'Learn to code',
+    blurb: 'Java taken all the way, DSA in Java, and SQL. The three subjects every fresher interview in Bangalore opens with.',
     icon: 'i-lucide-code'
   },
+  cs: {
+    label: 'Computer science',
+    blurb: 'DBMS, OOPs, operating systems, networks and the rest. The subjects I skipped in college and had to learn properly in a PG in BTM.',
+    icon: 'i-lucide-cpu'
+  },
   web: {
-    label: 'The web',
-    blurb: 'Structure, style, behaviour, types, components and the pictures that make a table of numbers mean something. The part of the university system a person actually opens.',
+    label: 'Web basics',
+    blurb: 'HTML, CSS and JavaScript: enough to explain how a web page works and to answer the questions a web interview asks.',
     icon: 'i-lucide-globe'
-  },
-  tooling: {
-    label: 'Tools',
-    blurb: 'The package manager, the build, the review. What a professional project switches on before the first line, and what you switch on before you build yours.',
-    icon: 'i-lucide-wrench'
-  },
-  build: {
-    label: 'The build',
-    blurb: 'One system, built end to end and put on the internet: the University Management App. Everything before this was so that you could build it, and it is the thing you will be talking about in every round that follows.',
-    icon: 'i-lucide-hammer'
   },
   written: {
     label: 'The written round',
-    blurb: 'The gate that rejects most people before anybody reads their code: quantitative aptitude, logical reasoning, data interpretation and English, against a clock. It is the round that eliminated me, four years running.',
+    blurb: 'Quantitative aptitude, logical reasoning and verbal ability. The gate that rejected me in college, and that I cleared once I practised it.',
     icon: 'i-lucide-clipboard-list'
   },
-  rounds: {
-    label: 'The rounds',
-    blurb: 'Past the written gate: the technical round, the HR round, and the two minutes of talking about yourself that decide more than the code does. Then reading the offer you get.',
+  interview: {
+    label: 'The interview',
+    blurb: 'Tell me about yourself, how to answer a technical question, the HR round, the offer and the negotiation.',
     icon: 'i-lucide-messages-square'
   },
-  upskill: {
-    label: 'Upskilling',
-    blurb: 'What you add once you are employable, not before: the other kind of database, a managed backend, and how models actually work. Last, because you can only supervise what you already understand.',
-    icon: 'i-lucide-sparkles'
+  story: {
+    label: 'My story',
+    blurb: 'Mahroni to Bangalore to Europe, chapter by chapter, with the rejections left in.',
+    icon: 'i-lucide-footprints'
   }
 }
 
@@ -178,7 +152,7 @@ export const stageLabels: Record<Stage, string> = Object.fromEntries(
 ) as Record<Stage, string>
 
 /** The order stages are shown in on `/start`, when a subject declares one. */
-export const stageOrder: Stage[] = ['introduction', 'foundation', 'language', 'web', 'tooling', 'build', 'written', 'rounds', 'upskill']
+export const stageOrder: Stage[] = ['move', 'code', 'cs', 'web', 'written', 'interview', 'story']
 
 /**
  * A directory that has an `index.md` shows up both as the directory item and, in
@@ -326,7 +300,7 @@ export function byStage(path: LearningPath): StageGroup[] {
 
   const untagged = path.subjects.filter(subject => !subject.stage)
   if (untagged.length) {
-    groups.push(group('build', {
+    groups.push(group('story', {
       label: 'Also on the path',
       blurb: 'Subjects that have not been placed in a section yet.',
       icon: 'i-lucide-book-open'

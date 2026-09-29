@@ -1,0 +1,3 @@
+title: Memory management
+icon: i-lucide-memory-stick
+description: Contiguous allocation and fragmentation, paging and address translation, segmentation, virtual memory, page replacement worked by hand, thrashing, and where an OutOfMemoryError really comes from.
