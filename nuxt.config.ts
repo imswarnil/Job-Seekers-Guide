@@ -144,7 +144,7 @@ export default defineNuxtConfig({
       name: 'Swarnil Singhai',
       description: 'Went from Mahroni to Bangalore with no skills, cleared the 34th walk-in, and wrote down the whole route for the next job seeker.',
       jobTitle: 'Salesforce engineer',
-      sameAs: ['https://github.com/imswarnil', 'https://imswarnil.com']
+      sameAs: ['https://github.com/imswarnil', 'https://imswarnil.com', 'https://imswarnil.com/about']
     }
   },
 

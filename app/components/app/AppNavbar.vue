@@ -6,7 +6,8 @@ import type { DropdownMenuItem } from '@nuxt/ui'
  *
  * Left to right: the sidebar control and the brand (in a cell exactly as wide
  * as the sidebar, so the rest of the bar starts on the content's edge), the
- * search, the community pages, and who you are.
+ * search, the community pages (each behind a small icon), the GitHub link,
+ * and who you are.
  *
  * The community links show as many as fit: all seven on a very wide screen,
  * fewer as it narrows, with the rest in "More". On a phone they all live in
@@ -202,6 +203,10 @@ const folded = computed(() => mounted.value && collapsed.value)
           :class="shownClass[link.from]"
           :aria-current="isActive(link.to) ? 'page' : undefined"
         >
+          <UIcon
+            :name="link.icon"
+            class="navbar__link-icon"
+          />
           {{ link.label }}
         </NuxtLink>
 
@@ -227,6 +232,18 @@ const folded = computed(() => mounted.value && collapsed.value)
           </button>
         </UDropdownMenu>
       </nav>
+
+      <UButton
+        to="https://github.com/imswarnil/Job-Seekers-Guide"
+        target="_blank"
+        rel="noopener"
+        icon="i-simple-icons-github"
+        color="neutral"
+        variant="ghost"
+        aria-label="Star this on GitHub"
+        title="Star this on GitHub"
+        class="navbar__github"
+      />
 
       <ClientOnly>
         <UDropdownMenu
@@ -405,6 +422,7 @@ const folded = computed(() => mounted.value && collapsed.value)
 .navbar__link {
   position: relative;
   align-items: center;
+  gap: 0.375rem;
   padding-inline: 0.625rem;
   font-size: var(--text-sm);
   font-weight: 500;
@@ -413,12 +431,30 @@ const folded = computed(() => mounted.value && collapsed.value)
   transition: color var(--dgm-t-fast) var(--dgm-ease);
 }
 
+/* The small mark before each label: quieter than the word beside it, and in
+   the accent only where you are. */
+.navbar__link-icon {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+  color: var(--ui-text-dimmed);
+  transition: color var(--dgm-t-fast) var(--dgm-ease);
+}
+
 .navbar__link:hover {
   color: var(--ui-text-highlighted);
 }
 
+.navbar__link:hover .navbar__link-icon {
+  color: var(--ui-text-muted);
+}
+
 .navbar__link[aria-current='page'] {
   color: var(--ui-text-highlighted);
+}
+
+.navbar__link[aria-current='page'] .navbar__link-icon {
+  color: var(--ui-primary);
 }
 
 .navbar__link[aria-current='page']::after {
@@ -457,6 +493,10 @@ const folded = computed(() => mounted.value && collapsed.value)
   .navbar__more {
     display: none;
   }
+}
+
+.navbar__github {
+  flex-shrink: 0;
 }
 
 .navbar__avatar {

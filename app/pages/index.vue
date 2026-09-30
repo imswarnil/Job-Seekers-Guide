@@ -136,32 +136,49 @@ useSchemaOrg([
           </UButton>
         </div>
 
-        <dl class="hero__facts">
-          <div>
-            <dt class="label">
-              Tracks
-            </dt>
-            <dd class="num">
-              {{ totals.tracks }}
-            </dd>
-          </div>
-          <div>
-            <dt class="label">
-              Lessons
-            </dt>
-            <dd class="num">
-              {{ totals.lessons }}
-            </dd>
-          </div>
-          <div>
-            <dt class="label">
-              Hours of reading
-            </dt>
-            <dd class="num">
-              {{ totals.hours }}
-            </dd>
-          </div>
-        </dl>
+        <div class="hero__factrow">
+          <dl class="hero__facts">
+            <div>
+              <dt class="label">
+                Tracks
+              </dt>
+              <dd class="num">
+                {{ totals.tracks }}
+              </dd>
+            </div>
+            <div>
+              <dt class="label">
+                Lessons
+              </dt>
+              <dd class="num">
+                {{ totals.lessons }}
+              </dd>
+            </div>
+            <div>
+              <dt class="label">
+                Hours of reading
+              </dt>
+              <dd class="num">
+                {{ totals.hours }}
+              </dd>
+            </div>
+          </dl>
+
+          <!-- A margin note in my own hand, because the numbers above are the
+               course and this one is the point. -->
+          <p class="hero__note handnote">
+            <span class="hero__note-line">₹13,000 a month → ₹2,70,000 a month</span>
+            <svg
+              class="handnote__stroke"
+              viewBox="0 0 176 10"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <path d="M2 7 C 34 3, 70 9, 108 5 S 158 2, 174 6" />
+            </svg>
+            <span class="handnote__sub">the same person, eight years apart</span>
+          </p>
+        </div>
 
         <ClientOnly>
           <PlayerProgress
@@ -273,6 +290,24 @@ useSchemaOrg([
         </div>
 
         <HomeJourney class="mt-12" />
+      </div>
+    </section>
+
+    <!-- ── A note scribbled under the journey ──────────────────────── -->
+    <section
+      class="band guides handband"
+      aria-label="A note from Swarnil"
+    >
+      <div class="frame swiss-grid">
+        <blockquote class="handband__quote">
+          <p class="handnote handnote--ink handband__text">
+            If you have lost faith: I have been there. Nothing changed between
+            walk-in 1 and 34 except what I had practised.
+          </p>
+          <footer class="handband__by">
+            <span class="handnote">Swarnil · imswarnil.com</span>
+          </footer>
+        </blockquote>
       </div>
     </section>
 
@@ -514,10 +549,18 @@ useSchemaOrg([
   margin-top: 2.25rem;
 }
 
+.hero__factrow {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1.5rem;
+  margin-top: 3rem;
+}
+
 .hero__facts {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  margin-top: 3rem;
+  align-self: stretch;
   border-top: 1px solid var(--rule-color);
 }
 
@@ -551,21 +594,74 @@ useSchemaOrg([
   margin-top: 2.5rem;
 }
 
+/* ≥1024px the hero is exactly one screen: the pane's height (the viewport
+   minus the bar), everything on it visible without scrolling, and the next
+   band starting right below the fold. The headline steps down from `.display`
+   and the vertical gaps tighten to buy that. */
 @media (min-width: 1024px) {
   .hero {
-    padding-block: 6rem 5rem;
+    display: flex;
+    align-items: center;
+    height: calc(100dvh - var(--navbar-h));
+    padding-block: 0;
+  }
+
+  .hero__grid {
+    width: 100%;
+    padding-block: 1.5rem;
   }
 
   .hero__title {
     grid-column: 1 / span 11;
+    margin-top: 1rem;
+    font-size: clamp(2.25rem, 0.9rem + 2.5vw, 3.375rem);
   }
 
   .hero__lede {
-    grid-column: 1 / span 6;
+    grid-column: 1 / span 7;
+    margin-top: 1rem;
+  }
+
+  .hero__actions {
+    margin-top: 1.5rem;
+  }
+
+  .hero__factrow {
+    flex-direction: row;
+    align-items: flex-end;
+    gap: 3rem;
+    margin-top: 1.75rem;
   }
 
   .hero__facts {
-    grid-column: 1 / span 6;
+    align-self: flex-end;
+    width: 50%;
+  }
+
+  .hero__facts dd {
+    font-size: clamp(1.875rem, 1.1rem + 1.5vw, 2.75rem);
+  }
+
+  .hero__note {
+    margin-bottom: 0.375rem;
+  }
+
+  .hero__progress {
+    margin-top: 1.25rem;
+  }
+
+  .hero__nudges {
+    margin-top: 1.25rem;
+  }
+}
+
+/* A stubby window (a short laptop screen with every toolbar open) gets the
+   flowing layout back rather than clipped words. */
+@media (min-width: 1024px) and (max-height: 700px) {
+  .hero {
+    height: auto;
+    min-height: calc(100dvh - var(--navbar-h));
+    padding-block: 3rem;
   }
 }
 
@@ -604,6 +700,51 @@ useSchemaOrg([
 
   .hero[data-video] .hero__title-2 {
     color: rgb(255 255 255 / 0.62);
+  }
+}
+
+/* ── The handwritten notes ───────────────────────────────────────────── */
+.hero__note {
+  max-width: 22rem;
+}
+
+.hero__note-line {
+  display: block;
+}
+
+.hero__note .handnote__stroke {
+  width: min(100%, 13rem);
+}
+
+/* The scribbled quote between the journey and the guide: real words, not
+   decoration, written large in the hand rather than set in Geist. */
+.handband__quote {
+  grid-column: 1 / -1;
+  padding-block: 0.5rem;
+}
+
+.handband__text {
+  max-width: 30ch;
+  font-size: clamp(1.875rem, 1.3rem + 2.2vw, 3.25rem);
+  line-height: 1.15;
+  font-weight: 600;
+  transform: rotate(-2deg);
+  transform-origin: left center;
+}
+
+.handband__by {
+  margin-top: 1.25rem;
+}
+
+.handband__by .handnote {
+  font-size: 1.375rem;
+  font-weight: 400;
+  color: var(--ui-text-muted);
+}
+
+@media (min-width: 1024px) {
+  .handband__quote {
+    grid-column: 2 / span 10;
   }
 }
 

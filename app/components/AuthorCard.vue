@@ -69,6 +69,18 @@ const facts = [
         />
       </NuxtLink>
       <NuxtLink
+        to="https://imswarnil.com/about"
+        target="_blank"
+        rel="noopener"
+        class="arrow-link"
+      >
+        About me
+        <UIcon
+          name="i-lucide-arrow-up-right"
+          class="size-4"
+        />
+      </NuxtLink>
+      <NuxtLink
         to="https://imswarnil.com"
         target="_blank"
         rel="noopener"

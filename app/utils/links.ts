@@ -12,10 +12,12 @@ export function editUrl(file: string) {
   return `${repoUrl}/edit/${repo.branch}/${file}`
 }
 
-/** The few places outside the guide. Shown small, at the foot of the sidebar. */
+/** The few places outside the guide. Shown small, at the foot of the sidebar.
+ *  Contact goes to the personal site: that is where a reply actually comes
+ *  from, and /contact itself now says the same. */
 export const footLinks = [
   { label: 'Privacy', to: '/privacy' },
   { label: 'Terms', to: '/terms' },
-  { label: 'Contact', to: '/contact' },
+  { label: 'Contact', to: 'https://imswarnil.com', target: '_blank' },
   { label: 'GitHub', to: repoUrl, target: '_blank' }
 ]

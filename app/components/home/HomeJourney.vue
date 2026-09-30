@@ -49,6 +49,10 @@ interface Stop {
   story: string
   guide?: { to: string, label: string }
   turn?: boolean
+  /** A short remark in Swarnil's hand, beside the road. Decorative (it
+   *  restates what the card already says), so it is aria-hidden, and it only
+   *  appears where the wide layout leaves room for it. */
+  note?: string
 }
 
 const stops: Stop[] = [
@@ -106,7 +110,8 @@ const stops: Stop[] = [
     text: 'A startup, a bond, six days a week. Sundays for study.',
     phase: 'first-job',
     story: '/my-story/the-first-job/thirteen-thousand-a-month',
-    guide: { to: '/bangalore/finding-a-job/taking-the-first-offer', label: 'Taking the first offer' }
+    guide: { to: '/bangalore/finding-a-job/taking-the-first-offer', label: 'Taking the first offer' },
+    note: 'started at ₹13k in a startup'
   },
   {
     year: '2019',
@@ -121,14 +126,16 @@ const stops: Stop[] = [
     text: 'A friend was on 21 LPA while I was on 5. I switched: 15.5 LPA at Cognizant.',
     phase: 'switch',
     story: '/my-story/the-switch/five-offers',
-    guide: { to: '/interview', label: 'Negotiation' }
+    guide: { to: '/interview', label: 'Negotiation' },
+    note: 'service companies, then product'
   },
   {
     year: '2023',
     place: 'Twilio',
     text: '30+ LPA, Salesforce analytics for the GTM team.',
     phase: 'switch',
-    story: '/my-story/the-switch/twilio'
+    story: '/my-story/the-switch/twilio',
+    note: 'close to eight years in, now in Europe'
   },
   {
     year: 'Now',
@@ -392,6 +399,13 @@ onMounted(async () => {
           class="stop__leader"
           aria-hidden="true"
         />
+        <p
+          v-if="stop.note"
+          class="stop__note handnote"
+          aria-hidden="true"
+        >
+          {{ stop.note }}
+        </p>
 
         <div class="stop__card">
           <p class="stop__year num">
@@ -559,6 +573,13 @@ onMounted(async () => {
   display: none;
 }
 
+/* The remark in Swarnil's hand, beside the road. Only where the winding
+   layout leaves clear space for it: on a phone the column is too tight, so
+   it stays hidden there. */
+.stop__note {
+  display: none;
+}
+
 .stop__year {
   font-size: clamp(2.25rem, 1.8rem + 2vw, 3.5rem);
   line-height: 0.9;
@@ -681,6 +702,29 @@ onMounted(async () => {
   }
 
   .journey[data-mode='static'] .stop__leader {
+    display: none;
+  }
+
+  /* The handwritten remark sits on the empty side of the node, clear of the
+     card and the road. */
+  .stop__note {
+    position: absolute;
+    top: 0.25rem;
+    display: block;
+    max-width: 13rem;
+    font-size: 1.25rem;
+    line-height: 1.1;
+  }
+
+  .stop[data-side='left'] .stop__note {
+    left: calc(var(--node-x) + 3rem);
+  }
+
+  .stop[data-side='right'] .stop__note {
+    right: calc(100% - var(--node-x) + 3rem);
+  }
+
+  .journey[data-mode='static'] .stop__note {
     display: none;
   }
 }

@@ -9,7 +9,6 @@ It is **not** a course that builds a project. Nothing here builds an app. It is 
 guide: where to go, where to live, how to learn, what to study, how to clear the
 written round, how to answer in the interview, and the story of how it went.
 
-`to-do.md` is the working plan and its status. Read it before starting work.
 
 ---
 

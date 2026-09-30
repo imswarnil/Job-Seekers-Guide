@@ -24,7 +24,12 @@ export default defineEventHandler(async (event) => {
     url.searchParams.set('q', term)
   }
 
+  const cacheKey = `search:${term || ''}`
+  const cached = gifCacheGet<{ enabled: true, items: unknown[] }>(cacheKey, 10 * 60_000)
   setResponseHeader(event, 'cache-control', 'public, max-age=300, s-maxage=600')
+  if (cached) {
+    return cached
+  }
   try {
     const response = await fetch(url, { headers: { accept: 'application/json' } })
     if (!response.ok) {
@@ -33,7 +38,7 @@ export default defineEventHandler(async (event) => {
     const body = await response.json() as {
       data?: { id: string, title?: string, images?: { fixed_width?: { url?: string }, original?: { url?: string } } }[]
     }
-    return {
+    const out = {
       enabled: true,
       items: (body.data ?? []).map(g => ({
         id: g.id,
@@ -42,6 +47,8 @@ export default defineEventHandler(async (event) => {
         url: g.images?.original?.url?.split('?')[0]
       })).filter(g => g.preview && g.url && isAllowedGif(g.url))
     }
+    gifCachePut(cacheKey, out)
+    return out
   } catch {
     return { enabled: true, items: [] }
   }

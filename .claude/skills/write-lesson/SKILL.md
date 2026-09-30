@@ -9,8 +9,7 @@ description: Write, review or repair a page of the Bangalore Job Seekers Guide u
 
 1. `CLAUDE.md`, all of it. It is the only spec: the narrator's facts (§2), the
    voice rules, the three page shapes (§3), the components and nesting (§4).
-2. `to-do.md`, to see what is planned and what is done.
-3. Two neighbouring pages in the same track, for the house style of that track.
+2. Two neighbouring pages in the same track, for the house style of that track.
 
 Do not work from memory of them.
 
