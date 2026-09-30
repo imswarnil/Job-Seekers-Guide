@@ -5,13 +5,11 @@ allowBuilds:
   esbuild: false
   unrs-resolver: false
   vue-demi: false
-  # mermaid-cli renders diagrams in headless Chromium, so puppeteer's install
-  # step has to be allowed to fetch it.
-  puppeteer: true
   # wrangler's local runtime; its install step checks the platform binary.
   workerd: true
   # Pulled in transitively by the auth SDK; its script only prints a banner.
   core-js: false
+  puppeteer: set this to true or false
 
 overrides:
   h3: 1.15.11

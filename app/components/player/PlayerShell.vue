@@ -81,10 +81,10 @@
   border-bottom: 1px solid var(--ui-border);
 }
 
-/* Room for the sidebar's fold button, pinned in the top-left corner. */
+/* A little more air above the title on a wide screen. */
 @media (min-width: 1024px) {
   .shell__hero {
-    padding-top: 3.75rem;
+    padding-top: 2.5rem;
   }
 }
 
@@ -146,7 +146,7 @@
 
 .shell__aside-inner :slotted(.shell-sticky) {
   position: sticky;
-  top: 1.5rem;
+  top: calc(var(--ui-header-height, 0px) + 1.5rem);
   display: flex;
   flex-direction: column;
   gap: 1rem;

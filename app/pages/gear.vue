@@ -101,12 +101,6 @@ usePageSeo({
       >
         The list is being put together.
       </p>
-
-      <SponsorSlot
-        name="gear"
-        variant="banner"
-        class="mt-14"
-      />
     </div>
   </div>
 </template>

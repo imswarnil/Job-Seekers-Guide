@@ -201,14 +201,6 @@ useSeoMeta({
         Share your story
       </UButton>
     </UCard>
-
-    <ClientOnly>
-      <SponsorSlot
-        name="story-footer"
-        variant="banner"
-        class="mt-8"
-      />
-    </ClientOnly>
   </CommunityPage>
 </template>
 

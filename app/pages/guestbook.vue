@@ -11,6 +11,8 @@ interface Entry {
   gif: string | null
   learned: string | null
   createdAt: string
+  /** Seeded example content. Optional: not every API response carries it. */
+  sample?: boolean
 }
 
 const { user, ready } = useUser()
@@ -191,6 +193,15 @@ usePageSeo({
           <p class="text-sm">
             <span class="font-semibold text-highlighted">{{ entry.name }}</span>
             <span class="text-dimmed"> · {{ formatAgo(entry.createdAt) }}</span>
+            <UBadge
+              v-if="entry.sample"
+              color="neutral"
+              variant="outline"
+              size="sm"
+              class="ml-2 align-middle"
+            >
+              Sample
+            </UBadge>
           </p>
           <p class="mt-1 whitespace-pre-line text-default">
             {{ entry.message }}
@@ -208,7 +219,7 @@ usePageSeo({
             alt=""
             loading="lazy"
             referrerpolicy="no-referrer"
-            class="mt-3 max-h-48 rounded-md"
+            class="mt-3 max-h-56 max-w-full border border-default"
           >
         </div>
       </li>

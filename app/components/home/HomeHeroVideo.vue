@@ -21,6 +21,8 @@ const src = computed(() => {
   const params = new URLSearchParams({
     autoplay: '1',
     mute: '1',
+    // Always from the first frame, never wherever the video was last left.
+    start: '0',
     loop: '1',
     // YouTube only loops an embed when the video is also its own playlist.
     playlist: props.id,
@@ -34,6 +36,11 @@ const src = computed(() => {
   })
   return `https://www.youtube-nocookie.com/embed/${encodeURIComponent(props.id)}?${params}`
 })
+
+// YouTube draws its title bar and logo over the first seconds of an embed. The
+// frame stays invisible until playback has had time to start, then fades in.
+const shown = ref(false)
+onMounted(() => setTimeout(() => (shown.value = true), 3500))
 
 const poster = computed(() => `https://i.ytimg.com/vi/${encodeURIComponent(props.id)}/hqdefault.jpg`)
 </script>
@@ -52,6 +59,7 @@ const poster = computed(() => `https://i.ytimg.com/vi/${encodeURIComponent(props
         v-if="play"
         :src="src"
         class="media__frame"
+        :class="shown && 'media__frame--shown'"
         title="Background video"
         tabindex="-1"
         allow="autoplay; encrypted-media; picture-in-picture"
@@ -89,16 +97,23 @@ const poster = computed(() => `https://i.ytimg.com/vi/${encodeURIComponent(props
   filter: saturate(0.9);
 }
 
-/* Cover the box at any aspect ratio: at least as wide as the box, and at
-   least as wide as a 16:9 frame the height of the box. */
+/* Cover the box at any aspect ratio (at least as wide as the box, and at
+   least as wide as a 16:9 frame the height of the box), then 35% larger again
+   so YouTube's title bar, logo and corner controls fall outside the box. */
 .media__frame {
   position: absolute;
   top: 50%;
   left: 50%;
   width: max(100cqw, 177.78cqh);
   height: max(100cqh, 56.25cqw);
-  transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%) scale(1.35);
   border: 0;
+  opacity: 0;
+  transition: opacity 1.2s ease;
+}
+
+.media__frame--shown {
+  opacity: 1;
 }
 
 /* Dark on the left where the words are, lighter to the right, so the headline
@@ -107,8 +122,8 @@ const poster = computed(() => `https://i.ytimg.com/vi/${encodeURIComponent(props
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(90deg, rgb(8 8 8 / 0.92) 0%, rgb(8 8 8 / 0.78) 45%, rgb(8 8 8 / 0.45) 100%),
-    linear-gradient(0deg, rgb(8 8 8 / 0.7), transparent 40%),
+    linear-gradient(90deg, rgb(8 8 8 / 0.82) 0%, rgb(8 8 8 / 0.55) 45%, rgb(8 8 8 / 0.2) 100%),
+    linear-gradient(0deg, rgb(8 8 8 / 0.6), transparent 35%),
     radial-gradient(50rem 20rem at 0% 0%, color-mix(in oklab, var(--color-guide-600) 30%, transparent), transparent 70%);
 }
 </style>

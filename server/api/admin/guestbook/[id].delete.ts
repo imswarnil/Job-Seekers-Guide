@@ -1,9 +1,11 @@
+/** Delete a guestbook entry. Audited. */
 export default defineEventHandler(async (event) => {
-  await requireAdmin(event)
+  const admin = await requireAdmin(event)
   const sql = requireDb(event)
-  const rows = await q(sql, 'delete from guestbook where id = $1 returning id', [Number(getRouterParam(event, 'id'))])
-  if (!rows.length) {
+  const id = Number(getRouterParam(event, 'id'))
+  if (!Number.isSafeInteger(id) || id < 1) {
     throw createError({ statusCode: 404, statusMessage: 'Entry not found' })
   }
+  await auditedDelete(event, sql, admin, 'guestbook', String(id))
   return { deleted: true }
 })

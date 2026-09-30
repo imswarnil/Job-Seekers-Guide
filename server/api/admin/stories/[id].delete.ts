@@ -1,19 +1,11 @@
-/** Delete a story, its votes, its media rows and its files in R2. */
+/** Delete a story, its votes, its media rows and its files in R2. Audited. */
 export default defineEventHandler(async (event) => {
-  await requireAdmin(event)
+  const admin = await requireAdmin(event)
   const sql = requireDb(event)
   const id = Number(getRouterParam(event, 'id'))
-  const files = await q<{ r2_key: string }>(sql, 'select r2_key from story_media where story_id = $1 and r2_key is not null', [id])
-  const bucket = uploadsBucket(event)
-  if (bucket && files.length) {
-    await bucket.delete(files.map(f => f.r2_key))
-  }
-  const rows = await q(sql, 'delete from stories where id = $1 returning id', [id])
-  if (!rows.length) {
+  if (!Number.isSafeInteger(id) || id < 1) {
     throw createError({ statusCode: 404, statusMessage: 'Story not found' })
   }
-  if (files.length) {
-    await q(sql, 'delete from uploads where key = any($1::text[])', [files.map(f => f.r2_key)])
-  }
+  await auditedDelete(event, sql, admin, 'stories', String(id))
   return { deleted: true }
 })

@@ -84,6 +84,29 @@
   --font-mono: 'Geist Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
   --font-pixel: 'Geist Pixel', 'Geist Mono', ui-monospace, monospace;
 
+  /* ---- Size ---------------------------------------------------------------
+     One notch larger than Tailwind's defaults across the board. The body is
+     17px, not 16, and every `text-*` step moves up with it, so a caption, a
+     sidebar row and a button label all grow together instead of the body
+     outgrowing the interface around it. Spacing is untouched: only type moved.
+     People read this site on cheap phones, for an hour at a time. */
+  --text-xs: 0.8125rem;
+  --text-xs--line-height: calc(1.125 / 0.8125);
+  --text-sm: 0.9375rem;
+  --text-sm--line-height: calc(1.375 / 0.9375);
+  --text-base: 1.0625rem;
+  --text-base--line-height: calc(1.625 / 1.0625);
+  --text-lg: 1.1875rem;
+  --text-lg--line-height: calc(1.75 / 1.1875);
+  --text-xl: 1.375rem;
+  --text-xl--line-height: calc(1.875 / 1.375);
+  --text-2xl: 1.625rem;
+  --text-2xl--line-height: calc(2.125 / 1.625);
+  --text-3xl: 2rem;
+  --text-3xl--line-height: calc(2.5 / 2);
+  --text-4xl: 2.5rem;
+  --text-4xl--line-height: calc(2.875 / 2.5);
+
   /* ---- The accent ---------------------------------------------------------
      `#f22f46` is the system's default accent — the value Ghost injects when a
      site owner has not chosen one. The ramp around it is built so 600 is that
@@ -289,11 +312,64 @@ h1, .text-display {
   mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 40%, transparent 100%);
 }
 
-/* Lesson prose. Capped at the reading measure and given a little more line
-   height than the UI default, because these pages are read, not scanned. */
+/* Anything scrolled into view lands below the sticky top bar, not under it. */
+html {
+  scroll-padding-top: 3.5rem;
+}
+
+body {
+  font-size: var(--text-base);
+  line-height: 1.6;
+}
+
+/* Lesson prose. Capped at the reading measure, a size up from the interface,
+   and given generous line height, because these pages are read, not scanned.
+   Nuxt UI's prose sets paragraphs and list items to a fixed 1.75rem leading,
+   which at 18px is tighter than it looks; these rules sit outside the utility
+   layer, so they win. */
 .guide-prose {
   max-width: var(--guide-measure);
+  font-size: 1.125rem;
   line-height: 1.75;
+}
+
+.guide-prose :where(p, li) {
+  line-height: 1.75;
+}
+
+.guide-prose :where(h2) {
+  font-size: 1.75rem;
+  line-height: 1.25;
+}
+
+.guide-prose :where(h3) {
+  font-size: 1.375rem;
+  line-height: 1.3;
+}
+
+.guide-prose :where(h4) {
+  font-size: 1.1875rem;
+  line-height: 1.35;
+}
+
+/* Code and tables stay a step smaller than the prose around them, so a
+   seventy-character line of Java still fits a phone without scrolling. */
+.guide-prose :where(pre, table) {
+  font-size: 0.9375rem;
+}
+
+@media (max-width: 639px) {
+  .guide-prose {
+    font-size: 1.0625rem;
+  }
+
+  .guide-prose :where(h2) {
+    font-size: 1.5rem;
+  }
+
+  .guide-prose :where(pre, table) {
+    font-size: 0.875rem;
+  }
 }
 
 /* An ad dropped into the prose by ~/utils/autoAds.ts rather than written there

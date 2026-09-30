@@ -126,7 +126,13 @@ export async function getSessionUser(event: H3Event): Promise<SessionUser | null
       method: 'GET',
       headers: { cookie, origin }
     })
-    const response = await handleAuthProxyRequest({ request, path: 'get-session', ...config })
+    // Neon Auth occasionally takes tens of seconds to refresh a session. Give
+    // up after 10 s and say so, so /api/me can answer "try again" instead of
+    // reporting a signed-in reader as signed out.
+    const response = await Promise.race([
+      handleAuthProxyRequest({ request, path: 'get-session', ...config }),
+      new Promise<never>((_, reject) => setTimeout(() => reject(new Error('session lookup timed out')), 10_000))
+    ])
     forwardSetCookies(event, response)
     if (!response.ok) {
       return null
@@ -144,6 +150,7 @@ export async function getSessionUser(event: H3Event): Promise<SessionUser | null
       isAdmin: isAdminEmail(event, user.email)
     }
   } catch (error) {
+    ;(event.context as { sessionLookupFailed?: boolean }).sessionLookupFailed = true
     console.error('[auth] session lookup failed:', error instanceof Error ? error.message : 'unknown')
   }
   return ctx.sessionUser

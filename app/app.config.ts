@@ -85,8 +85,10 @@ export default defineAppConfig({
      * A YouTube video id (the eleven characters after `v=`), played muted and
      * looping behind the headline on wide screens. Empty keeps the gradient.
      * Paste a real id from your own channel; never a guessed one.
+     *
+     * `ecOkmTD7KhU` is mine. It always starts from the first frame and loops.
      */
-    youtubeId: ''
+    youtubeId: 'ecOkmTD7KhU'
   },
 
   /** Lesson player behaviour. */
@@ -168,12 +170,16 @@ export default defineAppConfig({
      * `rail-bottom` and `path-parallax` stay off for the reasons written next
      * to them in that file, not because they are unconfigured. Both have a unit
      * id below and are one boolean away from running.
+     *
+     * Fewer ads, on purpose: one AdSense unit under each lesson and nothing
+     * else. The in-prose, in-feed and sidebar units are off. The only other
+     * paid thing on the site is the one `brand` sponsor spot.
      */
     slots: {
-      'in-article': true,
-      'in-feed': true,
+      'in-article': false,
+      'in-feed': false,
       'lesson-footer': true,
-      'sidebar': true,
+      'sidebar': false,
       'rail-bottom': false,
       'path-parallax': false
     },
@@ -220,8 +226,11 @@ export default defineAppConfig({
      * never moves.
      */
     autoInsert: {
-      /** Insert after every Nth paragraph of a lesson. 0 turns this off. */
-      afterParagraphs: 3,
+      /**
+       * Insert after every Nth paragraph of a lesson. 0 turns this off, which
+       * is where it is: the owner chose one ad per lesson, at the foot.
+       */
+      afterParagraphs: 0,
       /**
        * The ceiling per page. 0 removes it.
        *

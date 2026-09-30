@@ -257,12 +257,6 @@ usePageSeo({
         >Share your story</NuxtLink>
       </p>
     </UCard>
-
-    <SponsorSlot
-      name="stats"
-      variant="banner"
-      class="mt-10"
-    />
   </CommunityPage>
 </template>
 

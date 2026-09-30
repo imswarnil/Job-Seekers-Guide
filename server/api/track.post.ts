@@ -21,9 +21,23 @@ function referrerHost(value: string | null | undefined, ownHost: string): string
   }
 }
 
+/** A coarse device class from the user agent. Only the class is stored, never the agent. */
+function deviceClass(ua: string): 'mobile' | 'tablet' | 'desktop' | null {
+  if (!ua) {
+    return null
+  }
+  if (/ipad|tablet|kindle|silk|playbook|(android(?!.*mobile))/i.test(ua)) {
+    return 'tablet'
+  }
+  if (/mobi|iphone|ipod|android|blackberry|opera mini|iemobile/i.test(ua)) {
+    return 'mobile'
+  }
+  return 'desktop'
+}
+
 /**
  * One page view. No personal data: a random cookie id, the path, the
- * referring site's host and Cloudflare's country code. Never fails the page:
+ * referring site's host, Cloudflare's country code and a device class. Never fails the page:
  * with no database it answers 204 and does nothing.
  */
 export default defineEventHandler(async (event) => {
@@ -51,9 +65,10 @@ export default defineEventHandler(async (event) => {
     // reload storm or a double-fired route change counts once.
     await q(sql, `
       with s as (
-        insert into sessions (id, country, views) values ($1, $2, 1)
+        insert into sessions (id, country, views, device) values ($1, $2, 1, $5)
         on conflict (id) do update set last_seen = now(), views = sessions.views + 1,
-          country = coalesce(excluded.country, sessions.country)
+          country = coalesce(excluded.country, sessions.country),
+          device = coalesce(excluded.device, sessions.device)
         returning id
       )
       insert into page_views (session_id, path, referrer, country)
@@ -61,7 +76,7 @@ export default defineEventHandler(async (event) => {
       where not exists (
         select 1 from page_views
         where session_id = $1 and path = $3 and ts > now() - interval '10 seconds'
-      )`, [id, where, path, source])
+      )`, [id, where, path, source, deviceClass(ua)])
   })())
   return null
 })

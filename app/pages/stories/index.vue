@@ -94,12 +94,6 @@ usePageSeo({
         :story="story"
       />
     </div>
-
-    <SponsorSlot
-      name="story-footer"
-      variant="banner"
-      class="mt-10"
-    />
   </CommunityPage>
 </template>
 

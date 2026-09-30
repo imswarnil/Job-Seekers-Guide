@@ -10,6 +10,7 @@ interface AdminEntry {
   hidden: boolean
   createdAt: string
   email: string | null
+  sample?: boolean
 }
 
 const { data, status, error, refresh } = useFetch<{ items: AdminEntry[] }>('/api/admin/guestbook', { server: false, lazy: true })
@@ -63,6 +64,15 @@ useSeoMeta({ title: 'Guestbook · Admin', robots: 'noindex' })
       >
         <div class="min-w-0 flex-1">
           <p class="text-xs text-muted">
+            <UBadge
+              v-if="g.sample"
+              color="warning"
+              variant="subtle"
+              size="sm"
+              class="mr-1"
+            >
+              Sample
+            </UBadge>
             {{ g.name }} ({{ g.email || 'no email' }}) · {{ formatAgo(g.createdAt) }}
           </p>
           <p class="mt-1 text-sm whitespace-pre-line">

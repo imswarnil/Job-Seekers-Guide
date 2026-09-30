@@ -42,7 +42,7 @@ onMounted(async () => {
           :name="section.icon"
           class="size-3.5 text-dimmed shrink-0"
         />
-        <h2 class="text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-dimmed whitespace-nowrap">
+        <h2 class="text-xs font-semibold uppercase tracking-[0.14em] text-dimmed whitespace-nowrap">
           {{ section.label }}
         </h2>
         <span class="h-px flex-1 bg-[var(--ui-border)]" />

@@ -37,11 +37,14 @@ A signed-in request is recognised by the Neon Auth cookies, or by
 
 ## Sponsor spots (the outbid model)
 
-A **slot** is a named place on the site (`home-hero`, `home-footer`,
-`sidebar`, `lesson-aside`, `lesson-footer`, `story-footer`, `gear`, `stats`;
-the list lives in `server/utils/sponsors.ts`). The highest single paid bid for
-a slot holds it, with no expiry, until someone pays more. The next bid must
-beat the holder by 10% and by at least ₹100; an empty slot has a floor price.
+There is one **slot**, `brand` (the list lives in `server/utils/sponsors.ts`).
+It shows in two places: a band on the home page and the sticky card beside
+every lesson. The retired names (`home-hero`, `home-footer`, `sidebar`,
+`lesson-aside`, `lesson-footer`, `story-footer`, `gear`, `stats`) are still
+accepted by `/api/sponsors/slot/:slot` and `/api/sponsors/bid` as aliases of
+`brand`. The highest single paid bid holds it, with no expiry, until someone
+pays more. The next bid must beat the holder by 10% and by at least ₹100; an
+empty slot has a floor price.
 
 | Method | Path | Returns |
 | --- | --- | --- |
@@ -74,6 +77,7 @@ The front end's `<SponsorSlot name="…">` shows the holder, or a
 | GET | `/api/media/*` | *(extension)* serves an uploaded file from R2 |
 | GET/POST | `/api/guestbook` | entries `{ id, name, image, message, gif?, learned?, createdAt }`; POST `{ name?, message, gif?, learned? }` signed in |
 | GET | `/api/gifs/search?q=` | *(extension)* `{ enabled, items: [{ id, title, preview, url }] }`; `enabled: false` without `GIPHY_API_KEY` |
+| GET | `/api/gifs/trending` | *(extension)* same shape as search; GIPHY trending, rating g. `enabled: false` without `GIPHY_API_KEY` |
 | GET/POST | `/api/comments?path=` | lesson comments `{ items, used, limit }`; POST `{ path, body }` signed in, auto-published, **max 5 per user per page** |
 | GET | `/api/account` | *(extension)* the signed-in user's stories, comments and guestbook entries |
 | DELETE | `/api/account?confirm=DELETE` | deletes the user and everything they wrote (query, not body: DELETE bodies do not reach h3 on Workers) |
@@ -81,21 +85,32 @@ The front end's `<SponsorSlot name="…">` shows the holder, or a
 Plain text only, everywhere: the server strips control characters and the
 pages render every field escaped.
 
+**Sample content.** Stories, guestbook entries and comments carry
+`sample: boolean`. `true` marks fictional rows seeded by
+`scripts/seed-samples.mjs` (owned by the profile "Sample data"); pages show a
+"Sample" badge on them. `/api/stats/summary` never counts them. An admin can
+remove all of them from `/admin/content`.
+
 ## Admin (`/admin`, `isAdmin` only; admins are listed in `ADMIN_EMAILS`)
 
-`/api/admin/*`: analytics (views by day, top pages, countries, referrers,
-sessions), users, stories (hide/feature), comments and guestbook (delete),
-sponsors and payments (read), plus a read-only SQL table browser.
+`/api/admin/*`: live and ranged analytics, users, moderation, payments, a
+data manager for the app's own tables (fixed allow-list, never `neon_auth`,
+never SQL from the client) and the audit log. Every admin write is validated
+and recorded in `admin_audit` in the same statement.
 
 | Method | Path |
 | --- | --- |
-| GET | `/api/admin/analytics?days=30` |
+| GET | `/api/admin/live` (online now, their pages and countries, the latest 40 views, views per minute; polled every 10 s) |
+| GET | `/api/admin/analytics?range=24h\|7d\|30d\|90d&tz=` (series per hour or day, totals with the previous period, top pages, referrers, countries, devices; `?days=` still accepted) |
 | GET | `/api/admin/users` |
 | GET | `/api/admin/stories` · PATCH `/api/admin/stories/:id` `{ status: visible\|hidden\|featured }` · DELETE `/api/admin/stories/:id` |
 | GET | `/api/admin/comments` · DELETE `/api/admin/comments/:id` |
 | GET | `/api/admin/guestbook` · DELETE `/api/admin/guestbook/:id` |
 | GET | `/api/admin/payments` (payments, bids, totals) |
-| GET | `/api/admin/tables` · `/api/admin/tables/:name?page=&size=` (read-only transaction, fixed table list) |
+| GET | `/api/admin/tables` · `/api/admin/tables/:name?page=&size=&sort=&dir=&q=&f=[{col,op,value}]&format=csv` (read-only transaction) |
+| PATCH | `/api/admin/tables/:name/:id` `{ column: value }` (only the columns in `TABLE_SPECS`, server/utils/admin.ts) · DELETE `/api/admin/tables/:name/:id` (stories, guestbook, comments, page_views, jobs_got) |
+| GET | `/api/admin/audit?page=&size=&table=&action=` |
+| GET | `/api/admin/samples` · DELETE `/api/admin/samples` (removes every `sample` row and the sample profile; audited) |
 
 ## Errors and limits
 

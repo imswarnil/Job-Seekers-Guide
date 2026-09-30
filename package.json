@@ -5,13 +5,10 @@
   "scripts": {
     "build": "nuxt build",
     "dev": "nuxt dev",
-    "preview": "nuxt build && wrangler dev --port 3501",
     "postinstall": "nuxt prepare",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
     "check:lessons": "node scripts/check-lessons.mjs",
     "typecheck": "nuxt typecheck",
-    "svg:opt": "svgo --config svgo.config.mjs",
     "deploy": "nuxt build && wrangler deploy",
     "db:migrate": "node --env-file-if-exists=.env scripts/db-migrate.mjs",
     "db:status": "node --env-file-if-exists=.env scripts/db-migrate.mjs --status"
@@ -39,10 +36,8 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@mermaid-js/mermaid-cli": "^11.16.0",
     "@nuxt/eslint": "^1.17.0",
     "eslint": "^10.8.1",
-    "svgo": "^4.0.2",
     "typescript": "^6.0.3",
     "vue-tsc": "^3.3.9",
     "wrangler": "^4.142.0"

@@ -3,8 +3,8 @@ export default defineEventHandler(async (event) => {
   await requireAdmin(event)
   const sql = requireDb(event)
   setResponseHeader(event, 'cache-control', 'private, no-store')
-  const rows = await q<{ id: string, name: string, message: string, gif: string | null, learned: string | null, hidden: boolean, created_at: string, email: string | null }>(sql, `
-    select g.id, g.name, g.message, g.gif, g.learned, g.hidden, g.created_at, p.email
+  const rows = await q<{ id: string, name: string, message: string, gif: string | null, learned: string | null, hidden: boolean, created_at: string, email: string | null, sample: boolean }>(sql, `
+    select g.id, g.name, g.message, g.gif, g.learned, g.hidden, g.created_at, g.sample, p.email
     from guestbook g left join profiles p on p.id = g.user_id
     order by g.created_at desc limit 500`)
   return {
@@ -16,7 +16,8 @@ export default defineEventHandler(async (event) => {
       learned: r.learned,
       hidden: r.hidden,
       createdAt: r.created_at,
-      email: r.email
+      email: r.email,
+      sample: r.sample
     }))
   }
 })

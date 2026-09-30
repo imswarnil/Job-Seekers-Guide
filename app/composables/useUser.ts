@@ -57,16 +57,24 @@ export function useUser() {
       return
     }
     pending ||= (async () => {
-      try {
-        const me = await $fetch<MeResponse>('/api/me', { timeout: 8000 })
-        user.value = me.user
-        authConfigured.value = me.authConfigured !== false
-      } catch {
-        user.value = null
-      } finally {
-        ready.value = true
-        pending = undefined
+      // A slow or failed check is retried rather than read as "signed out":
+      // showing a signed-in reader a Sign in button is worse than a brief wait.
+      for (let attempt = 0; attempt < 3; attempt++) {
+        try {
+          const me = await $fetch<MeResponse>('/api/me', { timeout: 12_000 })
+          user.value = me.user
+          authConfigured.value = me.authConfigured !== false
+          break
+        } catch {
+          if (attempt === 2) {
+            user.value = null
+          } else {
+            await new Promise(resolve => setTimeout(resolve, 1500 * (attempt + 1)))
+          }
+        }
       }
+      ready.value = true
+      pending = undefined
     })()
     return pending
   }

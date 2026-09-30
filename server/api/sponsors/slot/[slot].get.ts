@@ -1,7 +1,7 @@
 /** `{ slot, holder: null | { name, url, image, tagline, amount }, minimumNextBid }` */
 export default defineEventHandler(async (event) => {
-  const slot = getRouterParam(event, 'slot') || ''
-  if (!isSlot(slot)) {
+  const slot = resolveSlot(getRouterParam(event, 'slot') || '')
+  if (!slot) {
     throw createError({ statusCode: 404, statusMessage: 'No such sponsor slot' })
   }
   setResponseHeader(event, 'cache-control', 'public, max-age=30, s-maxage=60')

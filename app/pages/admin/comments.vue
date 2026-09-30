@@ -1,7 +1,7 @@
 <script setup lang="ts">
 definePageMeta({ middleware: 'admin' })
 
-interface AdminComment { id: number, path: string, body: string, createdAt: string, name: string | null, email: string | null }
+interface AdminComment { id: number, path: string, body: string, createdAt: string, name: string | null, email: string | null, sample?: boolean }
 
 const { data, status, error, refresh } = useFetch<{ items: AdminComment[] }>('/api/admin/comments', { server: false, lazy: true })
 const busy = ref<number | null>(null)
@@ -25,7 +25,7 @@ useSeoMeta({ title: 'Comments · Admin', robots: 'noindex' })
 <template>
   <AdminShell
     title="Comments"
-    description="The latest 500 comments across every lesson."
+    description="The latest 500 comments across every lesson. Every delete is audited."
   >
     <UAlert
       v-if="error"
@@ -54,6 +54,15 @@ useSeoMeta({ title: 'Comments · Admin', robots: 'noindex' })
       >
         <div class="min-w-0 flex-1">
           <p class="text-xs text-muted">
+            <UBadge
+              v-if="c.sample"
+              color="warning"
+              variant="subtle"
+              size="sm"
+              class="mr-1"
+            >
+              Sample
+            </UBadge>
             <NuxtLink
               :to="c.path"
               class="text-primary"

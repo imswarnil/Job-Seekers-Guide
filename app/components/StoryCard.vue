@@ -13,6 +13,9 @@ export interface StorySummary {
   featured: boolean
   author: { name: string, image: string | null }
   createdAt: string
+  /** Seeded example content, not a real reader's story. Optional: older API
+   *  responses do not carry it. */
+  sample?: boolean
 }
 
 const props = defineProps<{ story: StorySummary }>()
@@ -58,6 +61,14 @@ const thumb = computed(() => {
 
     <div class="story-card__body">
       <div class="flex items-center gap-2 text-xs text-muted">
+        <UBadge
+          v-if="story.sample"
+          color="neutral"
+          variant="outline"
+          size="sm"
+        >
+          Sample
+        </UBadge>
         <UBadge
           v-if="story.featured"
           color="primary"

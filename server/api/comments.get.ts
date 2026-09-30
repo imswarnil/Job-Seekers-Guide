@@ -14,8 +14,8 @@ export default defineEventHandler(async (event) => {
   setResponseHeader(event, 'cache-control', 'private, no-store')
 
   return await softRead(event, { items: [] as unknown[], used: 0, limit: COMMENTS_PER_PAGE }, async (sql) => {
-    const rows = await q<{ id: string, body: string, ts: string, user_id: string, name: string | null, image: string | null }>(sql, `
-      select c.id, c.body, c.ts, c.user_id, p.name, p.image
+    const rows = await q<{ id: string, body: string, ts: string, user_id: string, name: string | null, image: string | null, sample: boolean }>(sql, `
+      select c.id, c.body, c.ts, c.user_id, c.sample, p.name, p.image
       from comments c left join profiles p on p.id = c.user_id
       where c.path = $1 order by c.ts asc limit 300`, [path])
     return {
@@ -24,7 +24,8 @@ export default defineEventHandler(async (event) => {
         body: r.body,
         createdAt: r.ts,
         author: { name: r.name || 'A reader', image: r.image },
-        mine: Boolean(user && r.user_id === user.id)
+        mine: Boolean(user && r.user_id === user.id),
+        sample: r.sample
       })),
       used: user ? rows.filter(r => r.user_id === user.id).length : 0,
       limit: COMMENTS_PER_PAGE

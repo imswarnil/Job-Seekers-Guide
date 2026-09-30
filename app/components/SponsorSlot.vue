@@ -3,6 +3,9 @@
  * A sponsor spot, sold on the outbid model in docs/api-contract.md: the highest
  * total paid for a slot holds it, with no expiry, until somebody pays more.
  *
+ * The site sells exactly one spot, `brand`, shown in two places: a band on the
+ * home page and the sticky card beside every lesson.
+ *
  * Fetched in the browser only. Every page is prerendered, and a holder baked
  * into the HTML would stay there after they were outbid. While it loads, and
  * whenever the request fails, the placeholder shows; a failed request just
@@ -10,16 +13,17 @@
  */
 const props = withDefaults(defineProps<{
   /**
-   * The slot's name, as the server knows it: `home-hero`, `sidebar`,
-   * `lesson-aside`… Pass it as `name`. `slot="…"` (the spelling in
-   * docs/api-contract.md) also works, but ESLint's vue/no-deprecated-slot-attribute
-   * rejects it in a template, so every placement here uses `name`.
+   * The slot's name, as the server knows it. There is one, `brand`, and it is
+   * the default. `slot="…"` (the spelling in docs/api-contract.md) also works,
+   * but ESLint's vue/no-deprecated-slot-attribute rejects it in a template.
    */
   name?: string
   slot?: string
   /** `card` for a column, `banner` for a full-width band, `compact` for the sidebar. */
   variant?: 'card' | 'banner' | 'compact'
 }>(), {
+  name: 'brand',
+  slot: undefined,
   variant: 'card'
 })
 
@@ -37,7 +41,7 @@ interface SlotResponse {
   minimumNextBid?: number
 }
 
-const slotName = computed(() => props.name || props.slot || '')
+const slotName = computed(() => props.slot || props.name || 'brand')
 
 const data = ref<SlotResponse | null>(null)
 
@@ -73,7 +77,7 @@ const price = computed(() => {
   return typeof paise === 'number' && paise > 0 ? inr.format(paise / 100) : undefined
 })
 
-const bidLink = computed(() => `/sponsor?slot=${encodeURIComponent(slotName.value)}`)
+const bidLink = '/sponsor'
 const failedImage = ref(false)
 </script>
 

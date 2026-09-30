@@ -134,17 +134,13 @@ usePageSeo({
       <PageActions :file="file" />
 
       <!-- The one block in the column that holds its place: once the reader
-           has scrolled down to it, it stays in view for the rest of the page. -->
-      <div class="shell-sticky">
-        <SponsorSlot
-          v-if="view === 'lesson'"
-          name="lesson-aside"
-        />
-
-        <AdSlot
-          placement="sidebar"
-          variant="card"
-        />
+           has scrolled down to it, it stays in view for the rest of the page.
+           The site's single sponsor spot, and nothing else paid. -->
+      <div
+        v-if="view === 'lesson'"
+        class="shell-sticky"
+      >
+        <SponsorSlot name="brand" />
       </div>
     </template>
 

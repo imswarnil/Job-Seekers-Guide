@@ -12,6 +12,8 @@ export interface StoryRow {
   author_name: string | null
   author_image: string | null
   user_id: string
+  /** Fictional content from scripts/seed-samples.mjs; the pages badge it. */
+  sample?: boolean
 }
 
 export interface MediaRow {
@@ -39,13 +41,14 @@ export function storyOut(row: StoryRow, media: MediaRow[], full = false) {
     votes: num(row.votes),
     featured: row.status === 'featured',
     author: { name: row.author_name || 'A reader', image: row.author_image },
-    createdAt: row.created_at
+    createdAt: row.created_at,
+    sample: Boolean(row.sample)
   }
 }
 
 export const STORY_SELECT = `
   select s.id, s.title, s.from_place, s.to_place, s.company, s.package, s.body, s.status, s.votes,
-         s.created_at, s.user_id, p.name as author_name, p.image as author_image
+         s.created_at, s.user_id, s.sample, p.name as author_name, p.image as author_image
   from stories s left join profiles p on p.id = s.user_id`
 
 /** The YouTube video id from any of the usual link shapes, or null. */

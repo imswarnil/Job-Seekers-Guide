@@ -19,14 +19,15 @@ export default defineEventHandler(async (event) => {
   const user = await requireUser(event)
   const sql = requireDb(event)
   const input = await readValid(event, schema)
-  if (!isSlot(input.slot)) {
+  const slot = resolveSlot(input.slot)
+  if (!slot) {
     throw createError({ statusCode: 400, statusMessage: 'slot: no such sponsor slot' })
   }
   await rateLimit(event, sql, `bid:${user.id}`, 10, 3600)
 
   const [holder] = await q<{ amount: number }>(sql,
-    `select amount from sponsor_bids where status = 'paid' and slot = $1 order by amount desc limit 1`, [input.slot])
-  const minimum = minimumNextBid(input.slot, holder ? num(holder.amount) : null)
+    `select amount from sponsor_bids where status = 'paid' and slot = $1 order by amount desc limit 1`, [slot])
+  const minimum = minimumNextBid(slot, holder ? num(holder.amount) : null)
   if (input.amount < minimum) {
     throw createError({ statusCode: 400, statusMessage: `amount: the minimum bid for this slot is ₹${(minimum / 100).toLocaleString('en-IN')}` })
   }
@@ -39,7 +40,7 @@ export default defineEventHandler(async (event) => {
   await q(sql, `
     insert into sponsor_bids (slot, user_id, sponsor_name, sponsor_url, image, tagline, amount, payment_id)
     values ($1, $2, $3, $4, $5, $6, $7, $8)`,
-  [input.slot, user.id, input.name, input.url, input.image || null, input.tagline ?? null, input.amount, paymentId])
+  [slot, user.id, input.name, input.url, input.image || null, input.tagline ?? null, input.amount, paymentId])
 
   try {
     const session = await startCheckout(event, {

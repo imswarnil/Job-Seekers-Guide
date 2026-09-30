@@ -12,6 +12,7 @@ interface AdminStory {
   email: string | null
   author: { name: string }
   createdAt: string
+  sample?: boolean
 }
 
 const { data, status, error, refresh } = useFetch<{ items: AdminStory[] }>('/api/admin/stories', { server: false, lazy: true })
@@ -94,6 +95,14 @@ useSeoMeta({ title: 'Stories · Admin', robots: 'noindex' })
               size="sm"
             >
               {{ s.status }}
+            </UBadge>
+            <UBadge
+              v-if="s.sample"
+              color="warning"
+              variant="subtle"
+              size="sm"
+            >
+              Sample
             </UBadge>
             <NuxtLink
               :to="`/stories/${s.id}`"

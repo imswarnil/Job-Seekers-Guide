@@ -98,7 +98,7 @@ app/plugins/track.client.ts page views
 app/middleware/{auth,admin}.ts
 app/pages/{login,account,stats,guestbook,leaderboard,sponsor}.vue
 app/pages/stories/{index,new,[id]}.vue, app/pages/support/{index,thanks}.vue
-app/pages/admin/{index,users,stories,comments,guestbook,payments,tables}.vue
+app/pages/admin/{index,live,traffic,content,tables,payments,audit}.vue (+ content sub-pages)
 app/components/{LessonComments,CommunityPage,StoryCard,GifPicker,ViewsChart,AdminShell}.vue
 ```
 
@@ -133,7 +133,7 @@ commit.
 
 ### 1. Neon
 
-Done for this project: `jobseekers-imswarnil` (region `aws-ap-southeast-1`).
+Done for this project: `jobseekers` (region `aws-ap-southeast-1`).
 For a fresh project:
 
 1. Neon console → New project. Copy the **pooled** connection string into

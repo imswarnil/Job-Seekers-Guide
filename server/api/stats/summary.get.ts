@@ -12,7 +12,8 @@ const EMPTY = {
 
 /**
  * The public numbers. One round trip, cached at the edge for a minute so a
- * busy home page does not become a busy database.
+ * busy home page does not become a busy database. Sample content
+ * (scripts/seed-samples.mjs) is never counted.
  */
 export default defineEventHandler(async (event) => {
   setResponseHeader(event, 'cache-control', 'public, max-age=30, s-maxage=60')
@@ -22,9 +23,9 @@ export default defineEventHandler(async (event) => {
       (select count(*) from page_views) as page_views,
       (select count(*) from sessions where last_seen > now() - interval '5 minutes') as live_now,
       (select count(distinct country) from sessions where country is not null) as countries,
-      (select count(*) from stories where status <> 'hidden') as stories,
+      (select count(*) from stories where status <> 'hidden' and not sample) as stories,
       (select count(*) from jobs_got) as jobs_got,
-      (select count(*) from guestbook where not hidden) as guestbook,
+      (select count(*) from guestbook where not hidden and not sample) as guestbook,
       (select coalesce(sum(amount), 0) from payments where status = 'paid') as raised,
       (select count(distinct coalesce(user_id, sponsor_url)) from sponsor_bids where status = 'paid') as sponsors`)
     return {

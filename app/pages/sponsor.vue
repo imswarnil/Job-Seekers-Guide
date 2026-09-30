@@ -1,7 +1,12 @@
 <script setup lang="ts">
 /**
- * Sponsor a spot on the site, on the outbid model: pay once, keep the spot for
- * as long as nobody pays more. No monthly fee, no expiry.
+ * Sponsor the site's one spot, on the outbid model: pay once, keep it for as
+ * long as nobody pays more. No monthly fee, no expiry.
+ *
+ * There used to be eight spots. There is one now, `brand`, shown in two places
+ * (a band on the home page and the card beside every lesson). An old link that
+ * still says `?slot=sidebar` lands here and bids on `brand`, which is what the
+ * server does with the old names too.
  */
 interface SlotInfo {
   slot: string
@@ -11,7 +16,6 @@ interface SlotInfo {
   minimumNextBid: number
 }
 
-const route = useRoute()
 const { user, ready } = useUser()
 
 const { data, status } = useFetch<{ items: SlotInfo[] }>('/api/sponsors/slots', {
@@ -20,8 +24,8 @@ const { data, status } = useFetch<{ items: SlotInfo[] }>('/api/sponsors/slots', 
   default: () => ({ items: [] })
 })
 
-const selected = ref<string>(typeof route.query.slot === 'string' ? route.query.slot : 'home-hero')
-const current = computed(() => data.value?.items.find(s => s.slot === selected.value))
+const selected = 'brand'
+const current = computed(() => data.value?.items.find(s => s.slot === selected) || data.value?.items[0])
 
 const form = reactive({ name: '', url: '', image: '', tagline: '', rupees: 0 })
 const saving = ref(false)
@@ -33,20 +37,11 @@ watch(current, (slot) => {
   }
 }, { immediate: true })
 
-function pick(slot: string) {
-  selected.value = slot
-  const s = data.value?.items.find(i => i.slot === slot)
-  if (s) {
-    form.rupees = Math.ceil(s.minimumNextBid / 100)
-  }
-  document.getElementById('bid')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-}
-
 async function submit() {
   error.value = ''
   const slot = current.value
   if (!slot) {
-    error.value = 'Pick a spot first.'
+    error.value = 'The spot has not loaded yet. Try again in a moment.'
     return
   }
   const amount = Math.round(form.rupees * 100)
@@ -150,48 +145,56 @@ usePageSeo({
     </section>
 
     <h2 class="mt-12 mb-4 text-xl font-semibold text-highlighted">
-      The spots
+      The spot
     </h2>
 
-    <div
+    <USkeleton
       v-if="status === 'pending' || status === 'idle'"
-      class="slots"
-    >
-      <USkeleton
-        v-for="n in 6"
-        :key="n"
-        class="h-36"
-      />
-    </div>
+      class="h-44 max-w-2xl"
+    />
 
     <div
       v-else
-      class="slots"
+      class="spot max-w-2xl"
     >
-      <button
-        v-for="s in data?.items"
-        :key="s.slot"
-        type="button"
-        class="slot"
-        :data-selected="s.slot === selected ? '' : undefined"
-        @click="pick(s.slot)"
+      <div class="flex flex-wrap items-baseline justify-between gap-2">
+        <span class="font-semibold text-highlighted">{{ current?.label || 'The brand spot' }}</span>
+        <span class="text-xs font-mono text-dimmed">brand</span>
+      </div>
+      <ul class="spot__where">
+        <li>
+          <UIcon
+            name="i-lucide-house"
+            class="size-4 text-primary shrink-0"
+          />
+          A band on the home page, under my journey
+        </li>
+        <li>
+          <UIcon
+            name="i-lucide-book-open"
+            class="size-4 text-primary shrink-0"
+          />
+          The card beside every lesson, which stays in view as the reader scrolls
+        </li>
+      </ul>
+      <p
+        v-if="current?.holder"
+        class="text-sm text-muted"
       >
-        <span class="text-xs font-mono text-dimmed">{{ s.slot }}</span>
-        <span class="font-semibold text-highlighted">{{ s.label }}</span>
-        <span
-          v-if="s.holder"
-          class="text-sm text-muted"
-        >
-          Held by <span class="font-medium text-default">{{ s.holder.name }}</span> at {{ formatPaise(s.holder.amount) }}
-        </span>
-        <span
-          v-else
-          class="text-sm text-muted"
-        >Nobody holds it yet</span>
-        <span class="mt-auto text-sm font-semibold text-primary">
-          {{ s.holder ? 'Outbid from' : 'Take it from' }} {{ formatPaise(s.minimumNextBid) }}
-        </span>
-      </button>
+        Held by <span class="font-medium text-default">{{ current.holder.name }}</span> at {{ formatPaise(current.holder.amount) }}
+      </p>
+      <p
+        v-else
+        class="text-sm text-muted"
+      >
+        Nobody holds it yet.
+      </p>
+      <p
+        v-if="current"
+        class="text-sm font-semibold text-primary"
+      >
+        {{ current.holder ? 'Outbid from' : 'Take it from' }} {{ formatPaise(current.minimumNextBid) }}
+      </p>
     </div>
 
     <UCard
@@ -199,7 +202,7 @@ usePageSeo({
       class="mt-10 max-w-2xl scroll-mt-8"
     >
       <h2 class="text-lg font-semibold text-highlighted">
-        Bid for <span class="font-mono text-primary">{{ selected }}</span>
+        Bid for the brand spot
       </h2>
       <p
         v-if="current"
@@ -224,7 +227,7 @@ usePageSeo({
           Sign in to bid, so the spot and the receipt are tied to you.
         </p>
         <UButton
-          :to="{ path: '/login', query: { next: `/sponsor?slot=${selected}` } }"
+          :to="{ path: '/login', query: { next: '/sponsor' } }"
           icon="i-lucide-log-in"
         >
           Sign in
@@ -346,30 +349,25 @@ usePageSeo({
   color: var(--ui-text-muted);
 }
 
-.slots {
-  display: grid;
-  gap: 0.75rem;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr));
-}
-
-.slot {
+.spot {
   display: flex;
   flex-direction: column;
+  gap: 0.625rem;
+  padding: 1.125rem 1.25rem;
+  border: 1px solid var(--ui-primary);
+  background: color-mix(in oklab, var(--ui-primary) 5%, transparent);
+}
+
+.spot__where {
+  display: grid;
   gap: 0.375rem;
-  min-height: 9rem;
-  padding: 1rem 1.125rem;
-  text-align: left;
-  border: 1px solid var(--ui-border);
-  border-radius: var(--radius-lg, 0.75rem);
-  transition: border-color 150ms ease, background-color 150ms ease;
+  font-size: 0.9375rem;
+  color: var(--ui-text-default, var(--ui-text));
 }
 
-.slot:hover {
-  border-color: var(--ui-border-accented);
-}
-
-.slot[data-selected] {
-  border-color: var(--ui-primary);
-  background: color-mix(in oklab, var(--ui-primary) 6%, transparent);
+.spot__where li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
 }
 </style>

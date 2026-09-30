@@ -4,20 +4,33 @@
  * The outbid model: the highest single paid bid on a slot holds it, with no
  * expiry, until somebody pays more. The next bid has to beat the holder by 10%
  * (and by at least ₹100), so a slot cannot be taken for one rupee more.
+ *
+ * There is exactly one slot, `brand`. It shows in two places, one band on the
+ * home page and the sticky card beside every lesson, and whoever holds it holds
+ * both. Bids placed on the older, retired slot names stay in the database and
+ * on the leaderboard, but no longer hold anything.
  */
 export const SLOTS = {
-  'home-hero': { label: 'Home page, under the hero', floor: 99_900 },
-  'home-footer': { label: 'Home page, at the foot', floor: 49_900 },
-  'sidebar': { label: 'The guide sidebar, on every page', floor: 99_900 },
-  'lesson-aside': { label: 'Beside every lesson', floor: 49_900 },
-  'lesson-footer': { label: 'Under every lesson', floor: 49_900 },
-  'story-footer': { label: 'Under every story', floor: 29_900 },
-  'gear': { label: 'The gear page', floor: 29_900 },
-  'stats': { label: 'The public stats page', floor: 29_900 }
+  brand: { label: 'The brand spot: on the home page and beside every lesson', floor: 99_900 }
 } as const satisfies Record<string, { label: string, floor: number }>
 
 export type SlotName = keyof typeof SLOTS
 export const SLOT_NAMES = Object.keys(SLOTS) as SlotName[]
+
+/**
+ * The names the site used when it sold eight spots. There is one spot now, and
+ * an old link (`/sponsor?slot=sidebar`) or an old embed still asking for one of
+ * these gets the brand spot rather than a 404.
+ */
+const LEGACY_SLOTS = ['home-hero', 'home-footer', 'sidebar', 'lesson-aside', 'lesson-footer', 'story-footer', 'gear', 'stats']
+
+/** The slot a name refers to, following the legacy aliases; null if none. */
+export function resolveSlot(value: string): SlotName | null {
+  if (value in SLOTS) {
+    return value as SlotName
+  }
+  return LEGACY_SLOTS.includes(value) ? 'brand' : null
+}
 
 export function isSlot(value: string): value is SlotName {
   return value in SLOTS
