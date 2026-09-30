@@ -100,6 +100,40 @@ What changed last month: I stopped applying everywhere and started preparing for
 I am writing this for the people reading the success stories and feeling behind. You are not the only one still at it. I will update this when something changes.`
   },
   {
+    title: '2024 batch, ECE, and the support desk nobody told me about',
+    from: 'B.Tech ECE, Vijayawada',
+    to: 'Technical support engineer, Bengaluru',
+    company: 'a mid-size IT services company',
+    package: '2.8 LPA',
+    status: 'visible',
+    votes: 12,
+    at: ago(5, 9),
+    body: `Everyone in my batch was chasing developer roles and most of us were getting nothing. I am from ECE, not CS, and in the developer queue that was one more filter against me.
+
+A senior told me to look at technical support roles instead. I did not like the sound of it at first. Then I read the job description properly: Linux basics, SQL, networking, exactly the subjects I could learn in weeks rather than years.
+
+I prepared three things: how to read a log file, the SQL track here, and how DNS works. The interview was forty minutes of "a customer says the app is slow, what do you do". I got the offer in the second week of trying this route.
+
+The plan is two years of support, learning the product deeply, then an internal move to the engineering team. Two people in my current team have done exactly that. It is a side door, but it is a door, and 2.8 LPA in hand beats a fourth year of applying.`
+  },
+  {
+    title: 'Back after three years at home, into testing',
+    from: 'Career break, Salem',
+    to: 'QA engineer, Bengaluru',
+    company: 'a product company in health tech',
+    package: '5.5 LPA',
+    status: 'visible',
+    votes: 21,
+    at: ago(2, 11),
+    body: `I left a junior developer job in 2021 when my daughter was born, and when I started applying again the gap was the first thing every interviewer saw. A few said it out loud. Most just never called back.
+
+What changed things was treating the gap as a fact and not an apology. One line in the resume: career break, family, 2021 to 2024. Then I made the rest of the page about what I could do now, not what I did before.
+
+I chose testing because it let me rebuild in months. I wrote test plans for two apps I use daily, learned SQL again from this guide, and did one course on an automation tool. In interviews I answered the gap question the same way every time: here is what I did, here is what I can do today, ask me anything technical.
+
+The company that hired me never made the gap a thing. Those are the ones to find. To every woman reading this in year two or three of a break: the skills come back much faster than the confidence, so start before you feel ready.`
+  },
+  {
     title: 'A frontend role after teaching myself in the evenings',
     from: 'Mechanical engineer, Coimbatore',
     to: 'Frontend developer, Bengaluru',
@@ -123,16 +157,30 @@ const GUESTBOOK = [
   { name: 'Imran from Lucknow', message: 'Still searching, but I feel less alone after reading the stories.', learned: 'Prepare for one kind of role properly instead of applying for everything.', at: ago(11, 6) },
   { name: 'Divya', message: 'The interview question sections are gold. Used three of them word for word.', learned: 'Say what a good answer contains before you give the answer.', at: ago(8, 1) },
   { name: 'Karthik', message: 'Switched from BPO to QA. This guide was one of my main resources.', learned: 'A bug report is a small story: what I did, what I expected, what happened.', at: ago(5, 8) },
+  // Kept in time order: the page shows newest first by id, so inserts must
+  // run oldest to newest or the dates read out of sequence.
+  { name: 'Pooja, Nagpur', message: 'Restarting after a break and the stories section is the only place that does not make me feel late.', learned: 'A career gap is a fact to state, not a fault to explain.', at: ago(4, 10) },
+  { name: 'Arvind', message: 'ECE grad here. The support engineer route mentioned in a story got me my first interview call in months.', learned: 'The developer queue is not the only queue.', at: ago(3, 5) },
   { name: 'Neha, Indore', message: 'Please add more on the HR round. Loved the SQL track.', learned: 'GROUP BY runs before SELECT, which is why the alias does not work there.', at: ago(2, 3) },
-  { name: 'Sandeep', message: 'Signing from a PG in BTM Layout at 1 am. Keep going, everyone.', learned: 'Write down what you learned every day, even one line.', at: ago(0, 20) }
+  { name: 'Fathima', message: 'Cleared my first technical round today. The joins lesson came up almost word for word.', learned: 'Draw the two tables before writing the join, every time.', at: ago(1, 12) },
+  { name: 'Sandeep', message: 'Signing from a PG in BTM Layout at 1 am. Keep going, everyone.', learned: 'Write down what you learned every day, even one line.', at: ago(0, 20) },
+  { name: 'Vikram, Hubli', message: 'Reading this on the bus to my third walk-in this week. The walk-in checklist is stuck to my folder.', learned: 'Carry six printed copies of the resume, not two.', at: ago(0, 6) }
 ]
 
 const COMMENTS = [
   { path: '/sql/joining/inner-and-outer-joins', body: 'The drawing of the left join with the empty right side finally made outer joins make sense to me.', at: ago(14, 5) },
   { path: '/sql/joining/inner-and-outer-joins', body: 'Tip for others: run the exercise once with INNER and once with LEFT and compare the row counts.', at: ago(10, 3) },
+  { path: '/sql/joining/inner-and-outer-joins', body: 'Question: if I LEFT JOIN and then filter on a column from the right table in WHERE, why do my NULL rows disappear?', at: ago(6, 8) },
+  { path: '/sql/joining/inner-and-outer-joins', body: 'Answering the question above: WHERE runs after the join, and NULL fails almost every comparison, so the outer rows get filtered out. Put that condition in the ON clause instead and the NULL rows stay. It comes up in interviews a lot.', at: ago(6, 2) },
   { path: '/dbms/transactions/acid', body: 'Got asked exactly the isolation question in an interview last week.', at: ago(7, 2) },
   { path: '/dbms/normalisation/anomalies', body: 'The admissions table example is much clearer than the one in my college notes.', at: ago(4, 7) },
-  { path: '/sql/joining/subqueries', body: 'I kept writing a subquery where a join would do. The compare block showed me why that matters.', at: ago(1, 4) }
+  { path: '/sql/joining/subqueries', body: 'I kept writing a subquery where a join would do. The compare block showed me why that matters.', at: ago(1, 4) },
+  { path: '/java/first-steps/why-java-jdk-jre-jvm', body: 'So when the interviewer asks what the JVM is, is "the thing that runs the bytecode" enough or do they expect more?', at: ago(9, 6) },
+  { path: '/java/first-steps/why-java-jdk-jre-jvm', body: 'On the question above: that one line is a pass, but the follow-up is always "then what is the JDK for". Say the JDK is what you install to write and compile, the JVM is what runs the result, and you have covered both.', at: ago(9, 1) },
+  { path: '/java/first-steps/why-java-jdk-jre-jvm', body: 'I had java 8 and java 17 both installed and could not work out which one was running. java -version and where the PATH points cleared it up, exactly as this lesson warned.', at: ago(3, 9) },
+  { path: '/interview/tell-me-about-yourself/the-template', body: 'Used this template in a mock interview at my institute today. The trainer stopped me halfway and asked where I learned to structure it.', at: ago(8, 4) },
+  { path: '/interview/tell-me-about-yourself/the-template', body: 'Does the template still work if my story is mostly a gap? I have eighteen months of nothing after graduation and I freeze at this question.', at: ago(5, 7) },
+  { path: '/interview/tell-me-about-yourself/the-template', body: 'For the gap question above: the template holds, you just spend the middle beat on what you did inside the gap, even if that is only the last three months of proper study. Naming the gap yourself, calmly, works far better than hoping nobody asks.', at: ago(5, 3) }
 ]
 
 async function main() {

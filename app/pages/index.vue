@@ -56,13 +56,25 @@ usePageSeo({
   type: 'website'
 })
 
-useSchemaOrg([
-  defineWebSite({
-    potentialAction: [
-      defineSearchAction({ target: '/?q={search_term_string}' })
-    ]
-  })
-])
+// WebSite with its search box, plus the whole curriculum as an ItemList of
+// Courses (one per track, built in usePageSeo.ts from the same path tree the
+// page renders). Reactive because the path arrives from the content query.
+const site = useSiteConfig()
+const schemaNodes = computed(() => {
+  const nodes: Record<string, unknown>[] = [
+    defineWebSite({
+      potentialAction: [
+        defineSearchAction({ target: '/?q={search_term_string}' })
+      ]
+    }) as Record<string, unknown>
+  ]
+  const courses = courseListNode(path.value, site.url)
+  if (courses) {
+    nodes.push(courses)
+  }
+  return nodes
+})
+useSchemaOrg(schemaNodes as unknown as Parameters<typeof useSchemaOrg>[0])
 </script>
 
 <template>

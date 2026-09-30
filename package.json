@@ -11,7 +11,9 @@
     "typecheck": "nuxt typecheck",
     "deploy": "nuxt build && wrangler deploy",
     "db:migrate": "node --env-file-if-exists=.env scripts/db-migrate.mjs",
-    "db:status": "node --env-file-if-exists=.env scripts/db-migrate.mjs --status"
+    "db:status": "node --env-file-if-exists=.env scripts/db-migrate.mjs --status",
+    "neon": "neonctl --project-id green-mouse-68892907",
+    "db:sql": "neonctl sql --project-id green-mouse-68892907"
   },
   "dependencies": {
     "@iconify-json/lucide": "^1.2.122",

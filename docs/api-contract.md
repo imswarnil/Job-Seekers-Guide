@@ -138,6 +138,24 @@ and recorded in `admin_audit` in the same statement.
 | GET | `/api/admin/audit?page=&size=&table=&action=` |
 | GET | `/api/admin/samples` · DELETE `/api/admin/samples` (removes every `sample` row and the sample profile; audited) |
 
+## Other routes
+
+| Method | Path | Notes |
+| --- | --- | --- |
+| GET | `/llms.txt` | The whole guide as one plain-markdown map (llms.txt convention): every track and lesson as absolute links with one-line descriptions, plus the community pages. Built from the content collection, prerendered at build time, `text/plain; charset=utf-8`, cached an hour. |
+
+**Security headers.** Every HTML response carries `X-Content-Type-Options:
+nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`,
+`X-Frame-Options: DENY`, `Permissions-Policy: camera=(), microphone=(),
+geolocation=()`, `Strict-Transport-Security` (https only) and a
+**report-only** Content-Security-Policy (AdSense, YouTube and GIPHY make an
+enforced one too risky to ship blind). Worker-rendered pages get them from
+`server/middleware/security.ts`; prerendered pages are served by the
+static-asset layer before the Worker runs, so the same list lives in
+`public/_headers`. Change one and change the other. `/api/*` is exempt on
+purpose: `/api/webhooks/dodo` stays exactly as Dodo expects, and
+`/api/media/*` sets its own stricter headers (nosniff plus a sandbox CSP).
+
 ## Errors and limits
 
 Errors are h3 errors: `{ statusCode, statusMessage }`, where `statusMessage`

@@ -250,3 +250,18 @@ removing it can wait until the Pages site is switched off.
   off). Payments and sponsor bids are kept as financial records, detached.
 - A sponsor bid that is outbid while its buyer is still paying is still marked
   paid and counts on the leaderboard; it simply does not hold the slot.
+
+## Neon CLI
+
+The Neon CLI is already signed in on this machine (`npx neonctl me`). The
+project is pinned in two package scripts:
+
+```bash
+pnpm neon projects list          # any neonctl command against this project
+pnpm db:sql "select count(*) from stories"
+pnpm db:migrate                  # apply db/migrations to DATABASE_URL
+```
+
+First time on a new machine: `npx neonctl auth` opens the browser to sign in,
+then `npx neonctl connection-string --project-id green-mouse-68892907 --pooled`
+prints the DATABASE_URL for `.env`.

@@ -27,8 +27,20 @@ const props = withDefaults(defineProps<{
 })
 
 const { ads } = useAppConfig()
+const route = useRoute()
 
 const definition = computed(() => adSlots[props.placement])
+
+// A `trackOnly` placement renders only on a track overview: `/java`, not
+// `/java/first-steps` and not a lesson. The same placement id sits in more
+// than one component, and this is what keeps one config boolean meaning
+// "track overviews" rather than "everywhere the id appears".
+const routeAllows = computed(() => {
+  if (!definition.value.trackOnly) {
+    return true
+  }
+  return route.path.split('/').filter(Boolean).length === 1
+})
 
 const root = useTemplateRef<HTMLElement>('root')
 const near = useElementVisibility(root, { rootMargin: '400px' })
@@ -66,13 +78,13 @@ const adsense = computed(() => {
 // dashed placeholder rather than an empty box. That is deliberate: a forgotten
 // unit id then looks like a missing ad instead of like nothing at all.
 const live = computed(() => {
-  if (!ads?.enabled || ads.provider === 'none' || !enabledHere.value) {
+  if (!ads?.enabled || ads.provider === 'none' || !enabledHere.value || !routeAllows.value) {
     return false
   }
   return ads.provider === 'adsense' ? Boolean(adsense.value) : true
 })
 
-const placeholder = computed(() => !live.value && Boolean(ads?.showPlaceholders) && enabledHere.value)
+const placeholder = computed(() => !live.value && Boolean(ads?.showPlaceholders) && enabledHere.value && routeAllows.value)
 
 const shown = computed(() => (live.value || placeholder.value) && fits.value)
 
@@ -110,29 +122,39 @@ const ins = useTemplateRef<HTMLElement>('ins')
  * client-side navigation makes that easy to do by accident, so each element is
  * pushed exactly once and never again.
  *
+ * Two SPA details make this correct across route changes:
+ *
+ * · The `<ins>` in the template is keyed by route path, so navigating from one
+ *   lesson to the next mounts a FRESH element rather than patching the old one
+ *   in place. AdSense never refills an element it has already filled, so
+ *   without the key the second lesson would show the first lesson's ad.
+ * · This is a `watch` on the template ref, not a `watchEffect`: the old code
+ *   read `ins.value` after an `await`, where it is no longer tracked, so a new
+ *   element mounted by a navigation never triggered it.
+ *
  * The queue is an array before the library arrives and replaced by the library
  * afterwards, so pushing early is fine — it is picked up on load.
  */
 const filled = new WeakSet<HTMLElement>()
 
-watchEffect(async () => {
-  if (!import.meta.client || !adsense.value || !loaded.value) {
-    return
-  }
-  await nextTick()
-  const el = ins.value
-  if (!el || filled.has(el)) {
-    return
-  }
-  filled.add(el)
-  try {
-    const w = window as unknown as { adsbygoogle?: unknown[] }
-    ;(w.adsbygoogle = w.adsbygoogle || []).push({})
-  } catch (error) {
-    // A blocked or failed ad is not worth breaking a lesson over.
-    console.warn('[AdSlot] adsbygoogle push failed', error)
-  }
-})
+watch(
+  [ins, () => Boolean(adsense.value && loaded.value)],
+  ([el, ready]) => {
+    if (!import.meta.client || !el || !ready || filled.has(el)) {
+      return
+    }
+    filled.add(el)
+    try {
+      const w = window as unknown as { adsbygoogle?: unknown[] }
+      ;(w.adsbygoogle = w.adsbygoogle || []).push({})
+    } catch (error) {
+      // A blocked or failed ad is not worth breaking a lesson over.
+      console.warn('[AdSlot] adsbygoogle push failed', error)
+    }
+  },
+  // After the DOM settles, so the element is laid out (AdSense measures it).
+  { immediate: true, flush: 'post' }
+)
 </script>
 
 <template>
@@ -178,6 +200,7 @@ watchEffect(async () => {
       <ins
         v-else-if="live && loaded && adsense"
         ref="ins"
+        :key="route.path"
         class="adsbygoogle ad__adsense"
         :data-ad-client="adsense.client"
         :data-ad-slot="adsense.unit"

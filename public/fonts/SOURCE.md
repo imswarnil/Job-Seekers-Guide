@@ -15,7 +15,7 @@ from a CDN or an npm package.
 They are **vendored, not linked.** A relative path to a sibling folder works on
 one machine and nowhere else, and this site is built in CI on a machine that has
 never seen `design.imswarnil.com/`. The same reasoning is written out at length in
-the umbrella `CLAUDE.md` under "How a theme consumes the design system"; this is
+the umbrella `AUTHORING.md` under "How a theme consumes the design system"; this is
 that pattern, applied to a Nuxt site instead of a Ghost theme.
 
 To refresh them, copy the files again and update the commit above.

@@ -79,6 +79,9 @@ export default defineNuxtConfig({
     // Rendered per request by the Worker: a story is shared by link and should
     // arrive with its title and text in the HTML.
     '/stories/**': { prerender: false },
+    // `/stories/**` also matches the bare `/stories`, so the list page and the
+    // share form opt back in; only `/stories/:id` is rendered per request.
+    '/stories': { prerender: true },
     '/stories/new': { prerender: true },
     '/account': { prerender: false },
     '/admin/**': { prerender: false, robots: false }
@@ -101,7 +104,10 @@ export default defineNuxtConfig({
       routes: [
         '/', '/privacy', '/terms', '/contact',
         '/stats', '/stories', '/stories/new', '/guestbook', '/leaderboard',
-        '/sponsor', '/support', '/support/thanks', '/login'
+        '/sponsor', '/support', '/support/thanks', '/login',
+        // The llms.txt map (server/routes/llms.txt.get.ts), baked to a static
+        // file so serving it never queries the content database.
+        '/llms.txt'
       ],
       crawlLinks: true,
       ignore: ['/api', '/admin', '/account']

@@ -1,0 +1,22 @@
+# Security headers for everything Cloudflare's static-asset layer serves.
+#
+# Prerendered pages (every lesson, the home page, the community shells) are
+# served as static assets BEFORE the Worker runs, so the middleware in
+# server/middleware/security.ts never sees them. This file is the same list,
+# applied by the asset layer. Change one and change the other.
+#
+# HSTS is safe to state unconditionally: browsers only honour it over https,
+# so a plain-http `wrangler dev` is unaffected.
+
+# Prerendered by server/routes/llms.txt.get.ts; the asset layer would
+# otherwise serve it with max-age=0.
+/llms.txt
+  Cache-Control: public, max-age=3600
+
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  X-Frame-Options: DENY
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+  Content-Security-Policy-Report-Only: default-src 'self'; script-src 'self' 'unsafe-inline' https://pagead2.googlesyndication.com https://tpc.googlesyndication.com https://googleads.g.doubleclick.net https://www.googletagservices.com https://ep2.adtrafficquality.google; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://i.ytimg.com https://*.giphy.com https://media.tenor.com https://c.tenor.com https://lh3.googleusercontent.com https://*.googlesyndication.com https://*.doubleclick.net https://ep1.adtrafficquality.google; media-src 'self' https://*.giphy.com https://media.tenor.com; font-src 'self' data:; connect-src 'self' https://pagead2.googlesyndication.com https://*.doubleclick.net https://ep1.adtrafficquality.google https://csi.gstatic.com; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://www.google.com https://ep2.adtrafficquality.google; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'

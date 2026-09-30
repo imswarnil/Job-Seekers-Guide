@@ -150,12 +150,14 @@ export default defineAppConfig({
      * to them in that file, not because they are unconfigured. Both have a unit
      * id below and are one boolean away from running.
      *
-     * Fewer ads, on purpose: one AdSense unit under each lesson and nothing
-     * else. The in-prose, in-feed and sidebar units are off. The only other
-     * paid thing on the site is the one `brand` sponsor spot.
+     * Fewer ads, on purpose: one AdSense unit under each lesson, one under
+     * each track overview (`in-article` is limited to track overviews in
+     * app/utils/ads.ts) and nothing else. The repeating in-prose unit and the
+     * sidebar are off. The only other paid thing on the site is the one
+     * `brand` sponsor spot.
      */
     slots: {
-      'in-article': false,
+      'in-article': true,
       'in-feed': false,
       'lesson-footer': true,
       'sidebar': false,

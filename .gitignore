@@ -28,3 +28,7 @@ logs
 
 # Wrangler local state and the generated deploy redirect
 .wrangler
+
+# Local tool configuration, not part of the project
+CLAUDE.md
+.claude/

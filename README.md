@@ -1,5 +1,7 @@
 <div align="center">
 
+![Bangalore Job Seekers Guide: from the train to a first IT job](docs/banner.svg)
+
 # Bangalore Job Seekers Guide
 
 **I got off the train in Bangalore knowing nothing.
@@ -14,7 +16,6 @@ This is the route I wish someone had handed me.**
 [![Cloudflare Workers](https://img.shields.io/badge/Cloudflare-Workers-F38020)](https://workers.cloudflare.com)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen)](CONTRIBUTING.md)
 
-![The home page](docs/screenshots/home.png)
 
 </div>
 
@@ -94,6 +95,8 @@ SQLite), the trap people fall into, and the interview questions it answers.
 ![A lesson](docs/screenshots/lesson.png)
 
 ## The app
+
+![The home page](docs/screenshots/home.png)
 
 - **Read** with a sidebar of the whole guide, progress you can tick off, a
   table of contents, and Previous / Next.
@@ -181,7 +184,7 @@ Found a wrong answer, a typo or a broken link? Every lesson has an **Edit this
 page** link, or open an issue. Got a job with the help of this guide? Share
 your story at [/stories](https://jobseekers.imswarnil.com/stories); that helps
 more than any pull request. See [CONTRIBUTING.md](CONTRIBUTING.md) and the
-style guide in [CLAUDE.md](CLAUDE.md).
+style guide in [AUTHORING.md](AUTHORING.md).
 
 ## Licence
 

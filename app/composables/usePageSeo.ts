@@ -70,6 +70,62 @@ export function faqFromBody(body: unknown, limit = 30): { name: string, text: st
   return found
 }
 
+/** Reading time as an ISO 8601 duration: 685 minutes is "PT11H25M". */
+function isoDuration(minutes: number): string | undefined {
+  if (!minutes || minutes < 1) {
+    return undefined
+  }
+  const hours = Math.floor(minutes / 60)
+  const rest = Math.round(minutes % 60)
+  return `PT${hours ? `${hours}H` : ''}${rest || !hours ? `${rest}M` : ''}`
+}
+
+/**
+ * The home page's structured data for the curriculum: an ItemList where every
+ * item is one track as a Course. This is what makes the homepage eligible for
+ * the course-list treatment in search, and it is derived from the same path
+ * tree the page renders, so it can never disagree with what a visitor sees.
+ *
+ * Returns one node for `useSchemaOrg`. Empty path (SSR before the content
+ * query lands) returns null and the caller passes nothing.
+ */
+export function courseListNode(path: LearningPath, siteUrl: string): Record<string, unknown> | null {
+  if (!path.subjects.length) {
+    return null
+  }
+  return {
+    '@type': 'ItemList',
+    'name': 'The learning path',
+    'description': 'Every track of the Bangalore Job Seekers Guide, in the order it is read.',
+    'numberOfItems': path.subjects.length,
+    'itemListElement': path.subjects.map((subject, index) => ({
+      '@type': 'ListItem',
+      'position': index + 1,
+      'item': {
+        '@type': 'Course',
+        '@id': `${siteUrl}${subject.path}#course`,
+        'name': subject.title,
+        'description': subject.description,
+        'url': `${siteUrl}${subject.path}`,
+        'courseCode': subject.code,
+        'inLanguage': 'en-IN',
+        'isAccessibleForFree': true,
+        'provider': {
+          '@type': 'Organization',
+          'name': 'Bangalore Job Seekers Guide',
+          'url': siteUrl
+        },
+        'offers': { '@type': 'Offer', 'category': 'Free', 'price': 0, 'priceCurrency': 'INR' },
+        'hasCourseInstance': {
+          '@type': 'CourseInstance',
+          'courseMode': 'online',
+          'courseWorkload': isoDuration(subject.minutes)
+        }
+      }
+    }))
+  }
+}
+
 /**
  * Everything a page owes a search engine, in one call.
  *

@@ -12,7 +12,7 @@
  *     closing fence closes the child and the rest of the lesson is inside it.
  *   · A `::flow-step{... highlight"}` with a stray quote, which renders the
  *     attribute as text.
- *   · An em dash in lesson prose, banned in CLAUDE.md as the loudest tell that
+ *   · An em dash in lesson prose, banned in AUTHORING.md as the loudest tell that
  *     a machine wrote the page.
  *
  * Run with `pnpm check:lessons`. Exits non-zero with file:line for each.
@@ -76,7 +76,7 @@ for (const file of lessons(PATH_DIR)) {
 
     const fence = line.match(/^(:{2,})(\S*)/)
     if (!fence) {
-      /* The em dash is banned in lesson prose (CLAUDE.md §1). Three exclusions,
+      /* The em dash is banned in lesson prose (AUTHORING.md §1). Three exclusions,
          and each one is a place where it is not prose: inside an inline SVG,
          inside a component's attribute string, and on a line that is quoting
          the rule itself. */
@@ -139,7 +139,7 @@ if (problems.length) {
    New lessons should come out of here clean; the backlog is a deliberate
    decision to fix by hand, not a rule that has been quietly dropped. */
 if (emDashes.length) {
-  console.warn(`\n${emDashes.length} em dash${emDashes.length === 1 ? '' : 'es'} in prose (CLAUDE.md bans these):\n`)
+  console.warn(`\n${emDashes.length} em dash${emDashes.length === 1 ? '' : 'es'} in prose (AUTHORING.md bans these):\n`)
   emDashes.slice(0, 40).forEach(p => console.warn('  ' + p))
   if (emDashes.length > 40) console.warn(`  …and ${emDashes.length - 40} more`)
 }

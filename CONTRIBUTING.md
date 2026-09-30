@@ -29,7 +29,7 @@ stories, payments and `/admin` need the environment variables in
 
 ## Writing or editing a lesson
 
-Read `CLAUDE.md` first: it is the style guide for the whole guide (the
+Read `AUTHORING.md` first: it is the style guide for the whole guide (the
 narrator, the page shapes, the components). The short version:
 
 - first person, plain English, British spelling;

@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 320" width="1280" height="320" role="img" aria-label="Bangalore Job Seekers Guide: the route from the train to a first IT job, from thirteen thousand a month to two lakh seventy thousand a month">
+  <defs>
+    <style>
+      .bg { fill: #0b0b0c; }
+      .guide { stroke: #ffffff; stroke-opacity: 0.06; stroke-width: 1; }
+      .kicker { font: 600 13px ui-sans-serif, -apple-system, "Segoe UI", Arial, sans-serif; letter-spacing: 3.5px; fill: #e5484d; }
+      .title { font: 800 52px ui-sans-serif, -apple-system, "Segoe UI", Arial, sans-serif; letter-spacing: -1px; fill: #ffffff; }
+      .sub { font: 400 19px ui-sans-serif, -apple-system, "Segoe UI", Arial, sans-serif; fill: #a1a1aa; }
+      .mono { font: 600 21px ui-monospace, "SF Mono", Menlo, Consolas, monospace; fill: #ffffff; }
+      .mono-dim { font: 500 13px ui-monospace, "SF Mono", Menlo, Consolas, monospace; fill: #71717a; letter-spacing: 2px; }
+      .accent { fill: #e5484d; }
+      .road-ahead { fill: none; stroke: #3f3f46; stroke-width: 2; stroke-dasharray: 2 7; stroke-linecap: round; }
+      .road-done { fill: none; stroke: #e5484d; stroke-width: 2.5; stroke-linecap: round;
+        stroke-dasharray: 940; stroke-dashoffset: 940; animation: draw 9s linear infinite; }
+      .stop { fill: #0b0b0c; stroke-width: 2.5; opacity: 0; animation: pop 9s linear infinite; }
+      .s1 { stroke: #d946ef; animation-delay: 0s; }
+      .s2 { stroke: #f97316; animation-delay: 1.6s; }
+      .s3 { stroke: #22c55e; animation-delay: 3.4s; }
+      .s4 { stroke: #3b82f6; animation-delay: 5.2s; }
+      .s5 { stroke: #e5484d; animation-delay: 7s; }
+      .caret { fill: #e5484d; animation: blink 1.1s steps(1) infinite; }
+      .fade1 { opacity: 0; animation: fadein 9s linear infinite; animation-delay: 0.2s; }
+      .fade2 { opacity: 0; animation: fadein 9s linear infinite; animation-delay: 4s; }
+      .fade3 { opacity: 0; animation: fadein 9s linear infinite; animation-delay: 7.2s; }
+      @keyframes draw { 0% { stroke-dashoffset: 940; } 78% { stroke-dashoffset: 0; } 88% { stroke-dashoffset: 0; opacity: 1; } 96% { opacity: 0; } 100% { stroke-dashoffset: 940; opacity: 1; } }
+      @keyframes pop { 0% { opacity: 0; } 4% { opacity: 1; } 88% { opacity: 1; } 96% { opacity: 0; } 100% { opacity: 0; } }
+      @keyframes blink { 0%, 55% { opacity: 1; } 56%, 100% { opacity: 0; } }
+      @keyframes fadein { 0% { opacity: 0; } 6% { opacity: 1; } 88% { opacity: 1; } 96% { opacity: 0; } 100% { opacity: 0; } }
+    </style>
+    <path id="road" d="M 700 268 C 800 268 810 196 900 196 C 990 196 980 252 1060 252 C 1140 252 1130 148 1200 132 C 1236 124 1248 96 1252 72" />
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1280" height="320" />
+  <g>
+    <line class="guide" x1="64" y1="0" x2="64" y2="320" />
+    <line class="guide" x1="368" y1="0" x2="368" y2="320" />
+    <line class="guide" x1="672" y1="0" x2="672" y2="320" />
+    <line class="guide" x1="976" y1="0" x2="976" y2="320" />
+    <line class="guide" x1="1216" y1="0" x2="1216" y2="320" />
+    <line class="guide" x1="0" y1="56" x2="1280" y2="56" />
+    <line class="guide" x1="0" y1="264" x2="1280" y2="264" />
+  </g>
+
+  <rect class="accent" x="64" y="70" width="10" height="10" />
+  <text class="kicker" x="86" y="80">FREE · OPEN SOURCE · JOBSEEKERS.IMSWARNIL.COM</text>
+
+  <text class="title" x="62" y="138">Bangalore Job Seekers Guide</text>
+  <text class="sub" x="64" y="172">I got off the train knowing nothing. This is the route</text>
+  <text class="sub" x="64" y="198">I wish someone had handed me.</text>
+
+  <g class="fade1">
+    <text class="mono" x="64" y="248">₹13,000<tspan fill="#71717a">/mo</tspan></text>
+  </g>
+  <g class="fade2">
+    <text class="mono" x="212" y="248" fill="#e5484d">→</text>
+    <text class="mono" x="248" y="248">₹2,70,000<tspan fill="#71717a">/mo</tspan></text>
+  </g>
+  <g class="fade3">
+    <text class="mono-dim" x="64" y="278">THE SAME PERSON, EIGHT YEARS APART</text>
+    <rect class="caret" x="382" y="266" width="8" height="14" />
+  </g>
+
+  <text class="mono-dim" x="700" y="296">2018 · MAHRONI</text>
+  <text class="mono-dim" x="1156" y="52">NOW · EUROPE</text>
+
+  <use href="#road" class="road-ahead" />
+  <use href="#road" class="road-done" />
+
+  <rect class="stop s1" x="694" y="262" width="12" height="12" />
+  <rect class="stop s2" x="894" y="190" width="12" height="12" />
+  <rect class="stop s3" x="1054" y="246" width="12" height="12" />
+  <rect class="stop s4" x="1194" y="126" width="12" height="12" />
+  <circle class="stop s5" cx="1252" cy="72" r="8" />
+
+  <circle r="7" fill="#e5484d">
+    <animateMotion dur="9s" repeatCount="indefinite" keyPoints="0;0.78;0.78;0" keyTimes="0;0.78;0.96;1" calcMode="linear">
+      <mpath href="#road" />
+    </animateMotion>
+  </circle>
+</svg>

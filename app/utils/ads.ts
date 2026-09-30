@@ -23,6 +23,14 @@ export interface AdSlot {
   height: number
   /** Below this viewport width the slot renders nothing at all. */
   minViewport?: number
+  /**
+   * Render only on a track overview (a depth-one route like `/java`), even
+   * when the placement is switched on. This is how one boolean in
+   * `app.config.ts` can mean "track overviews" without a second switch: the
+   * same placement sits in ModuleOverview and can be dropped into a lesson
+   * with `::ad`, and those render nothing while this is set.
+   */
+  trackOnly?: boolean
   /** A note for whoever is deciding whether this slot should exist. */
   note?: string
 }
@@ -42,7 +50,8 @@ export const adSlots: Record<AdSlotId, AdSlot> = {
     width: 728,
     height: 90,
     minViewport: 0,
-    note: 'Between blocks of a lesson. The only slot authors can place by hand, with ::ad.'
+    trackOnly: true,
+    note: 'Under the intro of a track overview. Also the slot authors can place by hand with ::ad, but while trackOnly is set those render nothing outside a track overview.'
   },
   'in-feed': {
     id: 'in-feed',
