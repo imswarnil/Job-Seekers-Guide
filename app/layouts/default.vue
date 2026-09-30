@@ -33,6 +33,12 @@ watch(() => route.path, close)
 const mounted = useMounted()
 const folded = computed(() => mounted.value && collapsed.value)
 
+// Hand the pre-mount CSS fold (see the style block) back to the component.
+onMounted(async () => {
+  await nextTick()
+  document.documentElement.removeAttribute('data-sidebar-init')
+})
+
 const pane = useTemplateRef<HTMLElement>('pane')
 
 // Remember where the pane was before leaving, so Back can return there.
@@ -172,6 +178,16 @@ onBeforeUnmount(stopRemembering)
     transition:
       width var(--dgm-t-base) var(--dgm-ease),
       visibility 0s linear var(--dgm-t-base);
+  }
+
+  /* Before Vue mounts, an inline script in app.vue marks <html> when the
+     reader had folded the sidebar, so a reload never flashes it open. Once
+     the component takes over (`data-sidebar` appears) this rule stands down. */
+  html[data-sidebar-init='collapsed'] .app:not([data-sidebar]) .app__sidebar {
+    width: 0;
+    border-right-width: 0;
+    visibility: hidden;
+    transition: none;
   }
 }
 </style>

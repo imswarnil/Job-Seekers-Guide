@@ -9,6 +9,12 @@ useHead({
     { name: 'viewport', content: 'width=device-width, initial-scale=1' },
     { key: 'theme-color', name: 'theme-color', content: color }
   ],
+  script: [{
+    // Runs before first paint: the folded-sidebar state lives in localStorage,
+    // which the prerendered HTML cannot know, so this marks <html> early and
+    // the layout's CSS keeps the sidebar folded instead of flashing it open.
+    innerHTML: 'try{if(JSON.parse(localStorage.getItem("guide:progress:v2")).railCollapsed)document.documentElement.setAttribute("data-sidebar-init","collapsed")}catch(e){}'
+  }],
   link: [
     { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' },
     { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }

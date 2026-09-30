@@ -69,12 +69,12 @@ const thumb = computed(() => {
           v-if="story.featured"
           class="story-card__flag story-card__flag--featured"
         >Featured</span>
-        <span class="truncate">{{ story.from }}</span>
+        <span class="story-card__place">{{ story.from }}</span>
         <UIcon
           name="i-lucide-arrow-right"
           class="size-3 shrink-0"
         />
-        <span class="truncate">{{ story.to }}</span>
+        <span class="story-card__place">{{ story.to }}</span>
       </p>
 
       <h3 class="story-card__title">
@@ -168,9 +168,16 @@ const thumb = computed(() => {
 }
 
 .story-card__route {
-  flex-wrap: nowrap;
+  /* Wrap rather than chop: "Voice process, Indore" beats "VOICE PROC…". */
+  flex-wrap: wrap;
   min-width: 0;
   gap: 0.375rem;
+  row-gap: 0.125rem;
+}
+
+.story-card__place {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .story-card__flag {

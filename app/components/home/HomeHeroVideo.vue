@@ -32,15 +32,54 @@ const src = computed(() => {
     iv_load_policy: '3',
     modestbranding: '1',
     playsinline: '1',
-    rel: '0'
+    rel: '0',
+    // So the frame posts its state and `shown` can wait for real playback.
+    enablejsapi: '1'
   })
   return `https://www.youtube-nocookie.com/embed/${encodeURIComponent(props.id)}?${params}`
 })
 
-// YouTube draws its title bar and logo over the first seconds of an embed. The
-// frame stays invisible until playback has had time to start, then fades in.
+/**
+ * The frame stays invisible until the embed reports it is actually playing
+ * (state 1 over the postMessage API, switched on by `enablejsapi`). That skips
+ * YouTube's title bar, which it draws over the first seconds, and it means a
+ * blocked autoplay (data saver, low battery mode) leaves the calm poster up
+ * instead of a grey title card across the headline.
+ */
 const shown = ref(false)
-onMounted(() => setTimeout(() => (shown.value = true), 3500))
+const frame = useTemplateRef<HTMLIFrameElement>('frame')
+
+const timers: ReturnType<typeof setTimeout>[] = []
+
+/** The embed only posts its state once somebody says they are listening. */
+function handshake() {
+  const send = () => frame.value?.contentWindow?.postMessage(
+    JSON.stringify({ event: 'listening', id: 'hero', channel: 'widget' }), '*')
+  send()
+  // The player is not always ready for the first hello.
+  timers.push(setTimeout(send, 1000), setTimeout(send, 3000))
+}
+
+function onMessage(event: MessageEvent) {
+  if (typeof event.data !== 'string' || !/youtube(-nocookie)?\.com$/.test(event.origin)) {
+    return
+  }
+  try {
+    const data = JSON.parse(event.data)
+    const state = data.event === 'onStateChange' ? data.info : data.info?.playerState
+    if (state === 1) {
+      shown.value = true
+    }
+  } catch {
+    // Someone else's message.
+  }
+}
+
+onMounted(() => window.addEventListener('message', onMessage))
+onBeforeUnmount(() => {
+  window.removeEventListener('message', onMessage)
+  timers.forEach(clearTimeout)
+})
 
 const poster = computed(() => `https://i.ytimg.com/vi/${encodeURIComponent(props.id)}/hqdefault.jpg`)
 </script>
@@ -57,6 +96,7 @@ const poster = computed(() => `https://i.ytimg.com/vi/${encodeURIComponent(props
     <ClientOnly>
       <iframe
         v-if="play"
+        ref="frame"
         :src="src"
         class="media__frame"
         :class="shown && 'media__frame--shown'"
@@ -65,6 +105,7 @@ const poster = computed(() => `https://i.ytimg.com/vi/${encodeURIComponent(props
         allow="autoplay; encrypted-media; picture-in-picture"
         loading="lazy"
         referrerpolicy="strict-origin-when-cross-origin"
+        @load="handshake"
       />
     </ClientOnly>
     <div class="media__shade" />
