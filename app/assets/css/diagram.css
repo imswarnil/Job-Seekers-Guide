@@ -140,8 +140,9 @@
   color: var(--dgm-label);
   font-size: 0.8125rem;
   margin-top: 0.75rem;
-  text-align: center;
-  text-wrap: balance;
+  /* Flush left, like every other line of text on the site. */
+  text-align: left;
+  text-wrap: pretty;
 }
 
 /* Wide diagrams scroll inside themselves. The page body never scrolls sideways

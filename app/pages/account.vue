@@ -71,7 +71,7 @@ useSeoMeta({ title: 'Your account', robots: 'noindex' })
       v-else-if="data"
       class="space-y-8"
     >
-      <UCard>
+      <div class="panel">
         <div class="flex flex-wrap items-center gap-4">
           <UAvatar
             :src="data.user.image || undefined"
@@ -110,7 +110,7 @@ useSeoMeta({ title: 'Your account', robots: 'noindex' })
           Your name and picture come from the account you signed in with. They
           appear next to your stories, comments and guestbook entries.
         </p>
-      </UCard>
+      </div>
 
       <section>
         <div class="flex items-center justify-between gap-4 mb-3">
@@ -134,7 +134,7 @@ useSeoMeta({ title: 'Your account', robots: 'noindex' })
         </p>
         <ul
           v-else
-          class="divide-y divide-default border border-default rounded-lg"
+          class="divide-y divide-default border-y border-default"
         >
           <li
             v-for="s in data.stories"
@@ -209,10 +209,7 @@ useSeoMeta({ title: 'Your account', robots: 'noindex' })
         </ul>
       </section>
 
-      <UCard
-        :ui="{ root: 'ring-error/40' }"
-        class="border-error/40"
-      >
+      <div class="panel panel--danger">
         <h2 class="font-semibold text-highlighted">
           Delete my account
         </h2>
@@ -231,7 +228,7 @@ useSeoMeta({ title: 'Your account', robots: 'noindex' })
         >
           Delete my account
         </UButton>
-      </UCard>
+      </div>
     </div>
 
     <UModal

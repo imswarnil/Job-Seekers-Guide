@@ -44,25 +44,29 @@ usePageSeo({
     <template #actions>
       <UButton
         to="/stories/new"
-        icon="i-lucide-pen-line"
+        size="lg"
       >
         Share your story
       </UButton>
-      <UButton
+      <NuxtLink
         to="/guestbook"
-        color="neutral"
-        variant="outline"
-        icon="i-lucide-book-open-text"
+        class="arrow-link"
       >
         Or just sign the guestbook
-      </UButton>
+        <UIcon
+          name="i-lucide-arrow-right"
+          class="size-4"
+        />
+      </NuxtLink>
     </template>
 
     <UTabs
       v-model="sort"
       :items="tabs"
       :content="false"
-      class="mb-6 max-w-sm"
+      variant="link"
+      color="neutral"
+      class="mb-8 max-w-sm"
     />
 
     <div
@@ -98,9 +102,23 @@ usePageSeo({
 </template>
 
 <style scoped>
+/* Stories on the grid: one column on a phone, two on a tablet, three on the
+   twelve-column frame, a gutter apart with a rule on top of each. */
 .stories-grid {
   display: grid;
-  gap: 1rem;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr));
+  grid-template-columns: minmax(0, 1fr);
+  gap: 3rem var(--gutter);
+}
+
+@media (min-width: 640px) {
+  .stories-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .stories-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 </style>

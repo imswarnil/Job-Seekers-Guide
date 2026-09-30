@@ -1,18 +1,25 @@
 <script setup lang="ts">
+import type { SponsorDraft, SponsorDesignOptions } from '~/components/SponsorDesigner.vue'
+import type { SponsorCardData, SponsorCardDesign } from '~/components/SponsorCard.vue'
+import { draftProblems } from '~/components/SponsorDesigner.vue'
+
 /**
  * Sponsor the site's one spot, on the outbid model: pay once, keep it for as
  * long as nobody pays more. No monthly fee, no expiry.
  *
- * There used to be eight spots. There is one now, `brand`, shown in two places
- * (a band on the home page and the card beside every lesson). An old link that
- * still says `?slot=sidebar` lands here and bids on `brand`, which is what the
- * server does with the old names too.
+ * The sponsor designs their card here first (SponsorDesigner, previewed with
+ * the real SponsorCard), then bids and pays through Dodo. The design travels
+ * with the bid and is checked by the server against the same lists the
+ * designer offers (GET /api/sponsors/design).
+ *
+ * An old link that still says `?slot=sidebar` lands here and bids on `brand`,
+ * which is what the server does with the old names too.
  */
 interface SlotInfo {
   slot: string
   label: string
   floor: number
-  holder: { name: string, url: string, image: string | null, tagline: string | null, amount: number } | null
+  holder: { name: string, url: string, image: string | null, tagline: string | null, amount: number, design: SponsorCardDesign } | null
   minimumNextBid: number
 }
 
@@ -24,42 +31,89 @@ const { data, status } = useFetch<{ items: SlotInfo[] }>('/api/sponsors/slots', 
   default: () => ({ items: [] })
 })
 
-const selected = 'brand'
-const current = computed(() => data.value?.items.find(s => s.slot === selected) || data.value?.items[0])
+const { data: options, status: optionsStatus, refresh: reloadOptions } = useFetch<SponsorDesignOptions>('/api/sponsors/design', {
+  server: false,
+  lazy: true
+})
 
-const form = reactive({ name: '', url: '', image: '', tagline: '', rupees: 0 })
+const current = computed(() => data.value?.items.find(s => s.slot === 'brand') || data.value?.items[0])
+const holderCard = computed<SponsorCardData | null>(() => {
+  const h = current.value?.holder
+  return h ? { name: h.name, url: h.url, image: h.image, tagline: h.tagline, design: h.design } : null
+})
+
+// ---- The draft, kept in this browser so signing in halfway loses nothing ----
+const DRAFT_KEY = 'jsg-sponsor-draft'
+const draft = ref<SponsorDraft>({ name: '', url: '', tagline: '', image: '', layout: 'logo-left', palette: 'ink', cta: null })
+
+onMounted(() => {
+  try {
+    const saved = JSON.parse(localStorage.getItem(DRAFT_KEY) || 'null')
+    if (saved && typeof saved === 'object') {
+      for (const key of ['name', 'url', 'tagline', 'image', 'layout', 'palette'] as const) {
+        if (typeof saved[key] === 'string') {
+          draft.value[key] = saved[key].slice(0, 500)
+        }
+      }
+      draft.value.cta = typeof saved.cta === 'string' ? saved.cta : null
+    }
+  } catch {
+    // No storage (private window, blocked): the designer still works, it just forgets.
+  }
+})
+
+watch(draft, (value) => {
+  try {
+    localStorage.setItem(DRAFT_KEY, JSON.stringify(value))
+  } catch {
+    // As above.
+  }
+}, { deep: true })
+
+// ---- The bid ----------------------------------------------------------------
+const rupees = ref(0)
 const saving = ref(false)
 const error = ref('')
+const attempted = ref(false)
 
 watch(current, (slot) => {
-  if (slot && form.rupees * 100 < slot.minimumNextBid) {
-    form.rupees = Math.ceil(slot.minimumNextBid / 100)
+  if (slot && rupees.value * 100 < slot.minimumNextBid) {
+    rupees.value = Math.ceil(slot.minimumNextBid / 100)
   }
 }, { immediate: true })
 
+const problems = computed(() => draftProblems(draft.value, options.value))
+
 async function submit() {
   error.value = ''
+  attempted.value = true
   const slot = current.value
   if (!slot) {
     error.value = 'The spot has not loaded yet. Try again in a moment.'
     return
   }
-  const amount = Math.round(form.rupees * 100)
-  if (amount < slot.minimumNextBid) {
+  if (Object.keys(problems.value).length) {
+    error.value = 'A field in the card above needs fixing first.'
+    return
+  }
+  const amount = Math.round(rupees.value * 100)
+  if (!Number.isFinite(amount) || amount < slot.minimumNextBid) {
     error.value = `The minimum for this spot is ${formatPaise(slot.minimumNextBid)}.`
     return
   }
   saving.value = true
   try {
+    const d = draft.value
     const { checkoutUrl } = await $fetch<{ checkoutUrl: string }>('/api/sponsors/bid', {
       method: 'POST',
       body: {
         slot: slot.slot,
         amount,
-        name: form.name,
-        url: form.url,
-        image: form.image || undefined,
-        tagline: form.tagline || undefined
+        name: d.name.trim(),
+        url: d.url.trim(),
+        image: d.image.trim() || undefined,
+        tagline: d.tagline.trim() || undefined,
+        design: { layout: d.layout, palette: d.palette, cta: d.cta }
       }
     })
     window.location.href = checkoutUrl
@@ -71,303 +125,371 @@ async function submit() {
 
 usePageSeo({
   title: 'Sponsor the guide',
-  description: 'Pay once and keep a spot on the Bangalore Job Seekers Guide until somebody outbids you. Companies and individuals welcome.',
+  description: 'Design your card, pay once and keep the spot on the Bangalore Job Seekers Guide until somebody outbids you. Companies and individuals welcome.',
   headline: 'Sponsor'
 })
 </script>
 
 <template>
-  <CommunityPage
-    width="wide"
-    kicker="Sponsor"
-    icon="i-lucide-megaphone"
-    title="Put your name in front of thousands of job seekers"
-    description="Pay once and the spot is yours, for as long as nobody pays more. No monthly fee and no expiry. If somebody outbids you, your name stays on the all-time leaderboard, and you can always take the spot back."
-  >
-    <template #actions>
-      <UButton
-        to="/leaderboard"
-        color="neutral"
-        variant="outline"
-        icon="i-lucide-trophy"
-      >
-        See the leaderboard
-      </UButton>
-      <UButton
-        to="/stats"
-        color="neutral"
-        variant="ghost"
-        icon="i-lucide-chart-column"
-      >
-        How many people read this
-      </UButton>
-    </template>
+  <div class="sponsor-page">
+    <!-- Head ------------------------------------------------------------------- -->
+    <header class="band guides">
+      <div class="frame swiss-grid">
+        <div class="col-span-full lg:col-span-9">
+          <p class="label">
+            <span class="mark" />
+            Sponsor
+          </p>
+          <h1 class="display mt-4">
+            Put your name in front of thousands of job seekers
+          </h1>
+          <p class="lede mt-5">
+            Design your card, pay once, and the spot is yours for as long as
+            nobody pays more. No monthly fee and no expiry. If somebody outbids
+            you, your name stays on the all-time leaderboard, and you can always
+            take the spot back.
+          </p>
+          <div class="mt-6 flex flex-wrap gap-x-6 gap-y-2">
+            <NuxtLink
+              to="#design"
+              class="arrow-link"
+            >
+              Design your card
+              <UIcon name="i-lucide-arrow-down" />
+            </NuxtLink>
+            <NuxtLink
+              to="/leaderboard"
+              class="arrow-link"
+            >
+              The leaderboard
+              <UIcon name="i-lucide-arrow-right" />
+            </NuxtLink>
+            <NuxtLink
+              to="/stats"
+              class="arrow-link"
+            >
+              How many people read this
+              <UIcon name="i-lucide-arrow-right" />
+            </NuxtLink>
+          </div>
+        </div>
+      </div>
+    </header>
 
-    <section class="how">
-      <div>
-        <UIcon
-          name="i-lucide-gavel"
-          class="size-5 text-primary"
-        />
-        <p class="how__title">
-          Outbid to take it
-        </p>
-        <p class="how__text">
-          The highest single payment for a spot holds it. The next bid has to
-          beat it by 10%, and by at least ₹100.
-        </p>
+    <!-- How it works ------------------------------------------------------------ -->
+    <section
+      class="band guides"
+      aria-labelledby="how-title"
+    >
+      <div class="frame swiss-grid gap-y-8">
+        <h2
+          id="how-title"
+          class="label col-span-full"
+        >
+          How it works
+        </h2>
+        <div
+          v-for="(step, i) in [
+            { title: 'Outbid to take it', text: 'The highest single payment holds the spot. The next bid has to beat it by 10%, and by at least ₹100.' },
+            { title: 'Keep it forever', text: 'There is no end date. The spot is yours until somebody pays more.' },
+            { title: 'Companies or people', text: 'An institute, a company that hires freshers, or someone who wants to say thank you. Your card, shown as you designed it.' }
+          ]"
+          :key="step.title"
+          class="step col-span-full sm:col-span-4"
+        >
+          <span class="step__n num">0{{ i + 1 }}</span>
+          <p class="step__title">
+            {{ step.title }}
+          </p>
+          <p class="step__text">
+            {{ step.text }}
+          </p>
+        </div>
       </div>
-      <div>
-        <UIcon
-          name="i-lucide-infinity"
-          class="size-5 text-primary"
-        />
-        <p class="how__title">
-          Keep it forever
-        </p>
-        <p class="how__text">
-          There is no end date. The spot is yours until somebody pays more.
-        </p>
+    </section>
+
+    <!-- The spot ---------------------------------------------------------------- -->
+    <section
+      class="band guides"
+      aria-labelledby="spot-title"
+    >
+      <div class="frame swiss-grid gap-y-6">
+        <div class="col-span-full lg:col-span-4">
+          <h2
+            id="spot-title"
+            class="headline"
+          >
+            The spot
+          </h2>
+          <ul class="row-list mt-5 text-sm">
+            <li class="py-2.5 flex gap-3">
+              <span class="label w-16 shrink-0">Home</span>
+              A band on the home page, under my journey
+            </li>
+            <li class="py-2.5 flex gap-3">
+              <span class="label w-16 shrink-0">Lessons</span>
+              The card beside every lesson, which stays in view as the reader scrolls
+            </li>
+          </ul>
+        </div>
+
+        <div class="col-span-full lg:col-span-7 lg:col-start-6">
+          <USkeleton
+            v-if="status === 'pending' || status === 'idle'"
+            class="h-32 w-full"
+          />
+          <template v-else>
+            <dl class="facts">
+              <div>
+                <dt class="label">
+                  Held by
+                </dt>
+                <dd class="facts__value">
+                  {{ current?.holder?.name || 'Nobody yet' }}
+                </dd>
+              </div>
+              <div v-if="current?.holder">
+                <dt class="label">
+                  At
+                </dt>
+                <dd class="facts__value num">
+                  {{ formatPaise(current.holder.amount) }}
+                </dd>
+              </div>
+              <div>
+                <dt class="label">
+                  {{ current?.holder ? 'Outbid from' : 'Take it from' }}
+                </dt>
+                <dd class="facts__value facts__value--accent num">
+                  {{ current ? formatPaise(current.minimumNextBid) : '–' }}
+                </dd>
+              </div>
+            </dl>
+            <div
+              v-if="holderCard"
+              class="mt-6"
+            >
+              <p class="label mb-2">
+                On the site now
+              </p>
+              <SponsorCard
+                :sponsor="holderCard"
+                size="band"
+              />
+            </div>
+          </template>
+        </div>
       </div>
-      <div>
-        <UIcon
-          name="i-lucide-building-2"
-          class="size-5 text-primary"
+    </section>
+
+    <!-- The designer ------------------------------------------------------------ -->
+    <section
+      id="design"
+      class="band guides scroll-mt-8"
+      aria-labelledby="design-title"
+    >
+      <div class="frame">
+        <div class="swiss-grid mb-8">
+          <div class="col-span-full lg:col-span-8">
+            <p class="label">
+              Step one
+            </p>
+            <h2
+              id="design-title"
+              class="headline mt-2"
+            >
+              Design your card
+            </h2>
+            <p class="lede mt-3">
+              Your name, your link, one line and a logo, in one of four layouts
+              and one of six colours. The preview is the card the site will
+              show, on the home page and beside every lesson, in light and dark.
+            </p>
+          </div>
+        </div>
+
+        <SponsorDesigner
+          v-if="options"
+          v-model="draft"
+          :options="options"
+          :can-upload="Boolean(user)"
+          :show-problems="attempted"
         />
-        <p class="how__title">
-          Companies or people
-        </p>
-        <p class="how__text">
-          An institute, a company that hires freshers, or someone who just wants
-          to say thank you. A name, a link and a line, shown as you wrote them.
+        <USkeleton
+          v-else-if="optionsStatus === 'pending' || optionsStatus === 'idle'"
+          class="h-96 w-full"
+        />
+        <p
+          v-else
+          class="text-sm text-muted"
+        >
+          The designer could not load just now.
+          <button
+            type="button"
+            class="text-primary font-medium"
+            @click="reloadOptions()"
+          >
+            Try again
+          </button>
         </p>
       </div>
     </section>
 
-    <h2 class="mt-12 mb-4 text-xl font-semibold text-highlighted">
-      The spot
-    </h2>
-
-    <USkeleton
-      v-if="status === 'pending' || status === 'idle'"
-      class="h-44 max-w-2xl"
-    />
-
-    <div
-      v-else
-      class="spot max-w-2xl"
-    >
-      <div class="flex flex-wrap items-baseline justify-between gap-2">
-        <span class="font-semibold text-highlighted">{{ current?.label || 'The brand spot' }}</span>
-        <span class="text-xs font-mono text-dimmed">brand</span>
-      </div>
-      <ul class="spot__where">
-        <li>
-          <UIcon
-            name="i-lucide-house"
-            class="size-4 text-primary shrink-0"
-          />
-          A band on the home page, under my journey
-        </li>
-        <li>
-          <UIcon
-            name="i-lucide-book-open"
-            class="size-4 text-primary shrink-0"
-          />
-          The card beside every lesson, which stays in view as the reader scrolls
-        </li>
-      </ul>
-      <p
-        v-if="current?.holder"
-        class="text-sm text-muted"
-      >
-        Held by <span class="font-medium text-default">{{ current.holder.name }}</span> at {{ formatPaise(current.holder.amount) }}
-      </p>
-      <p
-        v-else
-        class="text-sm text-muted"
-      >
-        Nobody holds it yet.
-      </p>
-      <p
-        v-if="current"
-        class="text-sm font-semibold text-primary"
-      >
-        {{ current.holder ? 'Outbid from' : 'Take it from' }} {{ formatPaise(current.minimumNextBid) }}
-      </p>
-    </div>
-
-    <UCard
+    <!-- The bid ----------------------------------------------------------------- -->
+    <section
       id="bid"
-      class="mt-10 max-w-2xl scroll-mt-8"
+      class="band guides scroll-mt-8"
+      aria-labelledby="bid-title"
     >
-      <h2 class="text-lg font-semibold text-highlighted">
-        Bid for the brand spot
-      </h2>
-      <p
-        v-if="current"
-        class="mt-1 text-sm text-muted"
-      >
-        The minimum right now is {{ formatPaise(current.minimumNextBid) }}. You pay
-        through Dodo Payments; the spot changes hands once the payment clears.
-      </p>
-
-      <div
-        v-if="!ready"
-        class="mt-4"
-      >
-        <USkeleton class="h-24 w-full" />
-      </div>
-
-      <div
-        v-else-if="!user"
-        class="mt-4 flex flex-wrap items-center justify-between gap-4"
-      >
-        <p class="text-muted text-sm">
-          Sign in to bid, so the spot and the receipt are tied to you.
-        </p>
-        <UButton
-          :to="{ path: '/login', query: { next: '/sponsor' } }"
-          icon="i-lucide-log-in"
-        >
-          Sign in
-        </UButton>
-      </div>
-
-      <form
-        v-else
-        class="mt-5 space-y-4"
-        @submit.prevent="submit"
-      >
-        <div class="grid gap-4 sm:grid-cols-2">
-          <UFormField
-            label="Name to show"
-            required
+      <div class="frame swiss-grid gap-y-6">
+        <div class="col-span-full lg:col-span-4">
+          <p class="label">
+            Step two
+          </p>
+          <h2
+            id="bid-title"
+            class="headline mt-2"
           >
-            <UInput
-              v-model="form.name"
-              maxlength="60"
-              placeholder="Your company, or you"
-              class="w-full"
-            />
-          </UFormField>
-          <UFormField
-            label="Link"
-            required
+            Bid and pay
+          </h2>
+          <p
+            v-if="current"
+            class="mt-3 text-sm text-muted"
           >
-            <UInput
-              v-model="form.url"
-              type="url"
-              placeholder="https://"
-              class="w-full"
-            />
-          </UFormField>
-          <UFormField
-            label="Logo or photo link"
-            hint="Optional, https"
-          >
-            <UInput
-              v-model="form.image"
-              type="url"
-              placeholder="https://…/logo.png"
-              class="w-full"
-            />
-          </UFormField>
-          <UFormField
-            label="Your bid (₹)"
-            required
-          >
-            <UInput
-              v-model.number="form.rupees"
-              type="number"
-              :min="current ? Math.ceil(current.minimumNextBid / 100) : 1"
-              step="1"
-              class="w-full"
-            />
-          </UFormField>
+            The minimum right now is <span class="num font-semibold text-highlighted">{{ formatPaise(current.minimumNextBid) }}</span>.
+            You pay through Dodo Payments; the spot changes hands once the
+            payment clears.
+          </p>
         </div>
-        <UFormField
-          label="One line"
-          hint="Optional, up to 100 characters"
-        >
-          <UInput
-            v-model="form.tagline"
-            maxlength="100"
-            placeholder="Hiring Java freshers in Bangalore"
-            class="w-full"
+
+        <div class="col-span-full lg:col-span-7 lg:col-start-6">
+          <USkeleton
+            v-if="!ready"
+            class="h-24 w-full"
           />
-        </UFormField>
 
-        <p
-          v-if="error"
-          class="text-sm text-error"
-          role="alert"
-        >
-          {{ error }}
-        </p>
+          <div
+            v-else-if="!user"
+            class="signin rule-strong"
+          >
+            <p class="text-sm text-muted">
+              Sign in to bid, so the spot and the receipt are tied to you. Your
+              card design is kept in this browser while you do.
+            </p>
+            <UButton
+              :to="{ path: '/login', query: { next: '/sponsor#bid' } }"
+              icon="i-lucide-log-in"
+            >
+              Sign in to bid
+            </UButton>
+          </div>
 
-        <UButton
-          type="submit"
-          size="lg"
-          :loading="saving"
-          icon="i-lucide-lock"
-        >
-          Pay {{ formatPaise(Math.round(form.rupees * 100)) }} and take the spot
-        </UButton>
-        <p class="text-xs text-muted">
-          Nothing is shown until the payment clears. If somebody else outbids you
-          while you are paying, your payment still counts on the leaderboard and
-          I will refund it if you ask.
-        </p>
-      </form>
-    </UCard>
-  </CommunityPage>
+          <form
+            v-else
+            class="bidform rule-strong"
+            @submit.prevent="submit"
+          >
+            <UFormField
+              label="Your bid, in rupees"
+              required
+            >
+              <UInput
+                v-model.number="rupees"
+                type="number"
+                :min="current ? Math.ceil(current.minimumNextBid / 100) : 1"
+                step="1"
+                size="xl"
+                class="w-full max-w-xs num"
+              />
+            </UFormField>
+
+            <p
+              v-if="error"
+              class="text-sm text-error"
+              role="alert"
+            >
+              {{ error }}
+            </p>
+
+            <div>
+              <UButton
+                type="submit"
+                size="xl"
+                :loading="saving"
+                icon="i-lucide-lock"
+              >
+                Pay {{ formatPaise(Math.round((rupees || 0) * 100)) }} and take the spot
+              </UButton>
+            </div>
+            <p class="text-xs text-muted">
+              Nothing is shown until the payment clears. If somebody else outbids
+              you while you are paying, your payment still counts on the
+              leaderboard and I will refund it if you ask. I can take a card down
+              if it breaks the site's rules, and I will refund you if I do.
+            </p>
+          </form>
+        </div>
+      </div>
+    </section>
+  </div>
 </template>
 
 <style scoped>
-.how {
-  display: grid;
-  gap: 1rem;
-  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+.step {
+  padding-top: 0.75rem;
+  border-top: 2px solid var(--rule-strong);
 }
 
-.how > div {
-  padding: 1.125rem;
-  border: 1px solid var(--ui-border);
-  border-radius: var(--radius-lg, 0.75rem);
-}
-
-.how__title {
-  margin-top: 0.5rem;
+.step__n {
+  display: block;
+  font-size: 0.8125rem;
   font-weight: 600;
+  color: var(--ui-primary);
+}
+
+.step__title {
+  margin-top: 0.75rem;
+  font-size: 1.125rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
   color: var(--ui-text-highlighted);
 }
 
-.how__text {
-  margin-top: 0.25rem;
-  font-size: 0.875rem;
-  color: var(--ui-text-muted);
-}
-
-.spot {
-  display: flex;
-  flex-direction: column;
-  gap: 0.625rem;
-  padding: 1.125rem 1.25rem;
-  border: 1px solid var(--ui-primary);
-  background: color-mix(in oklab, var(--ui-primary) 5%, transparent);
-}
-
-.spot__where {
-  display: grid;
-  gap: 0.375rem;
+.step__text {
+  margin-top: 0.375rem;
   font-size: 0.9375rem;
-  color: var(--ui-text-default, var(--ui-text));
+  color: var(--ui-text-muted);
+  text-wrap: pretty;
 }
 
-.spot__where li {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.5rem;
+.facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  gap: var(--gutter);
+}
+
+.facts > div {
+  padding-top: 0.75rem;
+  border-top: 2px solid var(--rule-strong);
+}
+
+.facts__value {
+  margin-top: 0.5rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--ui-text-highlighted);
+  overflow-wrap: anywhere;
+}
+
+.facts__value--accent {
+  color: var(--ui-primary);
+}
+
+.signin,
+.bidform {
+  display: grid;
+  gap: 1.25rem;
+  padding-top: 1.25rem;
 }
 </style>

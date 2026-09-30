@@ -1,21 +1,51 @@
 <script setup lang="ts">
 import { trackStyle } from '~/utils/tech'
+import { paneEl } from '~/utils/pane'
 
 /**
- * My journey, as a path. Every stop is a chapter of the story and, where there
- * is one, the part of the guide that teaches what that stop took, so the story
- * and the guide are one road.
+ * My journey, as the footpath I walked. A winding road snakes down the
+ * section, with each stop at a bend, alternating sides. As you scroll, a
+ * walker travels the road: the part behind it is drawn solid in the accent,
+ * the part ahead stays a faint dashed line, each stop lights up as the walker
+ * reaches it, and the walker takes the colour of the phase it is in.
  *
  * Every `story` URL is a real file under content/1.path/16.my-story/, with the
  * numeric prefixes dropped. Rename a chapter and this list has to follow.
+ *
+ * How it is built
+ *   · The stops are ordinary HTML, laid out by CSS (a column beside the road
+ *     on a phone, alternating either side of it on a wide screen). Each has a
+ *     square node, placed where the road should pass.
+ *   · Once mounted, the script measures the nodes and draws one smooth SVG
+ *     path through them, top to bottom. Nothing is hard-coded to a height, so
+ *     it redraws itself whenever the section changes size.
+ *   · Scrolling the content pane (not the window: the app is a fixed
+ *     viewport) moves the walker to the point on the road level with the
+ *     middle of the pane, found on the path with getPointAtLength.
+ *   · Without JavaScript, or before it runs, a plain hairline stands in for
+ *     the road, and every stop is there. With reduced motion, the whole road
+ *     is drawn, every stop is lit, and there is no walker.
  */
+
+type Phase = 'before' | 'move' | 'learning' | 'walkins' | 'first-job' | 'accenture' | 'switch' | 'europe'
+
+/** The phases of the story, each in the colour of the track it belongs to. */
+const phases: Record<Phase, { label: string, track: string }> = {
+  'before': { label: 'Before Bangalore', track: 'operating-systems' },
+  'move': { label: 'The move', track: 'bangalore' },
+  'learning': { label: 'Learning', track: 'java' },
+  'walkins': { label: 'The walk-ins', track: 'quantitative-aptitude' },
+  'first-job': { label: 'First job', track: 'interview' },
+  'accenture': { label: 'Accenture', track: 'oops' },
+  'switch': { label: 'The switch', track: 'logical-reasoning' },
+  'europe': { label: 'Europe', track: 'my-story' }
+}
+
 interface Stop {
   year: string
   place: string
   text: string
-  icon: string
-  /** The track whose colour the stop takes. */
-  track: string
+  phase: Phase
   story: string
   guide?: { to: string, label: string }
   turn?: boolean
@@ -26,16 +56,14 @@ const stops: Stop[] = [
     year: '2018',
     place: 'Mahroni',
     text: 'Graduated having never cleared a written round. Wanted YouTube, needed a job. My father wanted a government teacher.',
-    icon: 'i-lucide-house',
-    track: 'my-story',
+    phase: 'before',
     story: '/my-story/before-bangalore/the-kitchen-table'
   },
   {
     year: '2018',
     place: 'The train',
     text: 'My sister backed me. One ticket to Bangalore and no plan beyond the first week.',
-    icon: 'i-lucide-train-front',
-    track: 'bangalore',
+    phase: 'move',
     story: '/my-story/the-move/the-train-to-bangalore',
     guide: { to: '/bangalore/getting-there/the-train-from-home', label: 'Getting there' }
   },
@@ -43,8 +71,7 @@ const stops: Stop[] = [
     year: '2018',
     place: 'BTM Layout',
     text: 'A PG where every room was a job seeker, and I found out how much I did not know.',
-    icon: 'i-lucide-bed-double',
-    track: 'bangalore',
+    phase: 'move',
     story: '/my-story/the-move/btm-layout-and-the-pg',
     guide: { to: '/bangalore/where-to-live/finding-a-pg', label: 'Finding a PG' }
   },
@@ -52,8 +79,7 @@ const stops: Stop[] = [
     year: '2019',
     place: 'JSpiders',
     text: 'Three days of demo classes, then three months of Java, SQL and web.',
-    icon: 'i-simple-icons-openjdk',
-    track: 'java',
+    phase: 'learning',
     story: '/my-story/learning/three-months-at-jspiders',
     guide: { to: '/java', label: 'Java, in depth' }
   },
@@ -61,8 +87,7 @@ const stops: Stop[] = [
     year: '2019',
     place: '33 walk-ins',
     text: 'Aptitude, English and CS in parallel. Rejected, again and again, mostly in the written round.',
-    icon: 'i-lucide-clipboard-list',
-    track: 'quantitative-aptitude',
+    phase: 'walkins',
     story: '/my-story/the-walk-ins/thirty-three-walk-ins',
     guide: { to: '/quantitative-aptitude', label: 'The written round' }
   },
@@ -70,8 +95,7 @@ const stops: Stop[] = [
     year: '2019',
     place: 'The 34th',
     text: 'One of 700 to 1000 people in the queue. Selected.',
-    icon: 'i-lucide-badge-check',
-    track: 'interview',
+    phase: 'walkins',
     story: '/my-story/the-walk-ins/the-thirty-fourth',
     guide: { to: '/interview', label: 'The interview' },
     turn: true
@@ -80,8 +104,7 @@ const stops: Stop[] = [
     year: '2019',
     place: '₹13,000 a month',
     text: 'A startup, a bond, six days a week. Sundays for study.',
-    icon: 'i-lucide-wallet',
-    track: 'bangalore',
+    phase: 'first-job',
     story: '/my-story/the-first-job/thirteen-thousand-a-month',
     guide: { to: '/bangalore/finding-a-job/taking-the-first-offer', label: 'Taking the first offer' }
   },
@@ -89,16 +112,14 @@ const stops: Stop[] = [
     year: '2019',
     place: 'Accenture',
     text: 'I wanted web development. I got Salesforce, and it turned out to be the door.',
-    icon: 'i-lucide-building-2',
-    track: 'dbms',
+    phase: 'accenture',
     story: '/my-story/accenture/web-development-and-salesforce'
   },
   {
     year: '2022',
     place: 'Five offers',
     text: 'A friend was on 21 LPA while I was on 5. I switched: 15.5 LPA at Cognizant.',
-    icon: 'i-lucide-trending-up',
-    track: 'logical-reasoning',
+    phase: 'switch',
     story: '/my-story/the-switch/five-offers',
     guide: { to: '/interview', label: 'Negotiation' }
   },
@@ -106,103 +127,209 @@ const stops: Stop[] = [
     year: '2023',
     place: 'Twilio',
     text: '30+ LPA, Salesforce analytics for the GTM team.',
-    icon: 'i-lucide-rocket',
-    track: 'oops',
+    phase: 'switch',
     story: '/my-story/the-switch/twilio'
   },
   {
     year: 'Now',
     place: 'Europe',
     text: 'Education First sponsored my visa. And I wrote the whole route down.',
-    icon: 'i-lucide-plane',
-    track: 'my-story',
+    phase: 'europe',
     story: '/my-story/europe-and-why-this-exists/the-call-from-education-first'
   }
 ]
 
-const colored = stops.map(stop => ({ ...stop, color: trackStyle(stop.track).color }))
+const colored = stops.map(stop => ({
+  ...stop,
+  phaseLabel: phases[stop.phase].label,
+  color: trackStyle(phases[stop.phase].track).color
+}))
 
-/** The line down the middle runs through every stop's colour in order. */
-const line = `linear-gradient(to bottom, ${colored.map((stop, i) => `${stop.color} ${Math.round((i / (colored.length - 1)) * 100)}%`).join(', ')})`
+const { journey } = useAppConfig()
+const walkerImage = computed(() => (journey?.walkerImage || '').trim())
 
 /* -----------------------------------------------------------------------------
-   Motion
-   -----------------------------------------------------------------------------
-   The road draws itself as you scroll down it, a marker travels along with
-   you, and each stop slides in from its own side as it arrives.
-
-   The road and the marker read one number, `--progress`, from 0 to 1. Where
-   the browser has scroll-driven animations, CSS drives it from the page's
-   scroll with no script at all. Elsewhere the script below computes the same
-   number, and only listens to scroll while the journey is on screen.
-
-   Everything starts visible. The hidden, about-to-slide-in state is only
-   applied once this script has run (`data-animate`), so a reader without
-   JavaScript, or a crawler, sees the whole road. With reduced motion on,
-   nothing moves: the road is drawn and every stop is simply there.
+   The road
    -------------------------------------------------------------------------- */
+
 const root = useTemplateRef<HTMLElement>('root')
-const animate = ref(false)
+const base = useTemplateRef<SVGPathElement>('base')
+const walked = useTemplateRef<SVGPathElement>('walked')
+const walkerEl = useTemplateRef<HTMLElement>('walkerEl')
+
+/** The SVG's size and the road through it, in the section's own pixels. */
+const box = ref({ w: 0, h: 0 })
+/** Smaller beside the narrow road on a phone. */
+const walkerSize = ref(44)
+const d = ref('')
+/** How many stops the walker has reached (0 = none yet). */
+const reached = ref(0)
+/** `ready` once the road is drawn; `still` when motion is not wanted. */
+const mode = ref<'static' | 'ready' | 'still'>('static')
+
+const walkerColor = computed(() => colored[Math.max(0, reached.value - 1)]?.color || colored[0]!.color)
+const walkerPhase = computed(() => colored[Math.max(0, reached.value - 1)]?.phaseLabel || colored[0]!.phaseLabel)
+
+/** How far along the road each stop's node is. */
+let stopAt: number[] = []
+let total = 0
+
+/** The length along the road at which it reaches height `y`. The road only
+ *  ever runs downwards, so a binary search finds it. */
+function lengthAtY(path: SVGPathElement, y: number) {
+  let lo = 0
+  let hi = total
+  for (let i = 0; i < 24; i++) {
+    const mid = (lo + hi) / 2
+    if (path.getPointAtLength(mid).y < y) {
+      lo = mid
+    } else {
+      hi = mid
+    }
+  }
+  return (lo + hi) / 2
+}
+
+/** Measure the nodes and draw a smooth road through them. */
+async function build() {
+  const el = root.value
+  if (!el) {
+    return
+  }
+  const frame = el.getBoundingClientRect()
+  const nodes = [...el.querySelectorAll<HTMLElement>('.stop__node')].map((node) => {
+    const r = node.getBoundingClientRect()
+    return { x: r.left + r.width / 2 - frame.left, y: r.top + r.height / 2 - frame.top }
+  })
+  if (nodes.length < 2) {
+    return
+  }
+
+  const first = nodes[0]!
+  const last = nodes[nodes.length - 1]!
+  const lead = Math.min(48, first.y)
+  let path = `M ${first.x.toFixed(1)} ${(first.y - lead).toFixed(1)} L ${first.x.toFixed(1)} ${first.y.toFixed(1)}`
+
+  // Between two stops, an S-bend that leaves one node heading straight down
+  // and arrives at the next heading straight down: a footpath, not a zigzag.
+  for (let i = 1; i < nodes.length; i++) {
+    const a = nodes[i - 1]!
+    const b = nodes[i]!
+    const k = (b.y - a.y) * 0.55
+    path += ` C ${a.x.toFixed(1)} ${(a.y + k).toFixed(1)}, ${b.x.toFixed(1)} ${(b.y - k).toFixed(1)}, ${b.x.toFixed(1)} ${b.y.toFixed(1)}`
+  }
+  path += ` L ${last.x.toFixed(1)} ${Math.min(frame.height, last.y + 48).toFixed(1)}`
+
+  box.value = { w: frame.width, h: frame.height }
+  walkerSize.value = frame.width >= 720 ? 44 : 36
+  d.value = path
+  await nextTick()
+
+  const line = base.value
+  if (!line) {
+    return
+  }
+  total = line.getTotalLength()
+  stopAt = nodes.map(node => lengthAtY(line, node.y))
+
+  if (walked.value) {
+    walked.value.style.strokeDasharray = `${total} ${total}`
+  }
+  update()
+}
+
+/** Move the walker to the point on the road level with the pane's middle. */
+function update() {
+  const el = root.value
+  const line = base.value
+  if (!el || !line || !total) {
+    return
+  }
+
+  let length = total
+  if (mode.value !== 'still') {
+    const pane = paneEl()
+    const view = pane ? pane.getBoundingClientRect() : { top: 0, height: window.innerHeight }
+    const target = view.top + view.height * 0.55 - el.getBoundingClientRect().top
+    const start = line.getPointAtLength(0).y
+    const end = line.getPointAtLength(total).y
+    length = target <= start ? 0 : target >= end ? total : lengthAtY(line, target)
+  }
+
+  if (walked.value) {
+    walked.value.style.strokeDashoffset = `${total - length}`
+  }
+
+  const at = line.getPointAtLength(length)
+  if (walkerEl.value) {
+    walkerEl.value.style.transform = `translate(${at.x.toFixed(1)}px, ${at.y.toFixed(1)}px)`
+  }
+
+  const count = stopAt.filter(stop => stop <= length + 1).length
+  if (count !== reached.value) {
+    reached.value = count
+  }
+}
+
+let frame = 0
+function schedule() {
+  frame ||= requestAnimationFrame(() => {
+    frame = 0
+    update()
+  })
+}
+
 let cleanup = () => {}
 onBeforeUnmount(() => cleanup())
 
-onMounted(() => {
+onMounted(async () => {
   const el = root.value
-  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  if (!el || reduced || typeof IntersectionObserver === 'undefined') {
+  if (!el) {
     return
   }
-  animate.value = true
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  mode.value = reduced ? 'still' : 'ready'
+  // Let the stops move to their final places before anything is measured.
+  await nextTick()
 
-  // Each stop slides in once, as it enters, and then stays.
-  const stopsObserver = new IntersectionObserver((entries) => {
-    for (const entry of entries) {
-      if (entry.isIntersecting) {
-        (entry.target as HTMLElement).dataset.in = ''
-        stopsObserver.unobserve(entry.target)
-      }
-    }
-  }, { rootMargin: '0px 0px -12% 0px', threshold: 0.15 })
-  el.querySelectorAll('.stop').forEach(stop => stopsObserver.observe(stop))
+  let resizeFrame = 0
+  const resized = new ResizeObserver(() => {
+    cancelAnimationFrame(resizeFrame)
+    resizeFrame = requestAnimationFrame(() => build())
+  })
+  resized.observe(el)
 
-  // The road, where CSS cannot drive it from the scroll by itself.
-  const scrollDriven = typeof CSS !== 'undefined' && CSS.supports('animation-timeline: view()')
-  let stopRoad = () => {}
-  if (!scrollDriven) {
-    let frame = 0
-    const update = () => {
-      frame = 0
-      const box = el.getBoundingClientRect()
-      const middle = window.innerHeight / 2
-      const progress = Math.min(1, Math.max(0, (middle - box.top) / Math.max(1, box.height)))
-      el.style.setProperty('--progress', progress.toFixed(4))
+  const pane = paneEl()
+  const target: HTMLElement | Window = pane || window
+  let listening = false
+  const listen = (on: boolean) => {
+    if (on === listening || reduced) {
+      return
     }
-    const onScroll = () => {
-      frame ||= requestAnimationFrame(update)
-    }
-    const roadObserver = new IntersectionObserver(([entry]) => {
-      if (entry?.isIntersecting) {
-        window.addEventListener('scroll', onScroll, { passive: true })
-        window.addEventListener('resize', onScroll, { passive: true })
-        update()
-      } else {
-        window.removeEventListener('scroll', onScroll)
-        window.removeEventListener('resize', onScroll)
-        update()
-      }
-    })
-    roadObserver.observe(el)
-    stopRoad = () => {
-      roadObserver.disconnect()
-      window.removeEventListener('scroll', onScroll)
-      window.removeEventListener('resize', onScroll)
-      cancelAnimationFrame(frame)
+    listening = on
+    if (on) {
+      target.addEventListener('scroll', schedule, { passive: true })
+      window.addEventListener('resize', schedule, { passive: true })
+    } else {
+      target.removeEventListener('scroll', schedule)
+      window.removeEventListener('resize', schedule)
     }
   }
 
+  // Only follow the scroll while the road is on screen; update once on the
+  // way out so the walker is parked at the right end.
+  const seen = new IntersectionObserver(([entry]) => {
+    listen(Boolean(entry?.isIntersecting))
+    schedule()
+  })
+  seen.observe(el)
+
   cleanup = () => {
-    stopsObserver.disconnect()
-    stopRoad()
+    resized.disconnect()
+    seen.disconnect()
+    listen(false)
+    cancelAnimationFrame(frame)
+    cancelAnimationFrame(resizeFrame)
   }
 })
 </script>
@@ -210,53 +337,77 @@ onMounted(() => {
 <template>
   <div
     ref="root"
-    class="journey-wrap"
-    :data-animate="animate ? '' : undefined"
-    :style="{ '--line': line }"
+    class="journey"
+    :data-mode="mode"
   >
-    <!-- The drawn part of the road, and the marker that travels down it. -->
-    <div
-      class="road"
+    <svg
+      v-if="d"
+      class="journey__road"
+      :width="box.w"
+      :height="box.h"
+      :viewBox="`0 0 ${box.w} ${box.h}`"
       aria-hidden="true"
     >
-      <span class="road__fill" />
-      <span class="road__marker">
-        <UIcon
-          name="i-lucide-footprints"
-          class="size-3"
-        />
-      </span>
+      <path
+        ref="base"
+        :d="d"
+        class="journey__ahead"
+      />
+      <path
+        ref="walked"
+        :d="d"
+        class="journey__walked"
+      />
+    </svg>
+
+    <div
+      v-if="d && mode === 'ready'"
+      ref="walkerEl"
+      class="journey__walker"
+      :style="{ '--walker-size': `${walkerSize}px` }"
+    >
+      <HomeJourneyWalker
+        :color="walkerColor"
+        :image="walkerImage"
+        :size="walkerSize"
+        :label="`You are here: ${walkerPhase}`"
+      />
     </div>
 
-    <ol class="journey">
+    <ol class="journey__stops">
       <li
         v-for="(stop, index) in colored"
         :key="stop.place"
         class="stop"
         :data-side="index % 2 ? 'right' : 'left'"
+        :data-in="(mode === 'still' || index < reached) || undefined"
         :data-turn="stop.turn || undefined"
-        :style="{ '--track': stop.color, '--i': index }"
+        :style="{ '--phase': stop.color }"
       >
-        <span class="stop__node">
-          <UIcon
-            :name="stop.icon"
-            class="size-5"
-          />
-        </span>
+        <span
+          class="stop__node"
+          aria-hidden="true"
+        />
+        <span
+          class="stop__leader"
+          aria-hidden="true"
+        />
 
-        <div class="stop__card card-hover">
-          <p class="stop__meta">
-            <span class="stop__year">{{ stop.year }}</span>
+        <div class="stop__card">
+          <p class="stop__year num">
+            {{ stop.year }}
+          </p>
+          <p class="stop__phase label">
             <span
-              v-if="stop.turn"
-              class="stop__flag"
-            >the turn</span>
+              class="stop__swatch"
+              aria-hidden="true"
+            />
+            {{ stop.phaseLabel }}<template v-if="stop.turn">
+              · the turn
+            </template>
           </p>
           <h3 class="stop__place">
-            <NuxtLink
-              :to="stop.story"
-              class="stop__title-link"
-            >
+            <NuxtLink :to="stop.story">
               {{ stop.place }}
             </NuxtLink>
           </h3>
@@ -266,24 +417,24 @@ onMounted(() => {
           <p class="stop__links">
             <NuxtLink
               :to="stop.story"
-              class="stop__link"
+              class="arrow-link"
             >
+              The chapter
               <UIcon
-                name="i-lucide-footprints"
+                name="i-lucide-arrow-right"
                 class="size-3.5"
               />
-              The chapter
             </NuxtLink>
             <NuxtLink
               v-if="stop.guide"
               :to="stop.guide.to"
-              class="stop__link stop__link--guide"
+              class="arrow-link stop__guide"
             >
+              {{ stop.guide.label }}
               <UIcon
-                name="i-lucide-map"
+                name="i-lucide-arrow-right"
                 class="size-3.5"
               />
-              {{ stop.guide.label }}
             </NuxtLink>
           </p>
         </div>
@@ -293,215 +444,164 @@ onMounted(() => {
 </template>
 
 <style scoped>
-/* The number the road and the marker are drawn from, 0 at the first stop and 1
-   at the last. Registered so that CSS can animate it from the scroll. */
-@property --progress {
-  syntax: '<number>';
-  inherits: true;
-  initial-value: 1;
-}
-
-.journey-wrap {
-  position: relative;
-  /* Stops slide in from the sides; never let that widen the page. */
-  overflow-x: clip;
-  overflow-y: visible;
-  --road-x: 1.25rem;
-}
-
 .journey {
+  --walker-size: 44px;
   position: relative;
-  display: grid;
-  gap: 1.25rem;
-  padding-left: 3.25rem;
+  container: journey / inline-size;
 }
 
-/* The road: a coloured line through every stop, with a dashed centre line
-   painted on it. This is the faint, undrawn road; `.road__fill` is the part
-   you have travelled. */
-.journey::before,
-.journey::after {
-  content: '';
-  position: absolute;
-  top: 1.25rem;
-  bottom: 1.25rem;
-  left: var(--road-x);
-  transform: translateX(-50%);
-  border-radius: 999px;
-}
-
-.journey::before {
-  width: 0.5rem;
-  background: var(--line);
-  opacity: 0.2;
-}
-
-.journey::after {
-  width: 2px;
-  background: repeating-linear-gradient(to bottom, var(--ui-bg) 0 6px, transparent 6px 14px);
-  opacity: 0.9;
-  pointer-events: none;
-}
-
-.road {
-  position: absolute;
-  top: 1.25rem;
-  bottom: 1.25rem;
-  /* Centred on the road without a transform: a transform would make this a
-     stacking context and trap the marker underneath the stops. */
-  left: calc(var(--road-x) - 0.25rem);
-  width: 0.5rem;
-  pointer-events: none;
-}
-
-.road__fill {
+/* ── The road ──────────────────────────────────────────────────────────── */
+.journey__road {
   position: absolute;
   inset: 0;
-  border-radius: 999px;
-  background: var(--line);
-  transform-origin: top;
-  transform: scaleY(var(--progress));
+  z-index: 0;
+  overflow: visible;
+  pointer-events: none;
 }
 
-/* The marker: you, on the road. Hidden until the script has decided motion is
-   welcome, because a marker parked at the end of the road means nothing. */
-.road__marker {
+.journey__road path {
+  fill: none;
+  stroke-linecap: butt;
+  stroke-linejoin: round;
+}
+
+/* The way ahead: faint and dashed. */
+.journey__ahead {
+  stroke: var(--ui-border-accented);
+  stroke-width: 1.5;
+  stroke-dasharray: 3 6;
+}
+
+/* The way walked: solid, in the accent. Drawn by the script, which sets its
+   dash to the road's length and pulls the offset back as you scroll. */
+.journey__walked {
+  stroke: var(--ui-primary);
+  stroke-width: 2;
+}
+
+.journey[data-mode='still'] .journey__walked {
+  stroke-dashoffset: 0 !important;
+}
+
+/* Before the road is drawn (no JavaScript yet, or none at all), a plain
+   hairline stands in for it, through the phone-width node column. */
+.journey[data-mode='static']::before {
+  content: '';
   position: absolute;
-  left: 50%;
-  top: calc(var(--progress) * 100%);
-  /* Above the painted centre line, under the stop nodes it passes. */
+  top: 0;
+  bottom: 0;
+  left: 1.375rem;
+  width: 1px;
+  background: var(--ui-border-accented);
+}
+
+.journey__walker {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 3;
+  width: var(--walker-size);
+  height: var(--walker-size);
+  margin: calc(var(--walker-size) / -2) 0 0 calc(var(--walker-size) / -2);
+  pointer-events: none;
+  will-change: transform;
+}
+
+/* ── The stops: a column beside the road on a phone ───────────────────── */
+.journey__stops {
+  position: relative;
   z-index: 1;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  width: 1.5rem;
-  height: 1.5rem;
-  border-radius: 999px;
-  background: var(--ui-bg);
-  color: var(--ui-primary);
-  border: 2px solid var(--ui-primary);
-  box-shadow:
-    0 0 0 3px color-mix(in oklab, var(--ui-primary) 18%, transparent),
-    0 4px 12px rgb(0 0 0 / 0.18);
-  transform: translate(-50%, -50%);
-}
-
-.journey-wrap[data-animate] {
-  --progress: 0;
-}
-
-.journey-wrap[data-animate] .road__marker {
-  display: flex;
-}
-
-/* Where the browser can, the page's own scroll drives the road: it starts
-   drawing when the top of the journey reaches the middle of the screen and is
-   finished when the bottom does. The script's fallback computes exactly this. */
-@supports (animation-timeline: view()) {
-  .journey-wrap[data-animate] {
-    animation: road-draw linear both;
-    animation-timeline: view();
-    animation-range: cover 50vh cover calc(100% - 50vh);
-  }
-}
-
-@keyframes road-draw {
-  from {
-    --progress: 0;
-  }
-
-  to {
-    --progress: 1;
-  }
 }
 
 .stop {
+  --node-x: 0.875rem;
   position: relative;
+  padding: 0 0 3rem 3.25rem;
 }
 
+.stop:nth-child(even) {
+  --node-x: 1.875rem;
+}
+
+.stop:last-child {
+  padding-bottom: 0.5rem;
+}
+
+.journey[data-mode='static'] .stop {
+  --node-x: 1.375rem;
+}
+
+/* A small square on the road. Hollow until the walker reaches it, then
+   filled in the colour of its phase. */
 .stop__node {
   position: absolute;
-  left: -3.25rem;
-  top: 0.5rem;
-  z-index: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: 999px;
-  background: var(--track);
-  color: #fff;
-  box-shadow:
-    0 0 0 4px var(--ui-bg),
-    0 0 0 6px color-mix(in oklab, var(--track) 35%, transparent);
-}
-
-.stop[data-turn] .stop__node {
-  width: 2.75rem;
-  height: 2.75rem;
-  top: 0.375rem;
-  left: -3.375rem;
-  box-shadow:
-    0 0 0 4px var(--ui-bg),
-    0 0 0 7px var(--track),
-    0 0 24px 6px color-mix(in oklab, var(--track) 45%, transparent);
-}
-
-.stop__card {
-  padding: 0.875rem 1.125rem 1rem;
-  border: 1px solid var(--ui-border);
-  border-left: 3px solid var(--track);
-  border-radius: 0;
+  left: var(--node-x);
+  top: 1.25rem;
+  z-index: 2;
+  width: 0.75rem;
+  height: 0.75rem;
+  border: 1px solid var(--ui-border-accented);
   background: var(--ui-bg);
+  transform: translate(-50%, -50%);
+  transition:
+    background-color var(--dgm-t-base) var(--dgm-ease),
+    border-color var(--dgm-t-base) var(--dgm-ease),
+    transform var(--dgm-t-base) var(--dgm-ease);
 }
 
-.stop[data-turn] .stop__card {
-  background: color-mix(in oklab, var(--track) 7%, var(--ui-bg));
+.stop[data-in] .stop__node {
+  border-color: var(--phase);
+  background: var(--phase);
+  transform: translate(-50%, -50%) scale(1.25);
 }
 
-.stop__meta {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
+.stop__leader {
+  display: none;
 }
 
 .stop__year {
-  font-family: var(--font-pixel);
-  font-size: 0.9375rem;
-  color: var(--track);
-}
-
-.dark .stop__year,
-.dark .stop__flag {
-  color: color-mix(in oklab, var(--track) 68%, white);
-}
-
-.stop__flag {
-  font-size: 0.6875rem;
+  font-size: clamp(2.25rem, 1.8rem + 2vw, 3.5rem);
+  line-height: 0.9;
   font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--track);
+  letter-spacing: -0.05em;
+  color: var(--ui-text-dimmed);
+  transition: color var(--dgm-t-base) var(--dgm-ease);
 }
 
-.stop__place {
-  margin-top: 0.125rem;
-  font-family: var(--font-display);
-  font-size: 1.25rem;
-  font-weight: 700;
+.stop[data-in] .stop__year {
   color: var(--ui-text-highlighted);
 }
 
-.stop__title-link:hover {
-  text-decoration: underline;
-  text-decoration-color: var(--track);
-  text-underline-offset: 3px;
+.stop__phase {
+  margin-top: 0.75rem;
+}
+
+.stop__swatch {
+  width: 0.5rem;
+  height: 0.5rem;
+  background: var(--phase);
+}
+
+.stop__place {
+  margin-top: 0.375rem;
+  font-size: var(--text-xl);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--ui-text-highlighted);
+}
+
+.stop__place a:hover {
+  color: var(--ui-primary);
+}
+
+.stop[data-turn] .stop__place {
+  font-size: var(--text-2xl);
 }
 
 .stop__text {
-  margin-top: 0.25rem;
+  margin-top: 0.375rem;
+  max-width: 30rem;
   font-size: var(--text-sm);
   color: var(--ui-text-muted);
   text-wrap: pretty;
@@ -510,208 +610,85 @@ onMounted(() => {
 .stop__links {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.375rem;
+  gap: 0.25rem 1.25rem;
   margin-top: 0.75rem;
 }
 
-.stop__link {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
-  padding: 0.2rem 0.55rem;
-  border-radius: 2px;
-  border: 1px solid var(--ui-border);
+.stop__links .arrow-link {
   font-size: var(--text-xs);
-  font-weight: 500;
+}
+
+.stop__guide {
   color: var(--ui-text-muted);
-  transition:
-    border-color var(--dgm-t-fast) var(--dgm-ease),
-    color var(--dgm-t-fast) var(--dgm-ease);
 }
 
-.stop__link:hover {
-  border-color: var(--track);
-  color: var(--ui-text-highlighted);
-}
-
-/* ── Motion ─────────────────────────────────────────────────────────── */
-
-/* Each stop waits off to its own side until it scrolls into view, then slides
-   in. Left stops come from the left, right stops from the right; on a phone,
-   where every stop is on the right of the road, they still alternate. */
-.journey-wrap[data-animate] .stop {
-  opacity: 0;
-  transform: translateX(-1.5rem);
-  transition:
-    opacity 600ms var(--ease-out-im),
-    transform 600ms var(--ease-out-im);
-}
-
-.journey-wrap[data-animate] .stop:nth-child(even) {
-  transform: translateX(1.5rem);
-}
-
-.journey-wrap[data-animate] .stop[data-in] {
-  opacity: 1;
-  transform: none;
-}
-
-/* A slow ring off every node, staggered down the road so they breathe in turn
-   rather than all at once. */
-.stop__node::after {
-  content: '';
-  position: absolute;
-  inset: -4px;
-  border-radius: 999px;
-  border: 2px solid var(--track);
-  opacity: 0;
-  pointer-events: none;
-}
-
-.journey-wrap[data-animate] .stop[data-in] .stop__node::after {
-  animation: node-pulse 3.2s var(--ease-out-im) infinite;
-  animation-delay: calc(var(--i) * 0.28s);
-}
-
-@keyframes node-pulse {
-  0% {
-    opacity: 0.55;
-    transform: scale(1);
+/* ── Wide: the road winds down the middle, stops alternate either side ──
+   The road swings between 40% and 60% of the width; a stop's card sits in
+   the outer third on its side, joined to its node by a hairline. Alternate
+   stops pull up into the gap left by the one before, so the two sides
+   interlock and the bends come at an even pace. */
+@container journey (min-width: 720px) {
+  .stop,
+  .stop:nth-child(even) {
+    padding: 0;
   }
 
-  70%,
-  100% {
-    opacity: 0;
-    transform: scale(1.55);
-  }
-}
-
-/* The turn glows in the accent, and keeps glowing. */
-.stop[data-turn] .stop__card {
-  box-shadow:
-    0 0 0 1px color-mix(in oklab, var(--ui-primary) 45%, transparent),
-    0 0 28px -6px color-mix(in oklab, var(--ui-primary) 55%, transparent);
-}
-
-.journey-wrap[data-animate] .stop[data-turn][data-in] .stop__node {
-  animation: turn-glow 2.4s ease-in-out infinite;
-}
-
-@keyframes turn-glow {
-  0%,
-  100% {
-    box-shadow:
-      0 0 0 4px var(--ui-bg),
-      0 0 0 7px var(--track),
-      0 0 18px 4px color-mix(in oklab, var(--ui-primary) 40%, transparent);
+  .stop + .stop {
+    margin-top: -4.5rem;
   }
 
-  50% {
-    box-shadow:
-      0 0 0 4px var(--ui-bg),
-      0 0 0 7px var(--track),
-      0 0 34px 12px color-mix(in oklab, var(--ui-primary) 60%, transparent);
+  .stop[data-side='left'] {
+    --node-x: 40%;
+  }
+
+  .stop[data-side='right'] {
+    --node-x: 60%;
+  }
+
+  .journey[data-mode='static'] .stop {
+    --node-x: 50%;
+  }
+
+  .journey[data-mode='static']::before {
+    left: 50%;
+  }
+
+  .stop__card {
+    width: calc(100% / 3);
+    padding-bottom: 1.5rem;
+  }
+
+  .stop[data-side='right'] .stop__card {
+    margin-left: calc(200% / 3);
+  }
+
+  .stop__leader {
+    position: absolute;
+    top: 1.25rem;
+    display: block;
+    height: 1px;
+    background: var(--ui-border);
+  }
+
+  .stop[data-side='left'] .stop__leader {
+    left: calc(100% / 3 + 0.75rem);
+    right: calc(100% - var(--node-x) + 0.75rem);
+  }
+
+  .stop[data-side='right'] .stop__leader {
+    left: calc(var(--node-x) + 0.75rem);
+    right: calc(100% / 3 + 0.75rem);
+  }
+
+  .journey[data-mode='static'] .stop__leader {
+    display: none;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .journey-wrap {
-    --progress: 1 !important;
-    animation: none !important;
-  }
-
-  .road__marker {
-    display: none !important;
-  }
-
-  .stop {
-    opacity: 1 !important;
-    transform: none !important;
-    transition: none !important;
-  }
-
   .stop__node,
-  .stop__node::after {
-    animation: none !important;
-  }
-}
-
-/* Wide screens: the road runs down the middle and the stops alternate either
-   side of it, so the page reads as a route rather than as a list. */
-@media (min-width: 900px) {
-  .journey {
-    padding-left: 0;
-    gap: 0;
-  }
-
-  .journey-wrap {
-    --road-x: 50%;
-  }
-
-  .stop {
-    width: 50%;
-    padding-block: 0.625rem;
-  }
-
-  .stop[data-side='left'] {
-    padding-right: 2.75rem;
-  }
-
-  .stop[data-side='right'] {
-    margin-left: 50%;
-    padding-left: 2.75rem;
-  }
-
-  /* Pull alternate stops up so the two columns interlock. */
-  .stop + .stop {
-    margin-top: -2.5rem;
-  }
-
-  .stop__node {
-    top: 1.25rem;
-  }
-
-  .stop[data-side='left'] .stop__node {
-    left: auto;
-    right: -1.25rem;
-  }
-
-  .stop[data-side='right'] .stop__node {
-    left: -1.25rem;
-  }
-
-  .stop[data-turn][data-side='left'] .stop__node {
-    right: -1.375rem;
-  }
-
-  .stop[data-turn][data-side='right'] .stop__node {
-    left: -1.375rem;
-  }
-
-  .stop[data-side='left'] .stop__card {
-    border-left-width: 1px;
-    border-right: 3px solid var(--track);
-    text-align: right;
-  }
-
-  .stop[data-side='left'] .stop__meta {
-    flex-direction: row-reverse;
-  }
-
-  .stop[data-side='left'] .stop__links {
-    justify-content: flex-end;
-  }
-
-  .journey-wrap[data-animate] .stop[data-side='left'] {
-    transform: translateX(-2.5rem);
-  }
-
-  .journey-wrap[data-animate] .stop[data-side='right'] {
-    transform: translateX(2.5rem);
-  }
-
-  .journey-wrap[data-animate] .stop[data-in] {
-    transform: none;
+  .stop__year {
+    transition: none;
   }
 }
 </style>

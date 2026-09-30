@@ -175,7 +175,6 @@ const range = computed(() => {
   height: 3.5rem;
   border-radius: 999px;
   background: var(--color-guide-600);
-  box-shadow: 0 6px 20px rgb(0 0 0 / 0.35);
   transition: transform var(--dgm-t-fast) var(--dgm-ease);
 }
 

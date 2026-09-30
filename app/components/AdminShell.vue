@@ -31,19 +31,19 @@ const inContent = computed(() => contentPaths.includes(route.path))
 
 <template>
   <div class="admin">
-    <div class="border-b border-default bg-elevated/40">
-      <UContainer class="max-w-[90rem] pt-6">
+    <header class="admin__band guides">
+      <div class="frame">
         <div class="flex flex-wrap items-end justify-between gap-4">
           <div class="min-w-0">
-            <p class="text-xs font-semibold uppercase tracking-wider text-muted">
-              Admin
+            <p class="label">
+              <span class="mark" /> Admin
             </p>
-            <h1 class="mt-1 text-2xl font-bold text-highlighted">
+            <h1 class="admin__title">
               {{ title }}
             </h1>
             <p
               v-if="description"
-              class="mt-1 text-sm text-muted max-w-3xl"
+              class="mt-2 text-sm text-muted max-w-3xl"
             >
               {{ description }}
             </p>
@@ -56,30 +56,95 @@ const inContent = computed(() => contentPaths.includes(route.path))
         <UNavigationMenu
           :items="links"
           highlight
-          class="mt-4 -mb-px overflow-x-auto"
+          color="neutral"
+          class="mt-5 -mb-px overflow-x-auto"
           aria-label="Admin sections"
         />
-      </UContainer>
-    </div>
+      </div>
+    </header>
 
-    <UContainer class="max-w-[90rem] py-6 lg:py-8">
-      <nav
-        v-if="inContent"
-        class="mb-6 flex flex-wrap gap-1"
-        aria-label="Content sections"
-      >
-        <UButton
-          v-for="l in contentLinks"
-          :key="l.to"
-          :to="l.to"
-          size="sm"
-          :color="route.path === l.to ? 'primary' : 'neutral'"
-          :variant="route.path === l.to ? 'soft' : 'ghost'"
+    <div class="admin__page guides">
+      <div class="frame">
+        <nav
+          v-if="inContent"
+          class="admin__sub"
+          aria-label="Content sections"
         >
-          {{ l.label }}
-        </UButton>
-      </nav>
-      <slot />
-    </UContainer>
+          <NuxtLink
+            v-for="l in contentLinks"
+            :key="l.to"
+            :to="l.to"
+            class="admin__sub-link"
+            :aria-current="route.path === l.to ? 'page' : undefined"
+          >
+            {{ l.label }}
+          </NuxtLink>
+        </nav>
+        <slot />
+      </div>
+    </div>
   </div>
 </template>
+
+<style scoped>
+/* The dashboard wants more width than reading does. */
+.admin {
+  --grid-max: 90rem;
+}
+
+.admin__band {
+  padding-top: 2rem;
+  border-bottom: 1px solid var(--rule-color);
+}
+
+.admin__title {
+  margin-top: 0.75rem;
+  font-size: var(--text-3xl);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+  color: var(--ui-text-highlighted);
+}
+
+.admin__page {
+  padding-block: 2rem 4rem;
+}
+
+.admin__sub {
+  display: flex;
+  flex-wrap: wrap;
+  margin-bottom: 2rem;
+  border-bottom: 1px solid var(--rule-color);
+}
+
+.admin__sub-link {
+  position: relative;
+  padding: 0.5rem 1rem 0.625rem 0;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--ui-text-muted);
+}
+
+.admin__sub-link + .admin__sub-link {
+  padding-left: 1rem;
+}
+
+.admin__sub-link:hover,
+.admin__sub-link[aria-current='page'] {
+  color: var(--ui-text-highlighted);
+}
+
+.admin__sub-link[aria-current='page']::after {
+  content: '';
+  position: absolute;
+  right: 1rem;
+  bottom: -1px;
+  left: 0;
+  height: 2px;
+  background: var(--ui-primary);
+}
+
+.admin__sub-link + .admin__sub-link[aria-current='page']::after {
+  left: 1rem;
+}
+</style>

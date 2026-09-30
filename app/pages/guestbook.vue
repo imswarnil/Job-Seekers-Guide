@@ -73,89 +73,103 @@ usePageSeo({
     title="Sign the guestbook"
     description="If the guide helped you, even a little, leave a line here. Tell me one thing you learned. I read every one of these, and on bad days they are the reason I keep writing."
   >
-    <UCard class="mb-10">
-      <template v-if="!ready">
-        <USkeleton class="h-32 w-full" />
-      </template>
+    <section
+      class="gb-form"
+      aria-label="Sign the guestbook"
+    >
+      <!-- Who is signed in is only known in the browser, so all of this is
+           drawn there: the prerendered page carries the placeholder. -->
+      <ClientOnly>
+        <template #fallback>
+          <USkeleton class="h-32 w-full" />
+        </template>
+        <template v-if="!ready">
+          <USkeleton class="h-32 w-full" />
+        </template>
 
-      <div
-        v-else-if="!user"
-        class="flex flex-wrap items-center justify-between gap-4"
-      >
-        <p class="text-muted">
-          Sign in to write in the guestbook. It keeps the spam out.
-        </p>
-        <UButton
-          :to="{ path: '/login', query: { next: route.fullPath } }"
-          icon="i-lucide-log-in"
+        <div
+          v-else-if="!user"
+          class="flex flex-wrap items-center justify-between gap-4"
         >
-          Sign in
-        </UButton>
-      </div>
+          <p class="text-muted">
+            Sign in to write in the guestbook. It keeps the spam out.
+          </p>
+          <UButton
+            :to="{ path: '/login', query: { next: route.fullPath } }"
+            icon="i-lucide-log-in"
+          >
+            Sign in
+          </UButton>
+        </div>
 
-      <form
-        v-else
-        class="space-y-4"
-        @submit.prevent="submit"
-      >
-        <UFormField label="Your name">
-          <UInput
-            v-model="form.name"
-            maxlength="60"
-            class="w-full"
-          />
-        </UFormField>
-        <UFormField
-          label="Your message"
-          required
+        <form
+          v-else
+          class="space-y-4"
+          @submit.prevent="submit"
         >
-          <UTextarea
-            v-model="form.message"
-            :rows="3"
-            maxlength="500"
-            autoresize
-            placeholder="Hello from a PG in Marathahalli…"
-            class="w-full"
-          />
-        </UFormField>
-        <UFormField
-          label="What did you learn here?"
-          hint="Optional"
-        >
-          <UTextarea
-            v-model="form.learned"
-            :rows="2"
-            maxlength="500"
-            autoresize
-            placeholder="That a walk-in is a numbers game, and how to read the aptitude round against a clock."
-            class="w-full"
-          />
-        </UFormField>
-        <GifPicker v-model="form.gif" />
+          <UFormField label="Your name">
+            <UInput
+              v-model="form.name"
+              maxlength="60"
+              class="w-full"
+            />
+          </UFormField>
+          <UFormField
+            label="Your message"
+            required
+          >
+            <UTextarea
+              v-model="form.message"
+              :rows="3"
+              maxlength="500"
+              autoresize
+              placeholder="Hello from a PG in Marathahalli…"
+              class="w-full"
+            />
+          </UFormField>
+          <UFormField
+            label="What did you learn here?"
+            hint="Optional"
+          >
+            <UTextarea
+              v-model="form.learned"
+              :rows="2"
+              maxlength="500"
+              autoresize
+              placeholder="That a walk-in is a numbers game, and how to read the aptitude round against a clock."
+              class="w-full"
+            />
+          </UFormField>
+          <GifPicker v-model="form.gif" />
 
-        <p
-          v-if="error"
-          class="text-sm text-error"
-          role="alert"
-        >
-          {{ error }}
-        </p>
-        <p
-          v-else-if="done"
-          class="text-sm text-success"
-        >
-          Thank you. It is up.
-        </p>
+          <p
+            v-if="error"
+            class="text-sm text-error"
+            role="alert"
+          >
+            {{ error }}
+          </p>
+          <p
+            v-else-if="done"
+            class="text-sm text-success"
+          >
+            Thank you. It is up.
+          </p>
 
-        <UButton
-          type="submit"
-          :loading="saving"
-          icon="i-lucide-send"
-        >
-          Sign the guestbook
-        </UButton>
-      </form>
-    </UCard>
+          <UButton
+            type="submit"
+            :loading="saving"
+            size="lg"
+          >
+            Sign the guestbook
+          </UButton>
+        </form>
+      </ClientOnly>
+    </section>
+
+    <h2 class="label gb-heading">
+      Signed so far
+    </h2>
 
     <div
       v-if="status === 'pending' || status === 'idle'"
@@ -225,63 +239,76 @@ usePageSeo({
       </li>
     </ol>
 
-    <UCard class="mt-12">
-      <p class="font-semibold text-highlighted">
+    <section class="gb-more">
+      <p class="headline">
         Want to do more than sign?
       </p>
-      <p class="mt-1 text-sm text-muted">
+      <p class="mt-2 text-muted max-w-xl">
         The guide is free and stays free. If it saved you a coaching fee, a
         small contribution keeps it online for the next person.
       </p>
-      <div class="mt-4 flex flex-wrap gap-2">
-        <UButton
-          to="/support"
-          icon="i-lucide-heart-handshake"
-        >
+      <div class="mt-5 flex flex-wrap gap-3">
+        <UButton to="/support">
           Support the guide
         </UButton>
         <UButton
           to="/stories/new"
           color="neutral"
           variant="outline"
-          icon="i-lucide-pen-line"
         >
           Share your story
         </UButton>
       </div>
-    </UCard>
+    </section>
   </CommunityPage>
 </template>
 
 <style scoped>
+/* The form sits under a heavy rule, not in a box. */
+.gb-form {
+  padding-top: 1.25rem;
+  border-top: 2px solid var(--rule-strong);
+}
+
+.gb-heading {
+  margin-top: 4rem;
+  margin-bottom: 0.75rem;
+}
+
+/* Every entry is a row between rules. */
 .guestbook {
-  display: grid;
-  gap: 1.25rem;
+  border-top: 1px solid var(--rule-color);
 }
 
 .guestbook__entry {
   display: flex;
   gap: 0.875rem;
-  padding-bottom: 1.25rem;
-  border-bottom: 1px solid var(--ui-border);
+  padding-block: 1.25rem;
+  border-bottom: 1px solid var(--rule-color);
   overflow-wrap: anywhere;
 }
 
 .guestbook__learned {
-  margin-top: 0.625rem;
-  padding: 0.5rem 0.75rem;
-  border-left: 3px solid var(--ui-primary);
-  background: var(--ui-bg-elevated);
+  margin-top: 0.75rem;
+  padding-left: 0.875rem;
+  border-left: 2px solid var(--ui-primary);
   font-size: 0.9375rem;
   white-space: pre-line;
 }
 
 .guestbook__learned-label {
   display: block;
+  margin-bottom: 0.125rem;
   font-size: 0.6875rem;
   font-weight: 600;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--ui-text-dimmed);
+}
+
+.gb-more {
+  margin-top: 4rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--rule-color);
 }
 </style>

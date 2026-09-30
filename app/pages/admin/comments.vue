@@ -45,7 +45,7 @@ useSeoMeta({ title: 'Comments · Admin', robots: 'noindex' })
     </p>
     <ul
       v-else
-      class="divide-y divide-default border border-default rounded-lg"
+      class="divide-y divide-default border-y border-default"
     >
       <li
         v-for="c in data.items"

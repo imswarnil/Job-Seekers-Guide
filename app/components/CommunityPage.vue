@@ -1,8 +1,11 @@
 <script setup lang="ts">
 /**
  * The frame for the server-backed pages: stories, guestbook, sponsors,
- * support, stats, account and login. A narrow column with a kicker, a title
- * and a line of description, in the same type as the rest of the app.
+ * support, stats, leaderboard, account and login.
+ *
+ * On the grid: a header band (label, headline, one paragraph, actions) with a
+ * rule under it, then the page. `narrow` keeps the page to the first eight of
+ * twelve columns, for forms and reading; `wide` gives it the whole frame.
  */
 withDefaults(defineProps<{
   title: string
@@ -16,89 +19,101 @@ withDefaults(defineProps<{
 </script>
 
 <template>
-  <UContainer
-    class="community py-8 lg:py-12"
+  <div
+    class="community"
     :data-width="width"
   >
-    <header class="community__head">
-      <p
-        v-if="kicker"
-        class="community__kicker"
-      >
-        <UIcon
-          v-if="icon"
-          :name="icon"
-          class="size-4 text-primary"
-        />
-        {{ kicker }}
-      </p>
-      <h1 class="community__title">
-        {{ title }}
-      </h1>
-      <p
-        v-if="description"
-        class="community__description"
-      >
-        {{ description }}
-      </p>
-      <div
-        v-if="$slots.actions"
-        class="community__actions"
-      >
-        <slot name="actions" />
+    <header class="community__band guides">
+      <div class="frame swiss-grid">
+        <div class="community__head">
+          <p
+            v-if="kicker"
+            class="label"
+          >
+            <span class="mark" />
+            {{ kicker }}
+          </p>
+          <h1 class="community__title headline">
+            {{ title }}
+          </h1>
+          <p
+            v-if="description"
+            class="community__description lede"
+          >
+            {{ description }}
+          </p>
+          <div
+            v-if="$slots.actions"
+            class="community__actions"
+          >
+            <slot name="actions" />
+          </div>
+        </div>
       </div>
     </header>
 
-    <slot />
-  </UContainer>
+    <div class="community__page guides">
+      <div class="frame swiss-grid">
+        <div class="community__body">
+          <slot />
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <style scoped>
 .community {
-  max-width: 48rem;
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
 }
 
-.community[data-width='wide'] {
-  max-width: 72rem;
+.community__band {
+  padding-block: 2.5rem 2rem;
+  border-bottom: 1px solid var(--rule-color);
 }
 
-.community__head {
-  margin-bottom: 2rem;
+@media (min-width: 1024px) {
+  .community__band {
+    padding-block: 4rem 2.5rem;
+  }
 }
 
-.community__kicker {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--ui-text-muted);
+.community__head,
+.community__body {
+  grid-column: 1 / -1;
+  min-width: 0;
 }
 
 .community__title {
-  margin-top: 0.75rem;
-  font-size: clamp(1.75rem, 1.2rem + 2vw, 2.5rem);
-  line-height: 1.15;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  color: var(--ui-text-highlighted);
-  text-wrap: balance;
+  margin-top: 1rem;
 }
 
 .community__description {
-  margin-top: 0.75rem;
-  font-size: 1.0625rem;
-  color: var(--ui-text-muted);
-  text-wrap: pretty;
-  max-width: 40rem;
+  margin-top: 1rem;
 }
 
 .community__actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-top: 1.25rem;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 1.75rem;
+}
+
+.community__page {
+  flex: 1;
+  padding-block: 2.5rem 5rem;
+}
+
+@media (min-width: 1024px) {
+  .community__head {
+    grid-column: 1 / span 9;
+  }
+
+  .community[data-width='narrow'] .community__body {
+    grid-column: 1 / span 8;
+  }
 }
 </style>

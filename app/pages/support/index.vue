@@ -55,7 +55,7 @@ usePageSeo({
     title="Keep it free for the next person"
     description="I paid for the institute, the PG and the train out of savings and my sister's faith. This guide costs nothing to read and it never will. If it saved you a coaching fee, or just a few bad weeks, a small amount keeps it online and keeps me writing."
   >
-    <UCard>
+    <div class="panel">
       <form
         class="space-y-5"
         @submit.prevent="give"
@@ -144,10 +144,10 @@ usePageSeo({
           to unlock, because everything is already free.
         </p>
       </form>
-    </UCard>
+    </div>
 
     <div class="mt-10 grid gap-4 sm:grid-cols-2">
-      <UCard>
+      <div class="panel">
         <p class="font-semibold text-highlighted">
           Sponsor instead
         </p>
@@ -164,8 +164,8 @@ usePageSeo({
         >
           See the spots
         </UButton>
-      </UCard>
-      <UCard>
+      </div>
+      <div class="panel">
         <p class="font-semibold text-highlighted">
           No money? That is fine
         </p>
@@ -181,7 +181,7 @@ usePageSeo({
         >
           Sign the guestbook
         </UButton>
-      </UCard>
+      </div>
     </div>
   </CommunityPage>
 </template>

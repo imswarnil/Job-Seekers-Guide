@@ -60,7 +60,6 @@ const offset = computed(() => circumference.value * (1 - props.progress.percent 
         fill="none"
         stroke="currentColor"
         :stroke-width="STROKE"
-        stroke-linecap="round"
         :stroke-dasharray="circumference"
         :stroke-dashoffset="offset"
         :class="progress.finished ? 'text-success' : 'text-primary'"
@@ -70,14 +69,44 @@ const offset = computed(() => circumference.value * (1 - props.progress.percent 
   </div>
 
   <div v-else>
-    <div class="flex items-center justify-between text-xs text-muted mb-1.5">
+    <div class="flex items-baseline justify-between gap-4 text-xs text-muted mb-2">
       <span>{{ label || `${progress.completed} of ${progress.total} lessons` }}</span>
-      <span class="tabular-nums">{{ progress.percent }}%</span>
+      <span class="num font-semibold text-highlighted">{{ progress.percent }}%</span>
     </div>
-    <UProgress
-      :model-value="progress.percent"
-      size="sm"
-      :color="progress.finished ? 'success' : 'primary'"
+    <!-- A hairline with the finished part drawn over it: the Swiss version of
+         a progress bar. -->
+    <div
+      class="progress-line"
+      role="progressbar"
+      :aria-valuenow="progress.percent"
+      aria-valuemin="0"
+      aria-valuemax="100"
+      :aria-label="label || 'Progress'"
+      :data-done="progress.finished || undefined"
+      :style="{ '--pct': `${progress.percent}%` }"
     />
   </div>
 </template>
+
+<style scoped>
+.progress-line {
+  position: relative;
+  height: 1px;
+  background: var(--rule-color);
+}
+
+.progress-line::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: -1px;
+  height: 3px;
+  width: var(--pct);
+  background: var(--ui-primary);
+  transition: width var(--dgm-t-base) var(--dgm-ease);
+}
+
+.progress-line[data-done]::after {
+  background: var(--ui-success);
+}
+</style>

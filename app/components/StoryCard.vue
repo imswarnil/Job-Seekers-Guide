@@ -60,31 +60,22 @@ const thumb = computed(() => {
     </div>
 
     <div class="story-card__body">
-      <div class="flex items-center gap-2 text-xs text-muted">
-        <UBadge
+      <p class="story-card__route label">
+        <span
           v-if="story.sample"
-          color="neutral"
-          variant="outline"
-          size="sm"
-        >
-          Sample
-        </UBadge>
-        <UBadge
+          class="story-card__flag"
+        >Sample</span>
+        <span
           v-if="story.featured"
-          color="primary"
-          variant="subtle"
-          size="sm"
-          icon="i-lucide-star"
-        >
-          Featured
-        </UBadge>
+          class="story-card__flag story-card__flag--featured"
+        >Featured</span>
         <span class="truncate">{{ story.from }}</span>
         <UIcon
           name="i-lucide-arrow-right"
           class="size-3 shrink-0"
         />
         <span class="truncate">{{ story.to }}</span>
-      </div>
+      </p>
 
       <h3 class="story-card__title">
         {{ story.title }}
@@ -92,7 +83,7 @@ const thumb = computed(() => {
 
       <p
         v-if="story.company || story.package"
-        class="text-sm font-medium text-default"
+        class="story-card__job"
       >
         {{ [story.company, story.package].filter(Boolean).join(' · ') }}
       </p>
@@ -111,13 +102,14 @@ const thumb = computed(() => {
           size="2xs"
         />
         <span class="truncate">{{ story.author.name }}</span>
-        <span class="text-dimmed">· {{ formatAgo(story.createdAt) }}</span>
-        <span class="ml-auto inline-flex items-center gap-1 tabular-nums">
+        <span class="text-dimmed num shrink-0">{{ formatAgo(story.createdAt) }}</span>
+        <span class="story-card__votes num">
           <UIcon
             name="i-lucide-heart"
             class="size-3.5"
           />
           {{ story.votes }}
+          <span class="sr-only">votes</span>
         </span>
       </div>
     </div>
@@ -125,30 +117,38 @@ const thumb = computed(() => {
 </template>
 
 <style scoped>
+/* A story on the grid: a rule on top, the photo, then the words. No box. */
 .story-card {
   display: flex;
   flex-direction: column;
-  overflow: hidden;
-  border: 1px solid var(--ui-border);
-  border-radius: var(--radius-lg, 0.75rem);
-  background: var(--ui-bg);
-  transition: border-color 150ms ease, transform 150ms ease;
+  height: 100%;
+  padding-top: 0.75rem;
+  border-top: 2px solid var(--rule-strong);
+  overflow-wrap: anywhere;
 }
 
-.story-card:hover {
-  border-color: var(--ui-border-accented);
+.story-card:focus-visible {
+  outline: 2px solid var(--ui-text-highlighted);
+  outline-offset: 4px;
 }
 
 .story-card__media {
   position: relative;
   aspect-ratio: 16 / 9;
-  background: var(--ui-bg-accented);
+  margin-bottom: 1rem;
+  overflow: hidden;
+  background: var(--ui-bg-muted);
 }
 
 .story-card__media img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform var(--dgm-t-base) var(--dgm-ease);
+}
+
+.story-card:hover .story-card__media img {
+  transform: scale(1.02);
 }
 
 .story-card__play {
@@ -158,7 +158,6 @@ const thumb = computed(() => {
   width: 2.5rem;
   height: 2.5rem;
   color: white;
-  filter: drop-shadow(0 1px 4px rgb(0 0 0 / 0.5));
 }
 
 .story-card__body {
@@ -166,24 +165,52 @@ const thumb = computed(() => {
   flex: 1;
   flex-direction: column;
   gap: 0.5rem;
-  padding: 1rem 1.125rem 1.125rem;
+}
+
+.story-card__route {
+  flex-wrap: nowrap;
+  min-width: 0;
+  gap: 0.375rem;
+}
+
+.story-card__flag {
+  flex-shrink: 0;
+  padding: 0.0625rem 0.3125rem;
+  border: 1px solid var(--ui-border-accented);
+  color: var(--ui-text-muted);
+}
+
+.story-card__flag--featured {
+  border-color: var(--ui-primary);
+  color: var(--ui-primary);
 }
 
 .story-card__title {
-  font-weight: 650;
-  font-size: 1.0625rem;
-  line-height: 1.3;
+  font-size: var(--text-xl);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
   color: var(--ui-text-highlighted);
-  text-wrap: balance;
+  text-wrap: pretty;
+}
+
+.story-card:hover .story-card__title {
+  color: var(--ui-primary);
+}
+
+.story-card__job {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--ui-text);
 }
 
 .story-card__snippet {
-  font-size: 0.875rem;
-  color: var(--ui-text-muted);
   display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
   overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  font-size: var(--text-sm);
+  color: var(--ui-text-muted);
 }
 
 .story-card__foot {
@@ -191,8 +218,25 @@ const thumb = computed(() => {
   align-items: center;
   gap: 0.5rem;
   margin-top: auto;
-  padding-top: 0.5rem;
-  font-size: 0.8125rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--rule-color);
+  font-size: var(--text-xs);
   color: var(--ui-text-muted);
+}
+
+.story-card__votes {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-left: auto;
+  flex-shrink: 0;
+  color: var(--ui-text-highlighted);
+  font-weight: 600;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .story-card:hover .story-card__media img {
+    transform: none;
+  }
 }
 </style>

@@ -1,8 +1,14 @@
 <script setup lang="ts">
+import type { CommentReactionState } from '~/components/CommentReactions.vue'
+import { emptyReactions } from '~/components/CommentReactions.vue'
+
 /**
  * Comments under a lesson. Anybody can read them; posting needs an account,
  * goes live straight away, and is capped at five per person per page (the
  * server enforces it; this only shows the count).
+ *
+ * Each comment carries its reactions (CommentReactions): counts for everyone,
+ * a signed-in reader's own highlighted and toggled in place.
  *
  * Loaded in the browser when the section scrolls near, so a prerendered lesson
  * never waits on the database and a reader who never scrolls down costs nothing.
@@ -18,6 +24,8 @@ interface Comment {
   createdAt: string
   author: { name: string, image: string | null }
   mine: boolean
+  sample?: boolean
+  reactions?: CommentReactionState
 }
 
 interface CommentsResponse {
@@ -40,7 +48,11 @@ async function load() {
   loading.value = true
   failed.value = false
   try {
-    data.value = await $fetch<CommentsResponse>('/api/comments', { query: { path: props.path }, timeout: 8000 })
+    const result = await $fetch<CommentsResponse>('/api/comments', { query: { path: props.path }, timeout: 8000 })
+    for (const c of result.items) {
+      c.reactions ||= emptyReactions()
+    }
+    data.value = result
   } catch {
     failed.value = true
   } finally {
@@ -104,7 +116,7 @@ async function post() {
       body: { path: props.path, body: body.value }
     })
     data.value = {
-      items: [...(data.value?.items || []), result.comment],
+      items: [...(data.value?.items || []), { ...result.comment, reactions: result.comment.reactions || emptyReactions() }],
       used: result.used,
       limit: result.limit
     }
@@ -127,15 +139,11 @@ async function post() {
       id="comments-title"
       class="comments__title"
     >
-      <UIcon
-        name="i-lucide-message-square"
-        class="size-5"
-      />
       Questions and notes
       <span
         v-if="data?.items.length"
-        class="text-muted font-normal"
-      >({{ data.items.length }})</span>
+        class="text-muted font-normal num"
+      >{{ data.items.length }}</span>
     </h2>
     <p class="text-sm text-muted">
       Stuck on something here, or found a better way to say it? Leave it below
@@ -166,7 +174,7 @@ async function post() {
 
     <ol
       v-else-if="data?.items.length"
-      class="comments__list"
+      class="comments__list row-list"
     >
       <li
         v-for="c in data.items"
@@ -179,17 +187,27 @@ async function post() {
           size="sm"
         />
         <div class="min-w-0 flex-1">
-          <p class="text-sm">
+          <p class="comments__meta">
             <span class="font-semibold text-highlighted">{{ c.author.name }}</span>
             <span
               v-if="c.mine"
-              class="text-primary"
-            > (you)</span>
-            <span class="text-dimmed"> · {{ formatAgo(c.createdAt) }}</span>
+              class="label"
+            >You</span>
+            <span
+              v-if="c.sample"
+              class="label"
+              title="A made-up example, shown until real comments arrive"
+            >Sample</span>
+            <span class="text-dimmed num">{{ formatAgo(c.createdAt) }}</span>
           </p>
           <p class="comments__body">
             {{ c.body }}
           </p>
+          <CommentReactions
+            v-model="c.reactions"
+            :comment-id="c.id"
+            :path="path"
+          />
         </div>
       </li>
     </ol>
@@ -240,7 +258,7 @@ async function post() {
           >
             Post
           </UButton>
-          <span class="text-xs text-muted tabular-nums">{{ used }} of {{ limit }} comments used on this page</span>
+          <span class="text-xs text-muted num">{{ used }} of {{ limit }} comments used on this page</span>
           <span
             v-if="error"
             class="text-xs text-error"
@@ -255,30 +273,38 @@ async function post() {
 <style scoped>
 .comments {
   margin-top: 3rem;
-  padding-top: 2rem;
-  border-top: 1px solid var(--ui-border);
+  padding-top: 1.25rem;
+  border-top: 2px solid var(--rule-strong, var(--ui-text-highlighted));
 }
 
 .comments__title {
   display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  align-items: baseline;
+  gap: 0.625rem;
   margin-bottom: 0.25rem;
-  font-size: 1.125rem;
-  font-weight: 650;
+  font-size: 1.375rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
   color: var(--ui-text-highlighted);
   scroll-margin-top: 5rem;
 }
 
 .comments__list {
-  display: grid;
-  gap: 1rem;
   margin-top: 1.25rem;
 }
 
 .comments__item {
   display: flex;
   gap: 0.75rem;
+  padding-block: 1rem;
+}
+
+.comments__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 0.625rem;
+  font-size: 0.875rem;
 }
 
 .comments__body {

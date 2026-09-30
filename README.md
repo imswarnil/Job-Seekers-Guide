@@ -102,18 +102,23 @@ SQLite), the trap people fall into, and the interview questions it answers.
   the company and package, with photos or a video. Readers vote for the most
   inspiring ones.
 - **Sign the guestbook**: what did you learn here? With GIFs.
-- **Comment** under any lesson (five comments per person per page).
-- **Live stats** at `/stats`: readers right now, total reach, countries, jobs
-  got, all in the open.
-- **Support** it with any amount, or **sponsor** it: one brand spot, held by
-  the highest bid with no expiry until someone pays more, and a leaderboard of
-  every sponsor.
+- **Comment** under any lesson (five comments per person per page) and react: 👍 ❤️ 💡 😂 🙏.
+- **Live stats** at `/stats`: readers right now, total page views, daily
+  visitor and sign-up charts, countries, jobs got, all in the open.
+- **Support** it with any amount, or **sponsor** it: design your own card
+  (layout, colour, logo, button) in the page, then bid for the one brand spot.
+  The highest bid holds it with no expiry until someone pays more, and every
+  sponsor is ranked on a leaderboard.
 - **Gear** I actually used in the PG, with affiliate links.
 - **Your account**, which you can delete along with everything you wrote.
 
 <p>
-  <img src="docs/screenshots/stats.png" alt="Live stats and quick links" width="49%">
-  <img src="docs/screenshots/admin.png" alt="The admin dashboard" width="49%">
+  <img src="docs/screenshots/stats-page.png" alt="Public stats with daily charts" width="49%">
+  <img src="docs/screenshots/sponsor.png" alt="Designing a sponsor card" width="49%">
+</p>
+<p>
+  <img src="docs/screenshots/track-dark.png" alt="A track page in dark mode" width="73%">
+  <img src="docs/screenshots/mobile.png" alt="On a phone" width="24%">
 </p>
 
 The admin (`/admin`) has live analytics (who is reading right now, on which

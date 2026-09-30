@@ -2,12 +2,10 @@
 import { editUrl } from '~/utils/links'
 
 /**
- * "Edit this page", and where the words came from.
- *
- * Every lesson on this site is a markdown file in a public repository, and until
- * now nothing on the page said so. That is worth fixing for two reasons: a
- * reader who spots a mistake can fix it in about ninety seconds, and a reader
- * who can see the source can check whether they are being sold something.
+ * "Edit this page", and where the words came from. Every lesson is a markdown
+ * file in a public repository: a reader who spots a mistake can fix it in
+ * about ninety seconds, and one who can see the source can check whether they
+ * are being sold something.
  */
 const props = defineProps<{
   /** Repo-relative path of the file behind this page. */
@@ -22,40 +20,44 @@ const updated = computed(() => props.updatedAt ? formatter.format(new Date(props
 
 <template>
   <div class="page-actions">
-    <p class="text-xs font-semibold uppercase tracking-wider text-dimmed mb-3">
+    <p class="label">
       This page
     </p>
 
-    <div class="flex flex-col gap-1 items-start">
-      <UButton
-        v-if="file"
-        :to="editUrl(file)"
-        target="_blank"
-        rel="noopener"
-        label="Edit this page"
-        icon="i-lucide-pencil"
-        color="neutral"
-        variant="ghost"
-        size="sm"
-        class="-ms-2"
-      />
-
-      <UButton
-        :to="`${repoUrl}/issues/new?title=${encodeURIComponent(`Correction: ${$route.path}`)}`"
-        target="_blank"
-        rel="noopener"
-        label="Report a mistake"
-        icon="i-lucide-flag"
-        color="neutral"
-        variant="ghost"
-        size="sm"
-        class="-ms-2"
-      />
-    </div>
+    <ul class="row-list mt-3">
+      <li v-if="file">
+        <a
+          :href="editUrl(file)"
+          target="_blank"
+          rel="noopener"
+          class="page-actions__row row-link"
+        >
+          Edit this page
+          <UIcon
+            name="i-lucide-arrow-up-right"
+            class="size-4 shrink-0"
+          />
+        </a>
+      </li>
+      <li>
+        <a
+          :href="`${repoUrl}/issues/new?title=${encodeURIComponent(`Correction: ${$route.path}`)}`"
+          target="_blank"
+          rel="noopener"
+          class="page-actions__row row-link"
+        >
+          Report a mistake
+          <UIcon
+            name="i-lucide-arrow-up-right"
+            class="size-4 shrink-0"
+          />
+        </a>
+      </li>
+    </ul>
 
     <p
       v-if="updated"
-      class="text-xs text-dimmed mt-3"
+      class="text-xs text-dimmed mt-3 num"
     >
       Last updated {{ updated }}
     </p>
@@ -63,8 +65,18 @@ const updated = computed(() => props.updatedAt ? formatter.format(new Date(props
 </template>
 
 <style scoped>
-.page-actions {
-  border-top: 1px solid var(--ui-border);
-  padding-top: 1.25rem;
+.page-actions__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.625rem 0;
+  font-size: var(--text-sm);
+  color: var(--ui-text-highlighted);
+}
+
+.page-actions__row:hover {
+  background: transparent;
+  color: var(--ui-primary);
 }
 </style>

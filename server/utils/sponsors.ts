@@ -48,7 +48,7 @@ export function minimumNextBid(slot: SlotName, holderAmount: number | null | und
 
 /** The current holder of every slot: the largest paid bid, earliest first on a tie. */
 export const HOLDERS_SQL = `
-  select distinct on (slot) slot, sponsor_name as name, sponsor_url as url, image, tagline, amount, user_id, paid_at
+  select distinct on (slot) slot, sponsor_name as name, sponsor_url as url, image, tagline, amount, design, user_id, paid_at
   from sponsor_bids
   where status = 'paid'
   order by slot, amount desc, paid_at asc`

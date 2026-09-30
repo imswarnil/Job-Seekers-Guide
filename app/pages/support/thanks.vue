@@ -56,7 +56,7 @@ useSeoMeta({ title: 'Thank you', robots: 'noindex' })
     icon="i-lucide-heart"
     :title="state === 'failed' ? 'The payment did not go through' : 'Thank you'"
   >
-    <UCard>
+    <div class="panel">
       <div
         v-if="state === 'checking'"
         class="flex items-center gap-3 text-muted"
@@ -136,6 +136,6 @@ useSeoMeta({ title: 'Thank you', robots: 'noindex' })
           Back to the guide
         </UButton>
       </div>
-    </UCard>
+    </div>
   </CommunityPage>
 </template>

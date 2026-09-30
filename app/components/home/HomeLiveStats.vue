@@ -3,11 +3,12 @@
  * The live numbers on the home page, from GET /api/stats/summary, with
  * /api/stats/details for where the readers are.
  *
- * Browser only, because the page is prerendered and a number baked into the
- * HTML is stale the moment it is deployed. Every figure is shown, zeros
- * included: the site is live, and "0 stories" is a true thing to say on the
- * first day. Only a failed request hides the strip, because then there is no
- * number to be honest about.
+ * Pages read is the headline, set as large as anything on the page: it is the
+ * one number that says this is being used. The rest sit beside it in a ruled
+ * table. Browser only, because the page is prerendered and a number baked
+ * into the HTML is stale the moment it is deployed. Zeros are shown: "0
+ * stories" is a true thing to say on the first day. Only a failed request
+ * hides the block, because then there is no number to be honest about.
  */
 interface Summary {
   visitors?: number
@@ -38,60 +39,69 @@ onMounted(async () => {
 })
 
 const money = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 })
+const whole = new Intl.NumberFormat('en-IN')
 const n = (value: unknown) => typeof value === 'number' && Number.isFinite(value) ? value : 0
+
+const pageViews = computed(() => whole.format(n(summary.value?.pageViews)))
 
 const figures = computed(() => {
   const s = summary.value || {}
   const countries = n(s.countries) || details.value?.countries?.length || 0
   return [
-    { key: 'live', label: 'Reading now', text: formatCount(n(s.liveNow)), icon: 'i-lucide-radio', live: true },
-    { key: 'visitors', label: 'Readers so far', text: formatCount(n(s.visitors)), icon: 'i-lucide-users' },
-    { key: 'views', label: 'Pages read', text: formatCount(n(s.pageViews)), icon: 'i-lucide-eye' },
-    { key: 'countries', label: 'Countries', text: formatCount(countries), icon: 'i-lucide-globe' },
-    { key: 'stories', label: 'Stories shared', text: formatCount(n(s.stories)), icon: 'i-lucide-message-square-heart' },
-    { key: 'jobs', label: 'Got a job', text: formatCount(n(s.jobsGot)), icon: 'i-lucide-briefcase' },
+    { key: 'live', label: 'Reading now', text: formatCount(n(s.liveNow)), live: true },
+    { key: 'visitors', label: 'Readers so far', text: formatCount(n(s.visitors)) },
+    { key: 'countries', label: 'Countries', text: formatCount(countries) },
+    { key: 'stories', label: 'Stories shared', text: formatCount(n(s.stories)) },
+    { key: 'jobs', label: 'Got a job', text: formatCount(n(s.jobsGot)) },
     // `raised` is in paise.
-    { key: 'raised', label: 'Raised', text: money.format(n(s.raised) / 100), icon: 'i-lucide-heart' }
+    { key: 'raised', label: 'Raised', text: money.format(n(s.raised) / 100) }
   ]
 })
 
-/** The three countries with the most readers, as flags. */
+/** The three countries with the most readers. */
 const topCountries = computed(() => (details.value?.countries || []).slice(0, 3))
 </script>
 
 <template>
   <div
     v-if="state !== 'failed'"
-    class="strip"
+    class="live swiss-grid"
+    :aria-busy="state === 'loading'"
   >
-    <dl
-      class="strip__grid"
-      aria-label="Live numbers"
-      :aria-busy="state === 'loading'"
-    >
+    <div class="live__lead">
+      <p class="label">
+        Pages read, all time
+      </p>
+      <p class="live__big num">
+        <USkeleton
+          v-if="state === 'loading'"
+          class="h-[0.9em] w-[4ch]"
+        />
+        <template v-else>
+          {{ pageViews }}
+        </template>
+      </p>
+    </div>
+
+    <dl class="live__grid">
       <div
         v-for="figure in figures"
         :key="figure.key"
-        class="strip__item"
-        :data-live="figure.live ? '' : undefined"
+        class="live__item"
       >
-        <dt class="strip__label">
+        <dt class="label">
           <span
             v-if="figure.live"
-            class="strip__pulse"
+            class="mark"
+            data-live
             aria-hidden="true"
-          />
-          <UIcon
-            v-else
-            :name="figure.icon"
-            class="size-3.5 shrink-0"
           />
           {{ figure.label }}
         </dt>
-        <dd class="strip__value">
+        <dd class="live__value num">
           <USkeleton
             v-if="state === 'loading'"
-            class="h-6 w-12"
+            class="h-7 w-14"
           />
           <template v-else>
             {{ figure.text }}
@@ -100,22 +110,21 @@ const topCountries = computed(() => (details.value?.countries || []).slice(0, 3)
       </div>
     </dl>
 
-    <p class="strip__foot">
+    <p class="live__foot">
       <span v-if="topCountries.length">
-        Most readers from
-        <span
+        Most readers from<span
           v-for="(c, i) in topCountries"
           :key="c.country"
         >{{ i ? ', ' : ' ' }}{{ countryFlag(c.country) }} {{ countryName(c.country) }}</span>.
       </span>
       <NuxtLink
         to="/stats"
-        class="strip__link"
+        class="arrow-link"
       >
         All the numbers, live
         <UIcon
           name="i-lucide-arrow-right"
-          class="size-3.5"
+          class="size-4"
         />
       </NuxtLink>
     </p>
@@ -123,101 +132,92 @@ const topCountries = computed(() => (details.value?.countries || []).slice(0, 3)
 </template>
 
 <style scoped>
-.strip__grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  border-top: 1px solid var(--ui-border);
-  border-left: 1px solid var(--ui-border);
-}
-
-@media (min-width: 640px) {
-  .strip__grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-}
-
-@media (min-width: 1100px) {
-  .strip__grid {
-    grid-template-columns: repeat(7, minmax(0, 1fr));
-  }
-}
-
-.strip__item {
+.live > * {
+  grid-column: 1 / -1;
   min-width: 0;
-  padding: 0.75rem 0.875rem;
-  border-right: 1px solid var(--ui-border);
-  border-bottom: 1px solid var(--ui-border);
-  background: var(--ui-bg);
 }
 
-.strip__item[data-live] {
-  background: color-mix(in oklab, var(--ui-success) 7%, var(--ui-bg));
+.live__lead {
+  container-type: inline-size;
 }
 
-.strip__label {
-  display: flex;
-  align-items: center;
-  gap: 0.375rem;
-  font-size: var(--text-xs);
-  color: var(--ui-text-dimmed);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.strip__value {
-  margin-top: 0.25rem;
-  min-height: 1.5rem;
-  font-family: var(--font-pixel);
-  font-size: 1.5rem;
-  line-height: 1.1;
+/* Sized to the column it sits in, not the window, so a seven-figure number
+   never runs into the table beside it. */
+.live__big {
+  margin-top: 0.5rem;
+  font-size: clamp(3rem, 17cqi, 8rem);
+  line-height: 0.9;
+  font-weight: 700;
+  letter-spacing: -0.06em;
   color: var(--ui-text-highlighted);
-  font-variant-numeric: tabular-nums;
   overflow-wrap: anywhere;
 }
 
-.strip__pulse {
-  flex-shrink: 0;
-  width: 0.5rem;
-  height: 0.5rem;
-  border-radius: 999px;
-  background: var(--ui-success);
-  box-shadow: 0 0 0 0 color-mix(in oklab, var(--ui-success) 60%, transparent);
-  animation: pulse 1.8s var(--dgm-ease) infinite;
+.live__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 2.5rem;
+  border-top: 1px solid var(--rule-color);
 }
 
-@keyframes pulse {
-  70% {
-    box-shadow: 0 0 0 6px transparent;
-  }
+.live__item {
+  min-width: 0;
+  padding: 0.75rem 0.75rem 1rem 0;
+  border-bottom: 1px solid var(--rule-color);
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .strip__pulse {
-    animation: none;
-  }
+.live__item:nth-child(even) {
+  padding-left: 0.75rem;
+  border-left: 1px solid var(--rule-color);
 }
 
-.strip__foot {
+.live__value {
+  margin-top: 0.5rem;
+  min-height: 1.75rem;
+  font-size: 1.75rem;
+  line-height: 1;
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  color: var(--ui-text-highlighted);
+  overflow-wrap: anywhere;
+}
+
+.live__foot {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: baseline;
   justify-content: space-between;
-  gap: 0.5rem 1rem;
-  margin-top: 0.75rem;
+  gap: 0.5rem 1.5rem;
+  margin-top: 1.25rem;
   font-size: var(--text-sm);
   color: var(--ui-text-muted);
 }
 
-.strip__link {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
-  font-weight: 600;
-  color: var(--ui-text-highlighted);
+@media (min-width: 640px) {
+  .live__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .live__item:nth-child(even) {
+    padding-left: 0;
+    border-left: 0;
+  }
+
+  .live__item:not(:nth-child(3n + 1)) {
+    padding-left: 0.75rem;
+    border-left: 1px solid var(--rule-color);
+  }
 }
 
-.strip__link:hover {
-  color: var(--ui-primary);
+@media (min-width: 1024px) {
+  .live__lead {
+    grid-column: 1 / span 6;
+    align-self: end;
+  }
+
+  .live__grid {
+    grid-column: 7 / -1;
+    margin-top: 0;
+  }
 }
 </style>

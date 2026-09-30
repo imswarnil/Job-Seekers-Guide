@@ -154,7 +154,7 @@ useSeoMeta({ title: 'Tables · Admin', robots: 'noindex' })
   >
     <div class="grid gap-4 lg:grid-cols-[14rem_1fr]">
       <nav
-        class="border border-default bg-default self-start lg:sticky lg:top-20"
+        class="border border-default bg-default self-start lg:sticky lg:top-4"
         aria-label="Tables"
       >
         <p class="px-3 pt-3 pb-2 text-xs font-semibold uppercase tracking-wider text-muted">

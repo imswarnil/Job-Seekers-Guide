@@ -43,7 +43,9 @@ export default defineEventHandler(async (event) => {
       body,
       createdAt: row.ts,
       author: { name: user.name, image: user.image },
-      mine: true
+      mine: true,
+      sample: false,
+      reactions: { counts: emptyCounts(), mine: [] }
     },
     used: num(row.used),
     limit: LIMIT

@@ -80,7 +80,7 @@ useSeoMeta({ title: 'Stories · Admin', robots: 'noindex' })
 
     <ul
       v-else
-      class="divide-y divide-default border border-default rounded-lg"
+      class="divide-y divide-default border-y border-default"
     >
       <li
         v-for="s in data.items"

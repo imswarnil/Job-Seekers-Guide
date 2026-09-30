@@ -32,60 +32,60 @@ usePageSeo({
 
 <template>
   <div class="gear">
-    <header class="gear__hero">
-      <div class="gear__inner">
-        <p class="text-xs font-semibold uppercase tracking-[0.14em] text-muted">
-          Products I use
-        </p>
-        <h1 class="mt-4 font-display text-3xl sm:text-4xl xl:text-5xl font-bold tracking-tight text-highlighted text-balance max-w-3xl">
-          What was on my desk in the PG
-        </h1>
-        <p class="mt-4 text-lg text-muted max-w-3xl text-pretty">
-          None of this gets you a job. A notebook you actually fill, a book you
-          actually finish and a lamp that lets you study after the lights go out
-          made the months easier, so here they are, with why each one earned
-          its place.
-        </p>
-
-        <UAlert
-          icon="i-lucide-info"
-          color="neutral"
-          variant="subtle"
-          title="Some links are affiliate links; buying through them supports this guide at no extra cost to you."
-          description="I only list what I used or would use again. Nothing here is paid placement."
-          class="mt-8 max-w-3xl"
-        />
+    <header class="gear__hero guides">
+      <div class="frame swiss-grid">
+        <div class="gear__head">
+          <p class="label">
+            <span class="mark" /> Products I use
+          </p>
+          <h1 class="display mt-5">
+            What was on my desk in the PG
+          </h1>
+          <p class="lede mt-5">
+            None of this gets you a job. A notebook you actually fill, a book you
+            actually finish and a lamp that lets you study after the lights go out
+            made the months easier, so here they are, with why each one earned
+            its place.
+          </p>
+          <p class="gear__note">
+            Some links are affiliate links; buying through them supports this
+            guide at no extra cost to you. I only list what I used or would use
+            again. Nothing here is paid placement.
+          </p>
+        </div>
       </div>
     </header>
 
-    <div class="gear__inner py-10">
-      <div
-        v-if="categories.length > 1"
-        class="flex flex-wrap gap-2 mb-8"
-        role="group"
-        aria-label="Filter by category"
-      >
-        <UButton
-          v-for="category in ['All', ...categories]"
-          :key="category"
-          :label="category"
-          size="sm"
-          :color="active === category ? 'primary' : 'neutral'"
-          :variant="active === category ? 'solid' : 'subtle'"
-          :aria-pressed="active === category"
-          @click="active = category"
-        />
-      </div>
+    <div class="gear__body guides">
+      <div class="frame">
+        <div
+          v-if="categories.length > 1"
+          class="gear__filter"
+          role="group"
+          aria-label="Filter by category"
+        >
+          <button
+            v-for="category in ['All', ...categories]"
+            :key="category"
+            type="button"
+            class="gear__chip"
+            :aria-pressed="active === category"
+            @click="active = category"
+          >
+            {{ category }}
+          </button>
+        </div>
 
-      <div class="space-y-12">
         <section
           v-for="group in groups"
           :key="group.category"
+          class="gear__group swiss-grid"
         >
-          <h2 class="font-display text-xl font-semibold text-highlighted mb-4">
+          <h2 class="gear__group-title">
             {{ group.category }}
+            <span class="num text-dimmed">{{ String(group.items.length).padStart(2, '0') }}</span>
           </h2>
-          <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          <div class="gear__grid">
             <ProductCard
               v-for="item in group.items"
               :key="item.name"
@@ -93,47 +93,136 @@ usePageSeo({
             />
           </div>
         </section>
-      </div>
 
-      <p
-        v-if="!products.length"
-        class="text-muted"
-      >
-        The list is being put together.
-      </p>
+        <p
+          v-if="!products.length"
+          class="text-muted"
+        >
+          The list is being put together.
+        </p>
+      </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-.gear__inner {
-  max-width: 76rem;
-  margin-inline: auto;
-  padding-inline: 1rem;
+.gear__hero {
+  padding-block: 2.5rem 2rem;
+  border-bottom: 1px solid var(--rule-color);
+}
+
+.gear__head {
+  grid-column: 1 / -1;
+}
+
+.gear__note {
+  margin-top: 2rem;
+  max-width: 40rem;
+  padding-left: 0.875rem;
+  border-left: 2px solid var(--ui-text-highlighted);
+  font-size: var(--text-sm);
+  color: var(--ui-text-muted);
+}
+
+.gear__body {
+  padding-block: 2.5rem 5rem;
+}
+
+.gear__filter {
+  display: flex;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid var(--rule-color);
+}
+
+.gear__chip {
+  position: relative;
+  padding: 0.625rem 1rem 0.75rem 0;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--ui-text-muted);
+}
+
+.gear__chip + .gear__chip {
+  padding-left: 1rem;
+}
+
+.gear__chip:hover {
+  color: var(--ui-text-highlighted);
+}
+
+.gear__chip[aria-pressed='true'] {
+  color: var(--ui-text-highlighted);
+}
+
+.gear__chip[aria-pressed='true']::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 1rem;
+  bottom: -1px;
+  height: 2px;
+  background: var(--ui-primary);
+}
+
+.gear__chip + .gear__chip[aria-pressed='true']::after {
+  left: 1rem;
+}
+
+.gear__group {
+  margin-top: 3.5rem;
+}
+
+.gear__group-title,
+.gear__grid {
+  grid-column: 1 / -1;
+}
+
+.gear__group-title {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  color: var(--ui-text-highlighted);
+}
+
+.gear__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2.5rem var(--gutter);
+  margin-top: 1.5rem;
 }
 
 @media (min-width: 640px) {
-  .gear__inner {
-    padding-inline: 1.5rem;
+  .gear__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-}
-
-@media (min-width: 1024px) {
-  .gear__inner {
-    padding-inline: 2.5rem;
-  }
-}
-
-.gear__hero {
-  padding-block: 2.5rem 3rem;
-  border-bottom: 1px solid var(--ui-border);
-  background:
-    radial-gradient(50rem 20rem at 0% 0%, color-mix(in oklab, var(--ui-primary) 8%, transparent), transparent 70%);
 }
 
 @media (min-width: 1024px) {
   .gear__hero {
-    padding-top: 4.5rem;
+    padding-block: 4rem 2.5rem;
+  }
+
+  .gear__head {
+    grid-column: 1 / span 9;
+  }
+
+  .gear__group-title {
+    grid-column: 1 / span 3;
+  }
+
+  .gear__grid {
+    grid-column: 4 / -1;
+    margin-top: 0;
+  }
+}
+
+@media (min-width: 1280px) {
+  .gear__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 </style>

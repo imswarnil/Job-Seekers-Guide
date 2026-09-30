@@ -47,27 +47,28 @@ function toggleAll() {
 
 <template>
   <div>
-    <div
+    <section
       v-if="page?.outcomes?.length"
-      class="mb-10"
+      class="mb-14"
+      aria-labelledby="outcomes"
     >
-      <h2 class="font-display text-lg font-semibold text-highlighted mb-3">
+      <h2
+        id="outcomes"
+        class="label"
+      >
         By the end you can
       </h2>
-      <ul class="grid sm:grid-cols-2 gap-x-8 gap-y-2">
+      <ol class="outcomes row-list mt-3">
         <li
-          v-for="outcome in page.outcomes"
+          v-for="(outcome, index) in page.outcomes"
           :key="outcome"
-          class="flex items-start gap-2.5 text-muted"
+          class="outcomes__row"
         >
-          <UIcon
-            name="i-lucide-check"
-            class="size-4 mt-1 text-secondary shrink-0"
-          />
+          <span class="outcomes__n num">{{ String(index + 1).padStart(2, '0') }}</span>
           <span>{{ outcome }}</span>
         </li>
-      </ul>
-    </div>
+      </ol>
+    </section>
 
     <div
       v-if="page?.body"
@@ -88,10 +89,8 @@ function toggleAll() {
 
     <AdSlot placement="in-article" />
 
-    <USeparator class="my-10" />
-
-    <div class="flex items-center justify-between gap-4 mb-5">
-      <h2 class="font-display text-lg font-semibold text-highlighted">
+    <div class="contents-head rule-strong">
+      <h2 class="headline contents-head__title">
         Contents
       </h2>
 
@@ -106,54 +105,49 @@ function toggleAll() {
       />
     </div>
 
-    <div class="space-y-4">
+    <div class="modules">
       <section
         v-for="(module, index) in subject?.modules"
         :key="module.path"
         class="module"
       >
         <div class="module__head">
+          <span class="module__number num">{{ String(index + 1).padStart(2, '0') }}</span>
+
+          <span class="module__main">
+            <NuxtLink
+              :to="module.path"
+              class="module__title"
+            >
+              {{ module.title }}
+            </NuxtLink>
+            <span class="module__meta num">
+              {{ module.lessons.length }} {{ module.lessons.length === 1 ? 'lesson' : 'lessons' }}<template v-if="module.minutes"> · {{ formatMinutes(module.minutes) }}</template>
+              <ClientOnly>
+                <template v-if="moduleProgress(module).started"> · {{ moduleProgress(module).completed }} finished</template>
+              </ClientOnly>
+            </span>
+          </span>
+
           <button
             type="button"
             class="module__toggle"
             :aria-expanded="!closed.has(module.path)"
+            :aria-label="`${closed.has(module.path) ? 'Show' : 'Hide'} the lessons in ${module.title}`"
             @click="toggle(module.path)"
           >
-            <span class="module__number">{{ index + 1 }}</span>
-
-            <span class="min-w-0 flex-1 text-left">
-              <NuxtLink
-                :to="module.path"
-                class="module__title"
-                @click.stop
-              >
-                {{ module.title }}
-              </NuxtLink>
-              <span class="module__meta">
-                {{ module.lessons.length }} {{ module.lessons.length === 1 ? 'lesson' : 'lessons' }}
-                <span v-if="module.minutes">· {{ formatMinutes(module.minutes) }}</span>
-              </span>
-            </span>
-
-            <ClientOnly>
-              <PlayerProgress
-                :progress="moduleProgress(module)"
-                variant="ring"
-                :size="22"
-              />
-            </ClientOnly>
-
             <UIcon
               name="i-lucide-chevron-down"
-              class="size-4 text-dimmed shrink-0 transition-transform"
-              :class="closed.has(module.path) && '-rotate-90'"
+              class="size-4"
             />
           </button>
         </div>
 
-        <div v-if="!closed.has(module.path)">
-          <ModuleContents :lessons="module.lessons" />
-        </div>
+        <ModuleContents
+          v-if="!closed.has(module.path)"
+          :lessons="module.lessons"
+          class="module__lessons"
+        />
       </section>
 
       <ModuleContents
@@ -166,45 +160,59 @@ function toggleAll() {
 </template>
 
 <style scoped>
-.module__head {
-  margin-bottom: 0.5rem;
+.outcomes__row {
+  display: grid;
+  grid-template-columns: 2.5rem minmax(0, 1fr);
+  gap: 0.5rem;
+  padding-block: 0.75rem;
+  color: var(--ui-text);
 }
 
-.module__toggle {
+.outcomes__n {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--ui-text-dimmed);
+}
+
+.contents-head {
   display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  width: 100%;
-  padding: 0.5rem;
-  margin-inline: -0.5rem;
-  border-radius: var(--radius-md);
-  transition: background-color var(--dgm-t-fast) var(--dgm-ease);
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 4rem;
+  padding-top: 1rem;
 }
 
-.module__toggle:hover {
-  background: var(--ui-bg-elevated);
+.module {
+  margin-top: 2.5rem;
+}
+
+.module__head {
+  display: grid;
+  grid-template-columns: 2.5rem minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 0.5rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--rule-strong);
 }
 
 .module__number {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  width: 1.5rem;
-  height: 1.5rem;
-  border-radius: var(--radius-sm);
-  background: var(--ui-bg-elevated);
-  border: 1px solid var(--ui-border);
-  font-size: 0.6875rem;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-  color: var(--ui-text-muted);
+  font-size: var(--text-xl);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--ui-text-dimmed);
+}
+
+.module__main {
+  min-width: 0;
 }
 
 .module__title {
   display: block;
-  font-family: var(--font-display);
-  font-weight: 600;
+  font-size: var(--text-xl);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
   color: var(--ui-text-highlighted);
   transition: color var(--dgm-t-fast) var(--dgm-ease);
 }
@@ -215,7 +223,33 @@ function toggleAll() {
 
 .module__meta {
   display: block;
-  font-size: 0.75rem;
+  margin-top: 0.25rem;
+  font-size: var(--text-xs);
   color: var(--ui-text-dimmed);
+}
+
+.module__toggle {
+  align-self: center;
+  display: flex;
+  padding: 0.375rem;
+  color: var(--ui-text-dimmed);
+}
+
+.module__toggle:hover {
+  color: var(--ui-text-highlighted);
+}
+
+.module__toggle .iconify {
+  transition: transform var(--dgm-t-fast) var(--dgm-ease);
+}
+
+.module__toggle[aria-expanded='false'] .iconify {
+  transform: rotate(-90deg);
+}
+
+/* The lessons hang under the chapter title, from the same column. */
+.module__lessons {
+  margin-left: 3rem;
+  border-top: 0;
 }
 </style>

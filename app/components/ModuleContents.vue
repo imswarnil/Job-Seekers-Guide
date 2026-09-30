@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import type { Lesson } from '~/utils/path'
 
+/**
+ * A list of lessons: one row each, between rules. Number, title and a line of
+ * description, the minutes on the right, and a tick once it is finished.
+ */
 defineProps<{
   lessons: Lesson[]
   /** Show a running number down the left. */
@@ -8,53 +12,120 @@ defineProps<{
 }>()
 
 const { isComplete } = useProgress()
+const mounted = useMounted()
 </script>
 
 <template>
-  <ul class="border border-default rounded-lg divide-y divide-default overflow-hidden">
+  <ol class="lessons row-list">
     <li
       v-for="(lesson, index) in lessons"
       :key="lesson.path"
     >
       <NuxtLink
         :to="lesson.path"
-        class="flex items-center gap-3.5 px-4 py-3 hover:bg-elevated/50 transition-colors"
+        class="lessons__row row-link"
+        :data-numbered="numbered || undefined"
+        :data-done="(mounted && isComplete(lesson.path)) || undefined"
       >
         <span
           v-if="numbered"
-          class="text-xs text-dimmed tabular-nums w-5 shrink-0"
-        >{{ index + 1 }}</span>
+          class="lessons__n num"
+        >{{ String(index + 1).padStart(2, '0') }}</span>
 
-        <!-- Completion lives in localStorage, so the server draws the plain
-             tile and the client swaps in the finished one. -->
-        <ClientOnly>
-          <LessonThumb
-            :lesson="lesson"
-            :complete="isComplete(lesson.path)"
-          />
-
-          <template #fallback>
-            <LessonThumb :lesson="lesson" />
-          </template>
-        </ClientOnly>
-
-        <div class="min-w-0 flex-1">
-          <p class="text-sm font-medium text-highlighted truncate">
-            {{ lesson.title }}
-          </p>
-          <p
+        <span class="lessons__main">
+          <span class="lessons__title">{{ lesson.title }}</span>
+          <span
             v-if="lesson.description"
-            class="text-sm text-muted truncate"
-          >
-            {{ lesson.description }}
-          </p>
-        </div>
+            class="lessons__text"
+          >{{ lesson.description }}</span>
+        </span>
 
-        <span
-          v-if="lesson.minutes"
-          class="text-xs text-dimmed shrink-0 tabular-nums"
-        >{{ lesson.minutes }} min</span>
+        <span class="lessons__side">
+          <span
+            v-if="lesson.kind && lesson.kind !== 'lesson'"
+            class="label lessons__kind"
+          >{{ lesson.kind }}</span>
+          <span
+            v-if="lesson.minutes"
+            class="num"
+          >{{ lesson.minutes }} min</span>
+          <UIcon
+            v-if="mounted && isComplete(lesson.path)"
+            name="i-lucide-check"
+            class="size-4 text-success"
+            aria-label="Finished"
+          />
+        </span>
       </NuxtLink>
     </li>
-  </ul>
+  </ol>
 </template>
+
+<style scoped>
+.lessons__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 1rem;
+  align-items: baseline;
+  padding: 0.75rem 0.5rem 0.75rem 0;
+}
+
+.lessons__row[data-numbered] {
+  grid-template-columns: 2.5rem minmax(0, 1fr) auto;
+}
+
+.lessons__n {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--ui-text-dimmed);
+}
+
+.lessons__main {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.lessons__title {
+  font-weight: 600;
+  color: var(--ui-text-highlighted);
+}
+
+.lessons__row:hover .lessons__title {
+  color: var(--ui-primary);
+}
+
+.lessons__row[data-done] .lessons__title {
+  color: var(--ui-text-muted);
+}
+
+.lessons__text {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  margin-top: 0.125rem;
+  font-size: var(--text-sm);
+  color: var(--ui-text-muted);
+}
+
+.lessons__side {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: var(--text-xs);
+  color: var(--ui-text-dimmed);
+  white-space: nowrap;
+}
+
+.lessons__kind {
+  display: none;
+  font-size: 0.625rem;
+}
+
+@media (min-width: 640px) {
+  .lessons__kind {
+    display: inline-flex;
+  }
+}
+</style>

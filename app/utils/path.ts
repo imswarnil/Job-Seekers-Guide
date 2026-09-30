@@ -268,7 +268,7 @@ export interface StageGroup extends StageMeta {
   /** Anchor id, so the sidebar can jump to the section. */
   id: string
   subjects: Subject[]
-  /** Position of this group's first subject along the whole path, zero-based. */
+  /** Position of this group's first subject in the order the parts are shown, zero-based. */
   offset: number
   lessons: number
   minutes: number
@@ -309,6 +309,15 @@ export function byStage(path: LearningPath): StageGroup[] {
       blurb: 'Subjects that have not been placed in a section yet.',
       icon: 'i-lucide-book-open'
     }, untagged))
+  }
+
+  // Number the tracks in the order they are shown. The parts are grouped by
+  // stage, and a track filed out of folder order would otherwise repeat a
+  // number ("09 Other subjects", "09 HTML") or skip one.
+  let shown = 0
+  for (const g of groups) {
+    g.offset = shown
+    shown += g.subjects.length
   }
 
   return groups

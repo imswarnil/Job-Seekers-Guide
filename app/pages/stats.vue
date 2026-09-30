@@ -3,6 +3,11 @@
  * The public numbers, all of them. Counted on this site's own server, with no
  * third-party analytics: a random cookie id per browser, the page, the
  * referring site and the country. That is the whole list.
+ *
+ * Headline totals from /api/stats/summary, the daily trend (visitors, page
+ * views, new accounts) from /api/stats/trend for a chosen range, and the top
+ * pages and countries from /api/stats/details. All fetched in the browser, so
+ * the prerendered page is never out of date.
  */
 interface Summary {
   visitors: number
@@ -19,27 +24,59 @@ interface Summary {
 interface Details {
   countries: { country: string, visitors: number }[]
   topPages: { path: string, views: number }[]
-  perDay: { day: string, views: number }[]
 }
 
-const { data: summary, status } = useFetch<Summary>('/api/stats/summary', { server: false, lazy: true })
-const { data: details } = useFetch<Details>('/api/stats/details', { server: false, lazy: true })
+interface Trend {
+  range: number
+  totals: { visitors: number, views: number, signups: number }
+  days: { day: string, visitors: number, views: number, signups: number }[]
+}
 
-const tiles = computed(() => {
+const RANGES = [
+  { days: 30, label: '30 days' },
+  { days: 90, label: '90 days' },
+  { days: 365, label: '1 year' }
+] as const
+
+const range = ref<30 | 90 | 365>(30)
+
+const { data: summary, status } = useFetch<Summary>('/api/stats/summary', { server: false, lazy: true })
+const { data: details, status: detailsStatus } = useFetch<Details>('/api/stats/details', { server: false, lazy: true })
+const { data: trend, status: trendStatus } = useFetch<Trend>('/api/stats/trend', {
+  server: false,
+  lazy: true,
+  query: { days: range }
+})
+
+const loading = computed(() => status.value === 'pending' || status.value === 'idle')
+
+const numbers = computed(() => {
   const s = summary.value
+  const f = (v: number | undefined) => (s ? formatCount(v) : '–')
   return [
-    { label: 'Visitors', value: s ? formatCount(s.visitors) : '–', icon: 'i-lucide-users' },
-    { label: 'Pages read', value: s ? formatCount(s.pageViews) : '–', icon: 'i-lucide-book-open' },
-    { label: 'Reading right now', value: s ? formatCount(s.liveNow) : '–', icon: 'i-lucide-radio', live: true },
-    { label: 'Countries', value: s ? formatCount(s.countries) : '–', icon: 'i-lucide-globe' },
-    { label: 'Got a job', value: s ? formatCount(s.jobsGot) : '–', icon: 'i-lucide-briefcase' },
-    { label: 'Stories shared', value: s ? formatCount(s.stories) : '–', icon: 'i-lucide-footprints' },
-    { label: 'Raised', value: s ? formatPaise(s.raised) : '–', icon: 'i-lucide-heart-handshake' },
-    { label: 'Sponsors', value: s ? formatCount(s.sponsors) : '–', icon: 'i-lucide-megaphone' }
+    { label: 'Page views', value: f(s?.pageViews), note: 'Every page read, all time' },
+    { label: 'Unique visitors', value: f(s?.visitors), note: 'Browsers, not people' },
+    { label: 'Reading now', value: f(s?.liveNow), note: 'In the last five minutes', live: Boolean(s?.liveNow) },
+    { label: 'Countries', value: f(s?.countries), note: 'Where readers are' },
+    { label: 'Stories', value: f(s?.stories), note: 'Shared by readers' },
+    { label: 'Jobs got', value: f(s?.jobsGot), note: 'Readers who said so' },
+    { label: 'Raised', value: s ? formatPaise(s.raised) : '–', note: 'Gifts and sponsors' },
+    { label: 'Sponsors', value: f(s?.sponsors), note: 'All time' }
   ]
 })
 
+const days = computed(() => trend.value?.days.map(d => d.day) ?? [])
+const trafficSeries = computed(() => [
+  { key: 'visitors', label: 'Unique visitors', values: trend.value?.days.map(d => d.visitors) ?? [] },
+  { key: 'views', label: 'Page views', values: trend.value?.days.map(d => d.views) ?? [] }
+])
+const signupSeries = computed(() => [
+  { key: 'signups', label: 'New accounts', values: trend.value?.days.map(d => d.signups) ?? [] }
+])
+const rangeLabel = computed(() => RANGES.find(r => r.days === range.value)?.label ?? '')
+
 const maxCountry = computed(() => Math.max(1, ...(details.value?.countries || []).map(c => c.visitors)))
+const maxPage = computed(() => Math.max(1, ...(details.value?.topPages || []).map(p => p.views)))
 
 // "Did you get a job?"
 const job = reactive({ company: '', package: '' })
@@ -68,269 +105,436 @@ async function gotJob() {
 
 usePageSeo({
   title: 'The numbers, in public',
-  description: 'How many people read the Bangalore Job Seekers Guide, from where, what they read, how many got a job, and what it has raised.',
+  description: 'How many people read the Bangalore Job Seekers Guide, day by day, from where, what they read, how many got a job, and what it has raised.',
   headline: 'Stats'
 })
 </script>
 
 <template>
-  <CommunityPage
-    width="wide"
-    kicker="Open stats"
-    icon="i-lucide-chart-column"
-    title="The numbers, in public"
-    description="Everything this site counts, shown to everybody. No Google Analytics and no tracking scripts: my own server counts page views with a random id per browser, and nothing about who you are."
-  >
-    <div class="tiles">
-      <div
-        v-for="t in tiles"
-        :key="t.label"
-        class="tile"
-      >
-        <div class="flex items-center gap-2 text-sm text-muted">
-          <UIcon
-            :name="t.icon"
-            class="size-4"
-          />
-          {{ t.label }}
-          <span
-            v-if="t.live && summary?.liveNow"
-            class="live-dot"
-          />
+  <div class="stats-page">
+    <!-- Head ------------------------------------------------------------------- -->
+    <header class="band guides">
+      <div class="frame swiss-grid">
+        <div class="col-span-full lg:col-span-9">
+          <p class="label">
+            <span class="mark" />
+            Open stats
+          </p>
+          <h1 class="display mt-4">
+            The numbers, in public
+          </h1>
+          <p class="lede mt-5">
+            Everything this site counts, shown to everybody. No Google Analytics
+            and no tracking scripts: my own server counts page views with a
+            random id per browser, and nothing about who you are.
+          </p>
         </div>
-        <USkeleton
-          v-if="status === 'pending' || status === 'idle'"
-          class="mt-2 h-8 w-24"
-        />
-        <p
-          v-else
-          class="tile__value"
-        >
-          {{ t.value }}
-        </p>
       </div>
-    </div>
+    </header>
 
-    <section class="cta">
-      <div>
-        <p class="cta__title">
-          Become a sponsor of this project
-        </p>
-        <p class="cta__text">
-          Every reader above is somebody looking for their first IT job. Put your
-          company or your name in front of them, and keep the spot until somebody
-          outbids you.
-        </p>
-      </div>
-      <div class="flex flex-wrap gap-2">
-        <UButton
-          to="/sponsor"
-          size="xl"
-          icon="i-lucide-megaphone"
+    <!-- Headline numbers -------------------------------------------------------- -->
+    <section
+      class="band guides"
+      aria-label="Headline numbers"
+    >
+      <dl class="frame swiss-grid gap-y-8">
+        <div
+          v-for="t in numbers"
+          :key="t.label"
+          class="stat col-span-2 lg:col-span-3"
         >
-          Become a sponsor
-        </UButton>
-        <UButton
-          to="/support"
-          size="xl"
-          color="neutral"
-          variant="outline"
-          icon="i-lucide-heart"
-        >
-          Or give any amount
-        </UButton>
+          <dt class="label">
+            {{ t.label }}
+            <span
+              v-if="t.live"
+              class="mark"
+              data-live
+            />
+          </dt>
+          <dd>
+            <USkeleton
+              v-if="loading"
+              class="mt-3 h-10 w-24"
+            />
+            <span
+              v-else
+              class="stat__value num"
+            >{{ t.value }}</span>
+            <span class="stat__note">{{ t.note }}</span>
+          </dd>
+        </div>
+      </dl>
+    </section>
+
+    <!-- Readers per day --------------------------------------------------------- -->
+    <section
+      class="band guides"
+      aria-labelledby="trend-title"
+    >
+      <div class="frame">
+        <div class="flex flex-wrap items-end justify-between gap-4 mb-8">
+          <div>
+            <p class="label">
+              Traffic
+            </p>
+            <h2
+              id="trend-title"
+              class="headline mt-2"
+            >
+              Readers per day
+            </h2>
+          </div>
+          <div
+            class="ranges"
+            role="group"
+            aria-label="Range"
+          >
+            <button
+              v-for="r in RANGES"
+              :key="r.days"
+              type="button"
+              class="ranges__btn num"
+              :aria-pressed="range === r.days"
+              @click="range = r.days"
+            >
+              {{ r.label }}
+            </button>
+          </div>
+        </div>
+
+        <div class="swiss-grid gap-y-12">
+          <div class="col-span-full lg:col-span-8">
+            <USkeleton
+              v-if="!trend && (trendStatus === 'pending' || trendStatus === 'idle')"
+              class="h-80 w-full"
+            />
+            <StatsChart
+              v-else-if="trend?.days.length"
+              :days="days"
+              :series="trafficSeries"
+              :caption="`Unique visitors and page views per day, last ${rangeLabel}`"
+              :height="300"
+              :class="{ 'opacity-50': trendStatus === 'pending' }"
+            />
+            <p
+              v-else
+              class="text-sm text-muted"
+            >
+              Nothing counted yet.
+            </p>
+          </div>
+
+          <div class="col-span-full lg:col-span-4">
+            <p class="label">
+              New accounts
+            </p>
+            <p class="stat__value num mt-2">
+              {{ trend ? formatCount(trend.totals.signups) : '–' }}
+            </p>
+            <p class="stat__note mb-5">
+              Signed up in the last {{ rangeLabel }}
+            </p>
+            <StatsChart
+              v-if="trend?.days.length"
+              :days="days"
+              :series="signupSeries"
+              :caption="`New accounts per day, last ${rangeLabel}`"
+              :height="160"
+              class="chart--small"
+              :class="{ 'opacity-50': trendStatus === 'pending' }"
+            />
+          </div>
+        </div>
+        <p class="mt-6 text-xs text-muted">
+          Days are counted in India time. A visitor is one browser on one day;
+          the same person on a phone and a laptop counts twice. Admin and account
+          pages are left out.
+        </p>
       </div>
     </section>
 
-    <div class="grid gap-6 lg:grid-cols-2 mt-10">
-      <UCard>
-        <ViewsChart
-          v-if="details?.perDay.length"
-          :points="details.perDay"
-          label="Pages read per day, last 30 days"
-        />
-        <USkeleton
-          v-else
-          class="h-44 w-full"
-        />
-      </UCard>
-
-      <UCard>
-        <p class="text-sm text-muted mb-3">
-          Most read, last 30 days
-        </p>
-        <ol
-          v-if="details?.topPages.length"
-          class="space-y-2 text-sm"
-        >
-          <li
-            v-for="p in details.topPages"
-            :key="p.path"
-            class="flex items-center gap-3"
-          >
-            <NuxtLink
-              :to="p.path"
-              class="min-w-0 flex-1 truncate text-default hover:text-primary"
-            >{{ p.path }}</NuxtLink>
-            <span class="tabular-nums text-muted">{{ formatCount(p.views) }}</span>
-          </li>
-        </ol>
-        <p
-          v-else
-          class="text-sm text-muted"
-        >
-          Nothing counted yet.
-        </p>
-      </UCard>
-    </div>
-
-    <UCard class="mt-6">
-      <p class="text-sm text-muted mb-3">
-        Where readers are
-      </p>
-      <ul
-        v-if="details?.countries.length"
-        class="countries"
-      >
-        <li
-          v-for="c in details.countries"
-          :key="c.country"
-        >
-          <span class="w-6 text-center">{{ countryFlag(c.country) }}</span>
-          <span class="min-w-0 flex-1 truncate">{{ countryName(c.country) }}</span>
-          <span
-            class="bar"
-            :style="{ width: `${Math.max(4, (c.visitors / maxCountry) * 100)}%` }"
+    <!-- Top pages and countries ------------------------------------------------- -->
+    <section
+      class="band guides"
+      aria-label="What people read and where they are"
+    >
+      <div class="frame swiss-grid gap-y-12">
+        <div class="col-span-full lg:col-span-6">
+          <h2 class="label mb-4">
+            Most read, last 30 days
+          </h2>
+          <USkeleton
+            v-if="detailsStatus === 'pending' || detailsStatus === 'idle'"
+            class="h-64 w-full"
           />
-          <span class="tabular-nums text-muted w-12 text-right">{{ formatCount(c.visitors) }}</span>
-        </li>
-      </ul>
-      <p
-        v-else
-        class="text-sm text-muted"
-      >
-        Nothing counted yet.
-      </p>
-    </UCard>
+          <ol
+            v-else-if="details?.topPages.length"
+            class="row-list"
+          >
+            <li
+              v-for="(p, i) in details.topPages"
+              :key="p.path"
+              class="bar-row"
+            >
+              <span class="bar-row__n num">{{ String(i + 1).padStart(2, '0') }}</span>
+              <NuxtLink
+                :to="p.path"
+                class="bar-row__name hover:text-primary"
+              >{{ p.path }}</NuxtLink>
+              <span class="bar-row__value num">{{ formatCount(p.views) }}</span>
+              <span
+                class="bar-row__bar"
+                :style="{ width: `${Math.max(2, (p.views / maxPage) * 100)}%` }"
+              />
+            </li>
+          </ol>
+          <p
+            v-else
+            class="text-sm text-muted"
+          >
+            Nothing counted yet.
+          </p>
+        </div>
 
-    <UCard class="mt-6">
-      <p class="font-semibold text-highlighted">
-        Did you get a job?
-      </p>
-      <p class="mt-1 text-sm text-muted">
-        Press the button and the counter above goes up by one. Company and
-        package are optional and are never shown next to anything about you.
-      </p>
-      <form
-        class="mt-4 flex flex-wrap items-end gap-3"
-        @submit.prevent="gotJob"
-      >
-        <UInput
-          v-model="job.company"
-          placeholder="Company (optional)"
-          maxlength="80"
-        />
-        <UInput
-          v-model="job.package"
-          placeholder="Package (optional)"
-          maxlength="40"
-        />
-        <UButton
-          type="submit"
-          icon="i-lucide-party-popper"
-          :loading="jobState === 'saving'"
-          :disabled="jobState === 'done'"
-        >
-          I got a job
-        </UButton>
-      </form>
-      <p
-        v-if="jobMessage"
-        class="mt-3 text-sm"
-        :class="jobState === 'error' ? 'text-error' : 'text-success'"
-      >
-        {{ jobMessage }}
-        <NuxtLink
-          v-if="jobState === 'done'"
-          to="/stories/new"
-          class="text-primary font-medium"
-        >Share your story</NuxtLink>
-      </p>
-    </UCard>
-  </CommunityPage>
+        <div class="col-span-full lg:col-span-6">
+          <h2 class="label mb-4">
+            Where readers are
+          </h2>
+          <USkeleton
+            v-if="detailsStatus === 'pending' || detailsStatus === 'idle'"
+            class="h-64 w-full"
+          />
+          <ol
+            v-else-if="details?.countries.length"
+            class="row-list countries"
+          >
+            <li
+              v-for="c in details.countries"
+              :key="c.country"
+              class="bar-row"
+            >
+              <span
+                class="bar-row__n"
+                aria-hidden="true"
+              >{{ countryFlag(c.country) }}</span>
+              <span class="bar-row__name">{{ countryName(c.country) }}</span>
+              <span class="bar-row__value num">{{ formatCount(c.visitors) }}</span>
+              <span
+                class="bar-row__bar"
+                :style="{ width: `${Math.max(2, (c.visitors / maxCountry) * 100)}%` }"
+              />
+            </li>
+          </ol>
+          <p
+            v-else
+            class="text-sm text-muted"
+          >
+            Nothing counted yet.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Become a sponsor -------------------------------------------------------- -->
+    <section
+      class="band guides cta"
+      aria-labelledby="cta-title"
+    >
+      <div class="frame swiss-grid gap-y-8">
+        <div class="col-span-full lg:col-span-8">
+          <p class="label">
+            <span class="mark" />
+            Sponsor
+          </p>
+          <h2
+            id="cta-title"
+            class="display mt-4"
+          >
+            Become a sponsor
+          </h2>
+          <p class="lede mt-5">
+            Every reader counted above is somebody looking for their first IT
+            job. Design your card, put your company or your name in front of
+            them, and keep the spot until somebody outbids you.
+          </p>
+        </div>
+        <div class="col-span-full lg:col-span-4 flex flex-col justify-end gap-3">
+          <UButton
+            to="/sponsor"
+            size="xl"
+            icon="i-lucide-megaphone"
+            class="justify-center"
+          >
+            Become a sponsor
+          </UButton>
+          <NuxtLink
+            to="/support"
+            class="arrow-link"
+          >
+            Or give any amount
+            <UIcon name="i-lucide-arrow-right" />
+          </NuxtLink>
+        </div>
+      </div>
+    </section>
+
+    <!-- Did you get a job? ------------------------------------------------------ -->
+    <section
+      class="band guides"
+      aria-labelledby="job-title"
+    >
+      <div class="frame swiss-grid gap-y-6">
+        <div class="col-span-full lg:col-span-5">
+          <h2
+            id="job-title"
+            class="headline"
+          >
+            Did you get a job?
+          </h2>
+          <p class="mt-3 text-sm text-muted">
+            Press the button and the counter above goes up by one. Company and
+            package are optional and are never shown next to anything about you.
+          </p>
+        </div>
+        <div class="col-span-full lg:col-span-6 lg:col-start-7">
+          <form
+            class="flex flex-wrap items-end gap-3"
+            @submit.prevent="gotJob"
+          >
+            <UInput
+              v-model="job.company"
+              placeholder="Company (optional)"
+              maxlength="80"
+            />
+            <UInput
+              v-model="job.package"
+              placeholder="Package (optional)"
+              maxlength="40"
+            />
+            <UButton
+              type="submit"
+              color="neutral"
+              icon="i-lucide-party-popper"
+              :loading="jobState === 'saving'"
+              :disabled="jobState === 'done'"
+            >
+              I got a job
+            </UButton>
+          </form>
+          <p
+            v-if="jobMessage"
+            class="mt-3 text-sm"
+            :class="jobState === 'error' ? 'text-error' : 'text-success'"
+            role="status"
+          >
+            {{ jobMessage }}
+            <NuxtLink
+              v-if="jobState === 'done'"
+              to="/stories/new"
+              class="text-primary font-medium"
+            >Share your story</NuxtLink>
+          </p>
+        </div>
+      </div>
+    </section>
+  </div>
 </template>
 
 <style scoped>
-.tiles {
-  display: grid;
-  gap: 0.75rem;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 13rem), 1fr));
+.stat {
+  padding-top: 0.75rem;
+  border-top: 2px solid var(--rule-strong);
 }
 
-.tile {
-  padding: 1rem 1.125rem;
-  border: 1px solid var(--ui-border);
-  border-radius: var(--radius-lg, 0.75rem);
+.stat__value {
+  display: block;
+  margin-top: 0.5rem;
+  font-size: clamp(1.75rem, 1.2rem + 1.6vw, 2.75rem);
+  line-height: 1;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  color: var(--ui-text-highlighted);
 }
 
-.tile__value {
+.stat__note {
+  display: block;
   margin-top: 0.375rem;
-  font-size: 1.75rem;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  color: var(--ui-text-highlighted);
-  font-variant-numeric: tabular-nums;
-}
-
-.live-dot {
-  width: 0.5rem;
-  height: 0.5rem;
-  border-radius: 999px;
-  background: var(--ui-success);
-  box-shadow: 0 0 0 3px color-mix(in oklab, var(--ui-success) 25%, transparent);
-}
-
-.cta {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1.25rem;
-  margin-top: 2rem;
-  padding: 1.5rem 1.75rem;
-  border-radius: var(--radius-xl, 1rem);
-  background: color-mix(in oklab, var(--ui-primary) 9%, var(--ui-bg));
-  border: 1px solid color-mix(in oklab, var(--ui-primary) 35%, transparent);
-}
-
-.cta__title {
-  font-size: 1.375rem;
-  font-weight: 700;
-  color: var(--ui-text-highlighted);
-}
-
-.cta__text {
-  margin-top: 0.25rem;
-  max-width: 36rem;
+  font-size: 0.8125rem;
   color: var(--ui-text-muted);
 }
 
-.countries {
-  display: grid;
-  gap: 0.375rem;
-  font-size: 0.875rem;
+.ranges {
+  display: inline-flex;
+  border: 1px solid var(--ui-text-highlighted);
 }
 
-.countries li {
+.ranges__btn {
+  padding: 0.375rem 0.875rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--ui-text-highlighted);
+  background: transparent;
+  cursor: pointer;
+}
+
+.ranges__btn + .ranges__btn {
+  border-left: 1px solid var(--ui-text-highlighted);
+}
+
+.ranges__btn[aria-pressed='true'] {
+  color: var(--ui-bg);
+  background: var(--ui-text-highlighted);
+}
+
+/* A row of a ranked list: number, name, value, and a hairline bar under it
+   showing the share of the largest. */
+.bar-row {
+  position: relative;
   display: grid;
-  grid-template-columns: 1.5rem minmax(6rem, 12rem) 1fr 3rem;
-  align-items: center;
+  grid-template-columns: 2rem minmax(0, 1fr) auto;
+  align-items: baseline;
   gap: 0.75rem;
+  padding: 0.625rem 0 0.75rem;
+  font-size: 0.9375rem;
 }
 
-.countries .bar {
-  height: 0.5rem;
-  border-radius: 999px;
-  background: color-mix(in oklab, var(--ui-primary) 55%, transparent);
+.bar-row__n {
+  font-size: 0.8125rem;
+  color: var(--ui-text-muted);
+}
+
+.bar-row__name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--ui-text-highlighted);
+}
+
+.bar-row__value {
+  font-weight: 600;
+  color: var(--ui-text-highlighted);
+}
+
+.bar-row__bar {
+  position: absolute;
+  left: 2.75rem;
+  bottom: -1px;
+  height: 2px;
+  max-width: calc(100% - 2.75rem);
+  background: var(--ui-text-highlighted);
+}
+
+.bar-row:first-child .bar-row__bar {
+  background: var(--ui-primary);
+}
+
+.countries {
+  max-height: 32rem;
+  overflow: auto;
+}
+
+.cta {
+  border-top: 2px solid var(--rule-strong);
 }
 </style>

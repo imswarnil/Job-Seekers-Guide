@@ -27,7 +27,7 @@ const failed = ref(false)
 
 <template>
   <article
-    class="product card-hover"
+    class="product"
     :data-compact="compact || undefined"
     :style="{ '--track': look.color }"
   >
@@ -87,7 +87,7 @@ const failed = ref(false)
           trailing-icon="i-lucide-arrow-up-right"
           size="sm"
           color="neutral"
-          variant="subtle"
+          variant="outline"
           class="ms-auto"
         />
         <UButton
@@ -105,20 +105,20 @@ const failed = ref(false)
 </template>
 
 <style scoped>
+/* A product on the grid: a rule on top, the picture, then the words. */
 .product {
   display: flex;
   flex-direction: column;
-  overflow: hidden;
   height: 100%;
-  border: 1px solid var(--ui-border);
-  border-radius: 0;
-  background: var(--ui-bg);
+  padding-top: 0.75rem;
+  border-top: 2px solid var(--rule-strong);
 }
 
 .product__media {
   position: relative;
   aspect-ratio: 16 / 9;
-  background: color-mix(in oklab, var(--track) 12%, var(--ui-bg));
+  overflow: hidden;
+  background: var(--ui-bg-muted);
 }
 
 .product[data-compact] .product__media {
@@ -131,6 +131,7 @@ const failed = ref(false)
   object-fit: cover;
 }
 
+/* No photo yet: the category's mark, on a flat field. */
 .product__tile {
   display: flex;
   align-items: center;
@@ -138,9 +139,6 @@ const failed = ref(false)
   width: 100%;
   height: 100%;
   color: var(--track);
-  background:
-    radial-gradient(circle at 30% 20%, color-mix(in oklab, var(--track) 22%, transparent), transparent 60%),
-    repeating-linear-gradient(-45deg, transparent 0 12px, color-mix(in oklab, var(--track) 8%, transparent) 12px 13px);
 }
 
 .dark .product__tile {
@@ -149,37 +147,39 @@ const failed = ref(false)
 
 .product__badge {
   position: absolute;
-  top: 0.625rem;
-  left: 0.625rem;
-  padding: 0.125rem 0.5rem;
-  border-radius: 2px;
-  background: var(--ui-bg);
-  border: 1px solid var(--ui-border);
-  font-size: 0.6875rem;
+  top: 0;
+  left: 0;
+  padding: 0.25rem 0.5rem;
+  background: var(--ui-text-highlighted);
+  font-size: 0.625rem;
   font-weight: 600;
-  color: var(--ui-text-highlighted);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ui-bg);
 }
 
 .product__body {
   display: flex;
   flex-direction: column;
   flex: 1;
-  padding: 1rem;
+  padding-top: 1rem;
 }
 
 .product__category {
   font-size: 0.6875rem;
   font-weight: 600;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
 }
 
 .product__name {
-  margin-top: 0.25rem;
-  font-family: var(--font-display);
-  font-weight: 600;
+  margin-top: 0.375rem;
+  font-size: var(--text-lg);
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  line-height: 1.25;
   color: var(--ui-text-highlighted);
-  text-wrap: balance;
+  text-wrap: pretty;
 }
 
 .product__text {

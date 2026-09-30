@@ -101,37 +101,16 @@ export default defineAppConfig({
     showRailByDefault: true
   },
 
-  /**
-   * The "a human wrote this" badge in the sidebar of every path page.
-   *
-   * A third-party widget, rendered by `AuthorBadge.vue`. The fields below are
-   * the `data-` attributes it reads, one for one.
-   */
-  authorBadge: {
-    /** Off removes it everywhere. */
-    enabled: true,
+  /** The winding road on the home page ("My journey"). */
+  journey: {
     /**
-     * Where the widget script comes from.
+     * A photo for the walker that travels the road as you scroll: a path
+     * under /public (`/images/me.jpg`) or a full https URL. It is clipped to a
+     * circle and ringed in the colour of the stretch it is on.
      *
-     * Has to stay `https://`. The page is served over https, and a browser
-     * blocks a plain-http script on an https page as mixed content — so the
-     * `http://localhost:3000` address the widget is developed against renders
-     * nothing once this site is deployed.
+     * Empty draws a plain coloured circle instead.
      */
-    src: 'https://nac.imswarnil.com/widget.js',
-    /** Whose words these are. */
-    author: 'Swarnil Singhai',
-    /** The claim the badge makes, in the author's own voice. */
-    message: 'Written by a human. AI is used only to refine ideas — never to generate.',
-    /**
-     * Which of the widget's nine layouts to draw: stamp, wax, passport,
-     * postmark, ribbon, certificate, typewriter, banner or compact.
-     */
-    style: 'ribbon',
-    /** `light` or `dark`. Fixed, so it does not follow the site's theme. */
-    theme: 'light',
-    region: 'India',
-    category: 'Education'
+    walkerImage: ''
   },
 
   /**

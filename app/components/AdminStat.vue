@@ -40,9 +40,9 @@ const deltaText = computed(() => {
 </script>
 
 <template>
-  <div class="h-full border border-default bg-default p-4 min-w-0">
+  <div class="admin-stat h-full min-w-0">
     <div class="flex items-center justify-between gap-2">
-      <p class="text-xs font-medium text-muted truncate">
+      <p class="label truncate">
         {{ label }}
       </p>
       <UIcon
@@ -57,7 +57,7 @@ const deltaText = computed(() => {
     />
     <p
       v-else
-      class="mt-1 text-2xl font-bold tabular-nums text-highlighted truncate"
+      class="mt-2 text-3xl font-bold num tracking-tight text-highlighted truncate"
     >
       {{ value }}
     </p>
@@ -88,3 +88,10 @@ const deltaText = computed(() => {
     </p>
   </div>
 </template>
+
+<style scoped>
+.admin-stat {
+  padding: 0.75rem 0 1rem;
+  border-top: 1px solid var(--rule-strong);
+}
+</style>

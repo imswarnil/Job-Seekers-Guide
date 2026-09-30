@@ -21,6 +21,7 @@ export const BROWSABLE_TABLES = [
   'uploads',
   'guestbook',
   'comments',
+  'comment_reactions',
   'payments',
   'sponsor_bids',
   'jobs_got',
@@ -88,6 +89,7 @@ export const TABLE_SPECS: Record<BrowsableTable, TableSpec> = {
     deletable: true,
     editable: { body: field(text(1, 2000), 'textarea', { max: 2000 }) }
   },
+  comment_reactions: { note: 'Reactions under comments. Read-only here: deleting the comment removes its reactions.' },
   payments: { key: 'id', note: 'Financial records. Only the Dodo webhook changes them.' },
   sponsor_bids: {
     key: 'id',

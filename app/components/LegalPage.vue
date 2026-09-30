@@ -53,89 +53,122 @@ const updated = computed(() => {
 })
 
 const others = [
-  { label: 'Privacy', to: '/privacy', icon: 'i-lucide-shield-check' },
-  { label: 'Terms', to: '/terms', icon: 'i-lucide-scale' },
-  { label: 'Contact', to: '/contact', icon: 'i-lucide-mail' }
+  { label: 'Privacy', to: '/privacy' },
+  { label: 'Terms', to: '/terms' },
+  { label: 'Contact', to: '/contact' }
 ]
 </script>
 
 <template>
-  <UContainer
+  <div
     v-if="page"
-    class="py-8 lg:py-12"
+    class="legal"
   >
-    <div class="legal">
-      <UPageHeader
-        :title="page.title"
-        :description="page.description"
-      />
-
-      <p
-        v-if="updated"
-        class="legal__updated"
-      >
-        <UIcon
-          name="i-lucide-calendar-days"
-          class="size-3.5 shrink-0"
-        />
-        Last updated {{ updated }}
-      </p>
-
-      <div class="guide-prose legal__body">
-        <ContentRenderer :value="page" />
+    <header class="legal__band guides">
+      <div class="frame swiss-grid">
+        <div class="legal__head">
+          <p class="label">
+            <span class="mark" /> {{ headline || 'About this site' }}
+          </p>
+          <h1 class="headline mt-4">
+            {{ page.title }}
+          </h1>
+          <p
+            v-if="page.description"
+            class="lede mt-4"
+          >
+            {{ page.description }}
+          </p>
+          <p
+            v-if="updated"
+            class="legal__updated num"
+          >
+            Last updated {{ updated }}
+          </p>
+        </div>
       </div>
+    </header>
 
-      <!-- The other two, at the bottom, because somebody who has read one of
-           these is usually looking for another. -->
-      <nav
-        class="legal__siblings"
-        aria-label="Other pages"
-      >
-        <UButton
-          v-for="other in others.filter(item => item.to !== path)"
-          :key="other.to"
-          :to="other.to"
-          :label="other.label"
-          :icon="other.icon"
-          color="neutral"
-          variant="subtle"
-          size="sm"
-        />
-      </nav>
+    <div class="legal__page guides">
+      <div class="frame swiss-grid">
+        <div class="legal__body">
+          <div class="guide-prose">
+            <ContentRenderer :value="page" />
+          </div>
+
+          <!-- The other two, at the bottom, because somebody who has read one
+               of these is usually looking for another. -->
+          <nav
+            class="legal__siblings row-list"
+            aria-label="Other pages"
+          >
+            <NuxtLink
+              v-for="other in others.filter(item => item.to !== path)"
+              :key="other.to"
+              :to="other.to"
+              class="legal__sibling row-link"
+            >
+              {{ other.label }}
+              <UIcon
+                name="i-lucide-arrow-right"
+                class="size-4"
+              />
+            </NuxtLink>
+          </nav>
+        </div>
+      </div>
     </div>
-  </UContainer>
+  </div>
 </template>
 
 <style scoped>
-/* Narrower than the lessons. This is dense prose somebody is scanning for one
-   clause, and a long measure makes that harder. */
-.legal {
-  max-width: 44rem;
-  margin-inline: auto;
+.legal__band {
+  padding-block: 2.5rem 2rem;
+  border-bottom: 1px solid var(--rule-color);
+}
+
+.legal__head,
+.legal__body {
+  grid-column: 1 / -1;
+  min-width: 0;
 }
 
 .legal__updated {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  margin-top: 1.25rem;
-  font-size: 0.75rem;
+  margin-top: 1.5rem;
+  font-size: var(--text-xs);
   color: var(--ui-text-dimmed);
-  border: 1px solid var(--ui-border);
-  border-radius: 999px;
-  padding: 0.2rem 0.65rem;
 }
 
-.legal__body {
-  margin-top: 2rem;
+.legal__page {
+  padding-block: 2.5rem 5rem;
 }
 
 .legal__siblings {
+  margin-top: 4rem;
+  max-width: 28rem;
+}
+
+.legal__sibling {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-top: 3.5rem;
-  padding-top: 1.75rem;
-  border-top: 1px solid var(--ui-border);
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 0.5rem 0.75rem 0;
+  font-weight: 600;
+  color: var(--ui-text-highlighted);
+}
+
+/* Narrower than the lessons: dense prose somebody scans for one clause. */
+@media (min-width: 1024px) {
+  .legal__band {
+    padding-block: 4rem 2.5rem;
+  }
+
+  .legal__head {
+    grid-column: 1 / span 8;
+  }
+
+  .legal__body {
+    grid-column: 1 / span 7;
+  }
 }
 </style>

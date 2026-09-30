@@ -3,7 +3,7 @@
  * The video behind the home headline, when `hero.youtubeId` is set in
  * app.config.ts. Muted, looping, no controls, from the no-cookie domain.
  *
- * Wide screens only: on a phone the hero stays the plain gradient, because a
+ * Wide screens only: on a phone the hero stays the plain page, because a
  * background video there costs data a job seeker may be paying for by the
  * megabyte. With reduced motion on, the video's own still is shown instead
  * and nothing plays.
@@ -123,7 +123,6 @@ const poster = computed(() => `https://i.ytimg.com/vi/${encodeURIComponent(props
   inset: 0;
   background:
     linear-gradient(90deg, rgb(8 8 8 / 0.82) 0%, rgb(8 8 8 / 0.55) 45%, rgb(8 8 8 / 0.2) 100%),
-    linear-gradient(0deg, rgb(8 8 8 / 0.6), transparent 35%),
-    radial-gradient(50rem 20rem at 0% 0%, color-mix(in oklab, var(--color-guide-600) 30%, transparent), transparent 70%);
+    linear-gradient(0deg, rgb(8 8 8 / 0.6), transparent 35%);
 }
 </style>

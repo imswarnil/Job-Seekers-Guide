@@ -72,7 +72,7 @@ useSeoMeta({
     title="Sign in to write something here"
     description="Reading the guide never needs an account. You only need one to share your story, sign the guestbook, leave a comment under a lesson or sponsor the guide."
   >
-    <UCard class="max-w-md">
+    <div class="panel max-w-md">
       <UAlert
         v-if="!authConfigured"
         color="warning"
@@ -180,7 +180,7 @@ useSeoMeta({
           </button>
         </template>
       </p>
-    </UCard>
+    </div>
 
     <p class="mt-6 text-sm text-muted max-w-md">
       I keep your name, your email and your picture, and only to show next to

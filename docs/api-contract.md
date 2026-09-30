@@ -30,8 +30,9 @@ A signed-in request is recognised by the Neon Auth cookies, or by
 
 | Method | Path | Returns |
 | --- | --- | --- |
-| GET | `/api/stats/summary` | `{ visitors, pageViews, liveNow, countries, stories, jobsGot, guestbook, raised, sponsors }` (`raised` in paise) |
+| GET | `/api/stats/summary` | `{ visitors, pageViews, liveNow, countries, stories, jobsGot, guestbook, raised, sponsors }` (`raised` in paise; `pageViews` is every view, all time) |
 | GET | `/api/stats/details` | *(extension)* `{ countries: [{ country, visitors }], topPages: [{ path, views }], perDay: [{ day, views }] }` |
+| GET | `/api/stats/trend?days=30\|90\|365` | *(extension)* `{ range, tz, totals: { visitors, views, signups }, days: [{ day, visitors, views, signups }] }`. One entry per day, oldest first, zeros included; days are `YYYY-MM-DD` in India time (`tz: "Asia/Kolkata"`). `visitors` is distinct browsers that day; `totals.visitors` is distinct over the whole range. `signups` counts new Neon Auth accounts (falls back to `profiles` if `neon_auth` is not readable). Admin and account pages are left out. Any other `days` is a 400. `Cache-Control: public, max-age=60`. |
 | POST | `/api/track` | body `{ path, referrer }`; records a page view against a cookie session; country from `cf-ipcountry`. No personal data. |
 | POST | `/api/jobs/got` | body `{ company?, package? }`; "Did you get a job?" counter; one per session → `{ ok, alreadyCounted, jobsGot }` |
 
@@ -48,14 +49,38 @@ empty slot has a floor price.
 
 | Method | Path | Returns |
 | --- | --- | --- |
-| GET | `/api/sponsors/slot/:slot` | `{ slot, holder: null \| { name, url, image, tagline, amount }, minimumNextBid }` |
+| GET | `/api/sponsors/slot/:slot` | `{ slot, holder: null \| { name, url, image, tagline, amount, design }, minimumNextBid }` |
 | GET | `/api/sponsors/leaderboard` | `{ items: [{ rank, name, url, image, total, slots: string[], since }] }` |
-| GET | `/api/sponsors/slots` | *(extension)* `{ items: [{ slot, label, floor, holder, minimumNextBid }] }` |
-| POST | `/api/sponsors/bid` | body `{ slot, amount, name, url, image?, tagline? }` (signed in) → `{ checkoutUrl, ref }` (Dodo) |
+| GET | `/api/sponsors/slots` | *(extension)* `{ items: [{ slot, label, floor, holder, minimumNextBid }] }` (`holder` as above, with `design`) |
+| GET | `/api/sponsors/design` | *(extension)* the card designer's choices: `{ layouts: [{ id, label, description }], palette: [{ id, label, bg, ink, contrast }], ctas: string[], limits: { name, tagline }, default }`. Cached an hour. |
+| POST | `/api/sponsors/bid` | body `{ slot, amount, name, url, image?, tagline?, design? }` (signed in) → `{ checkoutUrl, ref }` (Dodo) |
 
-The front end's `<SponsorSlot name="…">` shows the holder, or a
-"Your ad here: from ₹X, outbid to take it" placeholder linking to
-`/sponsor?slot=…`.
+**The sponsor's card.** On `/sponsor` a bidder designs the card before paying.
+`design` in a bid is `{ layout, palette, cta? }`, checked strictly against the
+lists in `server/utils/sponsorDesign.ts` (the same lists `GET /api/sponsors/design`
+returns); anything else, or any extra key, is a 400:
+
+- `layout`: `wordmark` · `logo-left` · `statement` · `minimal`
+- `palette`: `signal` · `ink` · `cobalt` · `forest` · `violet` · `ochre`. Each is a
+  fill plus the ink drawn on it, and every pair is at least 4.5:1 contrast
+  (computed on the server; a pair that fails is dropped from the list).
+- `cta`: null, or one of `Visit` · `Hire with us` · `Try it free` · `Learn more` ·
+  `See open roles` · `Say hello`
+- `name` 2–60 characters, `tagline` up to 90, `url` an http(s) link. `image` is
+  an http(s) link, or an image the same user uploaded through `/api/uploads`
+  (`/api/media/stories/<user>/<file>`; ownership is checked).
+
+It is stored on the bid as `sponsor_bids.design` (`{ v: 1, layout, palette, cta }`).
+Every `holder` the API returns carries `design` **resolved to colours**:
+`{ layout, palette, accent, ink, cta }` (`accent`/`ink` are `#RRGGBB`). A bid
+from before designs existed, or one whose stored design no longer fits the
+lists, gets the default (`logo-left` in `ink`, no CTA). Hiding a bid
+(`status: hidden` in the admin data manager) takes the card off the site.
+
+The front end's `<SponsorSlot name="…">` draws the holder with `<SponsorCard>`
+(the same component the designer previews with), marked "Sponsored", linked
+with `rel="sponsored noopener"`, or a "Your ad here, from ₹X" placeholder
+linking to `/sponsor`.
 
 ## Support / donations
 
@@ -78,7 +103,8 @@ The front end's `<SponsorSlot name="…">` shows the holder, or a
 | GET/POST | `/api/guestbook` | entries `{ id, name, image, message, gif?, learned?, createdAt }`; POST `{ name?, message, gif?, learned? }` signed in |
 | GET | `/api/gifs/search?q=` | *(extension)* `{ enabled, items: [{ id, title, preview, url }] }`; `enabled: false` without `GIPHY_API_KEY` |
 | GET | `/api/gifs/trending` | *(extension)* same shape as search; GIPHY trending, rating g. `enabled: false` without `GIPHY_API_KEY` |
-| GET/POST | `/api/comments?path=` | lesson comments `{ items, used, limit }`; POST `{ path, body }` signed in, auto-published, **max 5 per user per page** |
+| GET/POST | `/api/comments?path=` | lesson comments `{ items, used, limit }`; POST `{ path, body }` signed in, auto-published, **max 5 per user per page**. Each item is `{ id, body, createdAt, author, mine, sample, reactions: { counts: { like, love, learned, funny, thanks }, mine: kind[] } }` (`mine` on the item: the viewer wrote it; `reactions.mine`: the kinds the viewer has pressed) |
+| POST | `/api/comments/:id/react` | signed in; body `{ kind, on? }` with `kind` one of `like` 👍 · `love` ❤️ · `learned` 💡 · `funny` 😂 · `thanks` 🙏. `on: true` adds, `false` removes, omitted toggles; one of each kind per user per comment → `{ counts, mine }` after the change. 404 for a missing comment |
 | GET | `/api/account` | *(extension)* the signed-in user's stories, comments and guestbook entries |
 | DELETE | `/api/account?confirm=DELETE` | deletes the user and everything they wrote (query, not body: DELETE bodies do not reach h3 on Workers) |
 
@@ -107,7 +133,7 @@ and recorded in `admin_audit` in the same statement.
 | GET | `/api/admin/comments` · DELETE `/api/admin/comments/:id` |
 | GET | `/api/admin/guestbook` · DELETE `/api/admin/guestbook/:id` |
 | GET | `/api/admin/payments` (payments, bids, totals) |
-| GET | `/api/admin/tables` · `/api/admin/tables/:name?page=&size=&sort=&dir=&q=&f=[{col,op,value}]&format=csv` (read-only transaction) |
+| GET | `/api/admin/tables` (now including `comment_reactions`, read-only: composite key; deleting the comment removes them) · `/api/admin/tables/:name?page=&size=&sort=&dir=&q=&f=[{col,op,value}]&format=csv` (read-only transaction) |
 | PATCH | `/api/admin/tables/:name/:id` `{ column: value }` (only the columns in `TABLE_SPECS`, server/utils/admin.ts) · DELETE `/api/admin/tables/:name/:id` (stories, guestbook, comments, page_views, jobs_got) |
 | GET | `/api/admin/audit?page=&size=&table=&action=` |
 | GET | `/api/admin/samples` · DELETE `/api/admin/samples` (removes every `sample` row and the sample profile; audited) |
@@ -116,6 +142,6 @@ and recorded in `admin_audit` in the same statement.
 
 Errors are h3 errors: `{ statusCode, statusMessage }`, where `statusMessage`
 is written for a person. 400 invalid input, 401 signed out, 403 not an admin,
-404, 429 rate limited (comments 20/hour, guestbook 3/day, stories 3/day,
+404, 429 rate limited (comments 20/hour, reactions 120/hour, guestbook 3/day, stories 3/day,
 uploads 20/day, bids 10/hour, donations 10/hour, track 120/10 minutes),
 503 when the database, sign-in or payments are not configured yet.

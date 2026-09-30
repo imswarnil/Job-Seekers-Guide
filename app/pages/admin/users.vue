@@ -46,7 +46,7 @@ useSeoMeta({ title: 'Users · Admin', robots: 'noindex' })
       :data="data?.items || []"
       :columns="columns"
       :loading="status === 'pending'"
-      class="border border-default rounded-lg"
+      class="border-y border-default"
     />
   </AdminShell>
 </template>

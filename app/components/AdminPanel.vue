@@ -11,10 +11,10 @@ defineProps<{
 </script>
 
 <template>
-  <section class="border border-default bg-default min-w-0 flex flex-col">
-    <header class="flex items-start justify-between gap-3 px-4 pt-4 pb-3">
+  <section class="admin-panel min-w-0 flex flex-col">
+    <header class="flex items-start justify-between gap-3 pt-3 pb-3">
       <div class="min-w-0">
-        <h2 class="text-sm font-semibold text-highlighted">
+        <h2 class="label !text-highlighted">
           {{ title }}
         </h2>
         <p
@@ -26,10 +26,10 @@ defineProps<{
       </div>
       <slot name="actions" />
     </header>
-    <div :class="['flex-1 min-h-0', flush ? '' : 'px-4 pb-4']">
+    <div :class="['flex-1 min-h-0', flush ? '' : 'pb-4']">
       <div
         v-if="loading"
-        :class="['space-y-2', flush ? 'px-4 pb-4' : '']"
+        :class="['space-y-2', flush ? 'pb-4' : '']"
       >
         <USkeleton
           v-for="n in 4"
@@ -39,7 +39,7 @@ defineProps<{
       </div>
       <p
         v-else-if="empty"
-        :class="['py-6 text-center text-sm text-muted', flush ? 'px-4' : '']"
+        class="py-6 text-sm text-muted"
       >
         {{ emptyText || 'Nothing yet.' }}
       </p>
@@ -47,3 +47,10 @@ defineProps<{
     </div>
   </section>
 </template>
+
+<style scoped>
+/* A dashboard panel is a column under a heavy rule, not a box. */
+.admin-panel {
+  border-top: 2px solid var(--rule-strong);
+}
+</style>

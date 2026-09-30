@@ -6,7 +6,8 @@ const COMMENTS_PER_PAGE = 5
 
 /**
  * Comments under one lesson, oldest first, plus how many of their five the
- * viewer has used on this page (0 when signed out).
+ * viewer has used on this page (0 when signed out). Each carries its reaction
+ * counts and the viewer's own reactions (`reactions: { counts, mine }`).
  */
 export default defineEventHandler(async (event) => {
   const { path } = queryValid(event, schema)
@@ -18,6 +19,7 @@ export default defineEventHandler(async (event) => {
       select c.id, c.body, c.ts, c.user_id, c.sample, p.name, p.image
       from comments c left join profiles p on p.id = c.user_id
       where c.path = $1 order by c.ts asc limit 300`, [path])
+    const reactions = await reactionsFor(sql, rows.map(r => Number(r.id)), user?.id ?? null)
     return {
       items: rows.map(r => ({
         id: Number(r.id),
@@ -25,7 +27,8 @@ export default defineEventHandler(async (event) => {
         createdAt: r.ts,
         author: { name: r.name || 'A reader', image: r.image },
         mine: Boolean(user && r.user_id === user.id),
-        sample: r.sample
+        sample: r.sample,
+        reactions: reactions.get(Number(r.id)) ?? { counts: emptyCounts(), mine: [] }
       })),
       used: user ? rows.filter(r => r.user_id === user.id).length : 0,
       limit: COMMENTS_PER_PAGE

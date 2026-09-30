@@ -122,14 +122,13 @@ usePageSeo({
         <UContentToc
           :links="toc"
           highlight
-          class="!bg-transparent !border-0 !p-0 !static"
+          highlight-color="neutral"
+          color="neutral"
+          class="!bg-transparent !backdrop-blur-none !border-0 !p-0 !static"
         />
       </div>
 
       <AuthorCard />
-
-      <!-- The third-party "a human wrote this" certificate. -->
-      <AuthorBadge />
 
       <PageActions :file="file" />
 

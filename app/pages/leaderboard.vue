@@ -111,30 +111,34 @@ usePageSeo({
 </template>
 
 <style scoped>
+/* The leaderboard as a ruled table: rank, who, since, total. */
 .board {
-  display: grid;
-  gap: 0.5rem;
+  border-top: 2px solid var(--rule-strong);
 }
 
 .board__row {
   display: flex;
   align-items: center;
   gap: 0.875rem;
-  padding: 0.75rem 1rem;
-  border: 1px solid var(--ui-border);
-  border-radius: var(--radius-lg, 0.75rem);
-}
-
-.board__row[data-rank='1'] {
-  border-color: var(--ui-primary);
-  background: color-mix(in oklab, var(--ui-primary) 6%, transparent);
+  padding: 0.875rem 0;
+  border-bottom: 1px solid var(--rule-color);
 }
 
 .board__rank {
-  width: 1.75rem;
+  width: 2.5rem;
+  flex-shrink: 0;
+  font-size: var(--text-xl);
   font-weight: 700;
-  text-align: center;
-  color: var(--ui-text-muted);
+  letter-spacing: -0.03em;
+  color: var(--ui-text-dimmed);
   font-variant-numeric: tabular-nums;
+}
+
+.board__row[data-rank] .board__rank {
+  color: var(--ui-text-highlighted);
+}
+
+.board__row[data-rank='1'] .board__rank {
+  color: var(--ui-primary);
 }
 </style>

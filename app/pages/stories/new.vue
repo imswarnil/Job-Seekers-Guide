@@ -185,7 +185,7 @@ useSeoMeta({ title: 'Share your story', robots: 'noindex' })
         />
       </UFormField>
 
-      <UCard>
+      <div class="panel">
         <p class="font-medium text-highlighted">
           Photos or a video
           <span class="text-sm font-normal text-muted">(optional)</span>
@@ -235,7 +235,7 @@ useSeoMeta({ title: 'Share your story', robots: 'noindex' })
           <li
             v-for="(m, i) in media"
             :key="m.url"
-            class="relative aspect-video overflow-hidden rounded-md bg-elevated"
+            class="relative aspect-video overflow-hidden bg-elevated"
           >
             <img
               v-if="m.kind === 'image'"
@@ -265,7 +265,7 @@ useSeoMeta({ title: 'Share your story', robots: 'noindex' })
             />
           </li>
         </ul>
-      </UCard>
+      </div>
 
       <p
         v-if="error"

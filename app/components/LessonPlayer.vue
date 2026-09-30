@@ -73,13 +73,27 @@ function startAdvance() {
   }, 1000)
 }
 
-function onToggle() {
-  cancelAdvance()
-  toggleComplete(route.path)
-
-  if (isComplete(route.path)) {
-    startAdvance()
+/*
+ * Marking a lesson finished happens in the lesson bar (PlayerPagination) or
+ * with `M`. Either way the stored state flips, and this is where it is heard:
+ * a lesson that has just become finished starts the countdown, one that has
+ * been un-finished cancels it. A change of page is not a change of mind, so
+ * arriving at a lesson that was already finished starts nothing.
+ */
+watch([() => route.path, complete], ([path, now], [before, was]) => {
+  if (path !== before) {
+    cancelAdvance()
+    return
   }
+  if (now && !was) {
+    startAdvance()
+  } else if (!now) {
+    cancelAdvance()
+  }
+})
+
+function onToggle() {
+  toggleComplete(route.path)
 }
 
 useEventListener('keydown', () => counting.value && cancelAdvance())
@@ -118,47 +132,19 @@ usePlayerShortcuts({
 
     <AdSlot placement="lesson-footer" />
 
-    <USeparator class="my-10" />
-
-    <!-- One action, not two.
-         This block used to carry both "mark as finished" and "finish and
-         continue", and the full-width band underneath it carried a Next card
-         doing the same job — so every lesson ended in two paginations arguing
-         about which one was the way forward. Moving on belongs to the band;
-         this is only ever about marking the lesson done. -->
-    <ClientOnly>
-      <div class="flex flex-wrap items-center gap-3">
-        <UButton
-          :label="complete ? 'Finished' : 'Mark as finished'"
-          :icon="complete ? 'i-lucide-circle-check' : 'i-lucide-circle'"
-          :color="complete ? 'success' : 'neutral'"
-          :variant="complete ? 'subtle' : 'solid'"
-          size="lg"
-          @click="onToggle"
-        />
-
-        <p
-          v-if="!complete && next"
-          class="text-sm text-dimmed"
-        >
-          Ticking it off moves you on to {{ next.title }}.
-        </p>
-      </div>
-    </ClientOnly>
-
     <PlayerUpNext
       v-if="counting"
       v-model:remaining="remaining"
       :next="next"
       :counting="counting"
       :seconds="AUTO_ADVANCE_SECONDS"
-      class="mt-8"
+      class="mt-10"
       @cancel="cancelAdvance"
     />
 
     <ProductShelf
       :track="subject?.slug"
-      class="mt-10"
+      class="mt-16"
     />
   </div>
 </template>

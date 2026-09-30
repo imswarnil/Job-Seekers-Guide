@@ -1,80 +1,142 @@
 <script setup lang="ts">
 import type { Lesson } from '~/utils/path'
-import { trackSlug } from '~/utils/tech'
+import { trackSlug, trackStyle } from '~/utils/tech'
 
-defineProps<{
+const props = defineProps<{
   title: string
   description?: string
   lesson?: Lesson
   minutes?: number
   kind?: string
 }>()
+
+const color = computed(() => trackStyle(trackSlug(props.lesson?.subjectPath)).color)
 </script>
 
 <template>
-  <header class="mb-8">
-    <div class="flex items-center gap-1.5 text-sm text-muted flex-wrap mb-3">
+  <header class="lesson-head swiss-grid">
+    <nav
+      class="lesson-head__crumbs"
+      aria-label="Where this lesson sits"
+    >
       <NuxtLink
         v-if="lesson?.subjectPath"
         :to="lesson.subjectPath"
-        class="inline-flex items-center gap-1.5 hover:text-primary transition-colors"
+        class="lesson-head__crumb"
+        :style="{ '--track': color }"
       >
-        <TrackIcon
-          :slug="trackSlug(lesson.subjectPath)"
-          size="xs"
-          bare
+        <span
+          class="lesson-head__swatch"
+          aria-hidden="true"
         />
         {{ lesson.subjectTitle }}
       </NuxtLink>
-
       <template v-if="lesson?.modulePath">
-        <UIcon
-          name="i-lucide-chevron-right"
-          class="size-3.5 text-dimmed"
-        />
+        <span aria-hidden="true">/</span>
         <NuxtLink
           :to="lesson.modulePath"
-          class="hover:text-primary transition-colors"
+          class="lesson-head__crumb"
         >
           {{ lesson.moduleTitle }}
         </NuxtLink>
       </template>
-    </div>
+    </nav>
 
-    <h1 class="font-display text-3xl sm:text-4xl font-bold text-highlighted tracking-tight text-balance">
+    <h1 class="lesson-head__title headline">
       {{ title }}
     </h1>
 
     <p
       v-if="description"
-      class="mt-3 text-lg text-muted text-balance"
+      class="lesson-head__lede lede"
     >
       {{ description }}
     </p>
 
-    <div
+    <dl
       v-if="minutes || kind"
-      class="mt-4 flex items-center gap-2 flex-wrap"
+      class="lesson-head__meta"
     >
-      <UBadge
-        v-if="kind && kind !== 'lesson'"
-        :label="kind"
-        :icon="lessonIcon({ kind })"
-        color="secondary"
-        variant="subtle"
-        size="sm"
-        class="capitalize"
-      />
-      <span
-        v-if="minutes"
-        class="inline-flex items-center gap-1.5 text-sm text-dimmed"
-      >
-        <UIcon
-          name="i-lucide-clock"
-          class="size-3.5"
-        />
-        {{ minutes }} min read
-      </span>
-    </div>
+      <div v-if="kind">
+        <dt class="label">
+          Kind
+        </dt>
+        <dd class="capitalize">
+          {{ kind }}
+        </dd>
+      </div>
+      <div v-if="minutes">
+        <dt class="label">
+          Reading
+        </dt>
+        <dd class="num">
+          {{ minutes }} min
+        </dd>
+      </div>
+    </dl>
   </header>
 </template>
+
+<style scoped>
+.lesson-head > * {
+  grid-column: 1 / -1;
+}
+
+.lesson-head__crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.625rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ui-text-dimmed);
+}
+
+.lesson-head__crumb {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--ui-text-muted);
+  transition: color var(--dgm-t-fast) var(--dgm-ease);
+}
+
+.lesson-head__crumb:hover {
+  color: var(--ui-text-highlighted);
+}
+
+.lesson-head__swatch {
+  width: 0.5rem;
+  height: 0.5rem;
+  background: var(--track);
+}
+
+.lesson-head__title {
+  margin-top: 1.25rem;
+  max-width: 22ch;
+}
+
+.lesson-head__lede {
+  margin-top: 1rem;
+}
+
+.lesson-head__meta {
+  display: flex;
+  gap: 2.5rem;
+  margin-top: 2rem;
+  font-size: var(--text-sm);
+  color: var(--ui-text-highlighted);
+}
+
+.lesson-head__meta dd {
+  margin-top: 0.25rem;
+}
+
+@media (min-width: 1280px) {
+  .lesson-head__title,
+  .lesson-head__lede {
+    grid-column: 1 / span 9;
+  }
+}
+</style>

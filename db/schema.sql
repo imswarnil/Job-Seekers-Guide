@@ -200,3 +200,24 @@ create table if not exists admin_audit (
 );
 create index if not exists admin_audit_created_idx on admin_audit (created_at desc);
 create index if not exists admin_audit_table_idx on admin_audit (table_name, created_at desc);
+
+-- From 0003_sponsor_design_and_reactions.
+
+-- The card a sponsor designed on /sponsor before paying: which layout, which
+-- colour from the fixed palette, and an optional call-to-action label, as
+-- `{ "v": 1, "layout": "...", "palette": "...", "cta": "..." | null }`.
+-- Validated against the allow-lists in server/utils/sponsorDesign.ts before it
+-- is written, and again when it is read, so a row that no longer fits (or an
+-- older bid with no design at all) falls back to the default card.
+alter table sponsor_bids add column if not exists design jsonb;
+
+-- Reactions under a lesson comment: one of each kind per person per comment.
+-- Pressing the same reaction again takes it back.
+create table if not exists comment_reactions (
+  comment_id  bigint not null references comments (id) on delete cascade,
+  user_id     text not null references profiles (id) on delete cascade,
+  kind        text not null check (kind in ('like', 'love', 'learned', 'funny', 'thanks')),
+  created_at  timestamptz not null default now(),
+  primary key (comment_id, user_id, kind)
+);
+create index if not exists comment_reactions_user_idx on comment_reactions (user_id);

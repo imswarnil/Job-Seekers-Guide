@@ -52,81 +52,125 @@ const tiles = computed<Tile[]>(() => {
 <template>
   <ul class="quick">
     <li
-      v-for="tile in tiles"
+      v-for="(tile, index) in tiles"
       :key="tile.key"
     >
       <NuxtLink
         :to="tile.to"
-        class="quick__tile card-hover"
+        class="quick__row row-link"
         :data-primary="tile.primary ? '' : undefined"
         :style="tile.track ? { '--track': trackStyle(tile.track).color } : undefined"
       >
-        <span class="quick__icon">
-          <UIcon
-            :name="tile.icon"
-            class="size-5"
-          />
-        </span>
-        <span class="min-w-0">
-          <span class="quick__label">{{ tile.label }}</span>
+        <span class="quick__n num">{{ String(index + 1).padStart(2, '0') }}</span>
+        <span class="quick__main">
+          <span class="quick__label">
+            <span
+              v-if="tile.track"
+              class="quick__swatch"
+              aria-hidden="true"
+            />
+            {{ tile.label }}
+          </span>
           <span class="quick__note">{{ tile.note }}</span>
         </span>
+        <UIcon
+          name="i-lucide-arrow-right"
+          class="quick__arrow size-4"
+        />
       </NuxtLink>
     </li>
   </ul>
 </template>
 
 <style scoped>
+/* An index: numbered rows between rules, in two columns once there is room.
+   The rules run the full width of each column, so the two lists read as one
+   table. */
 .quick {
   display: grid;
-  gap: 0.75rem;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 14.5rem), 1fr));
+  column-gap: var(--gutter);
+  border-top: 1px solid var(--rule-color);
 }
 
-.quick__tile {
-  display: flex;
-  align-items: flex-start;
+.quick > li {
+  border-bottom: 1px solid var(--rule-color);
+}
+
+@media (min-width: 768px) {
+  .quick {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.quick__row {
+  display: grid;
+  grid-template-columns: 2rem minmax(0, 1fr) auto;
   gap: 0.75rem;
+  align-items: baseline;
   height: 100%;
-  padding: 0.875rem 1rem;
-  border: 1px solid var(--ui-border);
-  background: var(--ui-bg);
+  padding: 0.875rem 0.5rem 0.875rem 0;
 }
 
-.quick__tile[data-primary] {
-  border-color: var(--ui-primary);
-  background: color-mix(in oklab, var(--ui-primary) 6%, var(--ui-bg));
+.quick__n {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--ui-text-dimmed);
 }
 
-.quick__icon {
+.quick__main {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  width: 2.25rem;
-  height: 2.25rem;
-  color: var(--track, var(--ui-primary));
-  background: color-mix(in oklab, var(--track, var(--ui-primary)) 12%, transparent);
-}
-
-.dark .quick__icon {
-  color: color-mix(in oklab, var(--track, var(--ui-primary)) 70%, white);
+  flex-direction: column;
+  min-width: 0;
 }
 
 .quick__label {
-  display: block;
-  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: var(--text-lg);
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  line-height: 1.25;
   color: var(--ui-text-highlighted);
 }
 
+.quick__row[data-primary] .quick__label,
+.quick__row:hover .quick__label {
+  color: var(--ui-primary);
+}
+
+.quick__swatch {
+  flex-shrink: 0;
+  width: 0.5rem;
+  height: 0.5rem;
+  background: var(--track);
+}
+
 .quick__note {
-  display: -webkit-box;
   margin-top: 0.125rem;
   overflow: hidden;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font-size: var(--text-sm);
-  line-height: 1.4;
   color: var(--ui-text-muted);
+}
+
+.quick__arrow {
+  align-self: center;
+  color: var(--ui-text-dimmed);
+  transition:
+    transform var(--dgm-t-fast) var(--dgm-ease),
+    color var(--dgm-t-fast) var(--dgm-ease);
+}
+
+.quick__row:hover .quick__arrow {
+  color: var(--ui-primary);
+  transform: translateX(3px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .quick__row:hover .quick__arrow {
+    transform: none;
+  }
 }
 </style>

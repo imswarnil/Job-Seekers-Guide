@@ -1,10 +1,14 @@
 <script setup lang="ts">
+import type { SponsorCardData, SponsorCardDesign } from '~/components/SponsorCard.vue'
+
 /**
  * A sponsor spot, sold on the outbid model in docs/api-contract.md: the highest
- * total paid for a slot holds it, with no expiry, until somebody pays more.
+ * single paid bid holds it, with no expiry, until somebody pays more.
  *
  * The site sells exactly one spot, `brand`, shown in two places: a band on the
- * home page and the sticky card beside every lesson.
+ * home page and the sticky card beside every lesson. The holder is drawn by
+ * `SponsorCard`, in the card they designed on /sponsor (the server resolves
+ * the design, and gives a bid from before designs existed the default card).
  *
  * Fetched in the browser only. Every page is prerendered, and a holder baked
  * into the HTML would stay there after they were outbid. While it loads, and
@@ -33,6 +37,7 @@ interface Holder {
   image?: string | null
   tagline?: string | null
   amount?: number
+  design?: SponsorCardDesign
 }
 
 interface SlotResponse {
@@ -58,15 +63,17 @@ onMounted(async () => {
   }
 })
 
-/** Only a plain web link is ever rendered, whatever a bidder typed in. */
+/** Only a plain web link is ever a destination, whatever a bidder typed in. */
 const isWeb = (value?: string | null) => Boolean(value && /^https?:\/\//i.test(value))
 
-const holder = computed(() => {
+const DEFAULT_DESIGN: SponsorCardDesign = { layout: 'logo-left', accent: '#111111', ink: '#FFFFFF', cta: null }
+
+const holder = computed<SponsorCardData | null>(() => {
   const h = data.value?.holder
   if (!h || !h.name || !isWeb(h.url)) {
     return null
   }
-  return { ...h, image: isWeb(h.image) ? h.image : null }
+  return { name: h.name, url: h.url, image: h.image ?? null, tagline: h.tagline ?? null, design: h.design ?? DEFAULT_DESIGN }
 })
 
 const inr = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 })
@@ -76,9 +83,6 @@ const price = computed(() => {
   const paise = data.value?.minimumNextBid
   return typeof paise === 'number' && paise > 0 ? inr.format(paise / 100) : undefined
 })
-
-const bidLink = '/sponsor'
-const failedImage = ref(false)
 </script>
 
 <template>
@@ -87,176 +91,122 @@ const failedImage = ref(false)
     :data-variant="variant"
     :aria-label="holder ? `Sponsored by ${holder.name}` : 'Sponsor spot'"
   >
-    <a
+    <SponsorCard
       v-if="holder"
-      :href="holder.url"
-      target="_blank"
-      rel="sponsored noopener"
-      class="sponsor__card card-hover"
-    >
-      <img
-        v-if="holder.image && !failedImage"
-        :src="holder.image"
-        :alt="holder.name"
-        loading="lazy"
-        decoding="async"
-        class="sponsor__image"
-        @error="failedImage = true"
-      >
-      <span
-        v-else
-        class="sponsor__initial"
-      >{{ holder.name.slice(0, 1).toUpperCase() }}</span>
-
-      <span class="min-w-0 flex-1">
-        <span class="sponsor__label">Sponsored</span>
-        <span class="sponsor__name">{{ holder.name }}</span>
-        <span
-          v-if="holder.tagline && variant !== 'compact'"
-          class="sponsor__tagline"
-        >{{ holder.tagline }}</span>
-      </span>
-
-      <UIcon
-        name="i-lucide-arrow-up-right"
-        class="size-4 shrink-0 text-dimmed"
-      />
-    </a>
+      :sponsor="holder"
+      :size="variant === 'banner' ? 'band' : 'column'"
+    />
 
     <NuxtLink
       v-else
-      :to="bidLink"
-      class="sponsor__empty card-hover"
+      to="/sponsor"
+      class="sponsor__empty"
     >
-      <UIcon
-        name="i-lucide-megaphone"
-        class="sponsor__icon"
-      />
-      <span class="min-w-0 flex-1">
-        <span class="sponsor__label">Sponsor spot</span>
-        <span class="sponsor__name">Your ad here</span>
-        <span
-          v-if="variant !== 'compact'"
-          class="sponsor__tagline"
-        >
-          Outbid the current holder and keep this spot forever.<template v-if="price"> From {{ price }}.</template>
-        </span>
-        <span
-          v-else-if="price"
-          class="sponsor__tagline"
-        >From {{ price }}</span>
+      <span class="sponsor__label">Sponsor spot</span>
+      <span class="sponsor__name">Your ad here</span>
+      <span
+        v-if="variant !== 'compact'"
+        class="sponsor__text"
+      >
+        Design your card, outbid the holder and keep this spot for as long as nobody pays more.
       </span>
-      <UIcon
-        name="i-lucide-arrow-right"
-        class="size-4 shrink-0 text-dimmed"
-      />
+      <span class="sponsor__foot">
+        <span
+          v-if="price"
+          class="sponsor__price"
+        >From {{ price }}</span>
+        <span class="sponsor__go">
+          Sponsor
+          <UIcon
+            name="i-lucide-arrow-right"
+            class="size-4"
+          />
+        </span>
+      </span>
     </NuxtLink>
   </aside>
 </template>
 
 <style scoped>
-.sponsor__card,
 .sponsor__empty {
   display: flex;
-  align-items: center;
-  gap: 0.875rem;
-  padding: 0.875rem 1rem;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 1rem;
+  border: 1px solid var(--rule-color, var(--ui-border));
+  border-top: 3px solid var(--ui-text-highlighted);
   border-radius: 0;
+  text-decoration: none;
+  transition: border-color var(--dgm-t-fast, 120ms) var(--dgm-ease, ease);
 }
 
-.sponsor__card {
-  border: 1px solid var(--ui-border);
-  background: var(--ui-bg);
-}
-
-.sponsor__empty {
-  border: 1px dashed var(--ui-border-accented);
-  background:
-    repeating-linear-gradient(
-      -45deg,
-      transparent 0 10px,
-      color-mix(in oklab, var(--ui-border) 35%, transparent) 10px 11px
-    );
-}
-
-.sponsor__image,
-.sponsor__initial {
-  flex-shrink: 0;
-  width: 2.75rem;
-  height: 2.75rem;
-  border-radius: 0;
-  object-fit: cover;
-}
-
-.sponsor__initial {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--ui-bg-accented);
-  font-weight: 700;
-  color: var(--ui-text-highlighted);
-}
-
-.sponsor__icon {
-  flex-shrink: 0;
-  width: 1.25rem;
-  height: 1.25rem;
-  color: var(--ui-primary);
+.sponsor__empty:hover,
+.sponsor__empty:focus-visible {
+  border-color: var(--ui-text-highlighted);
 }
 
 .sponsor__label {
-  display: block;
-  font-size: 0.625rem;
+  font-size: 0.6875rem;
+  line-height: 1.3;
   font-weight: 600;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--ui-text-dimmed);
+  color: var(--ui-text-muted);
 }
 
 .sponsor__name {
-  display: block;
-  font-weight: 600;
+  font-size: 1.125rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
   color: var(--ui-text-highlighted);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
-.sponsor__tagline {
-  display: block;
-  margin-top: 0.125rem;
-  font-size: 0.8125rem;
+.sponsor__text {
+  font-size: 0.875rem;
+  line-height: 1.45;
   color: var(--ui-text-muted);
   text-wrap: pretty;
 }
 
-.sponsor[data-variant='banner'] .sponsor__card,
+.sponsor__foot {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--rule-color, var(--ui-border));
+}
+
+.sponsor__price {
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums lining-nums;
+  color: var(--ui-text-muted);
+}
+
+.sponsor__go {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  margin-left: auto;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--ui-primary);
+}
+
 .sponsor[data-variant='banner'] .sponsor__empty {
-  padding: 1.125rem 1.5rem;
+  padding: 1.25rem 1.5rem;
 }
 
-.sponsor[data-variant='compact'] .sponsor__card,
+.sponsor[data-variant='banner'] .sponsor__name {
+  font-size: 1.5rem;
+}
+
 .sponsor[data-variant='compact'] .sponsor__empty {
-  gap: 0.625rem;
-  padding: 0.5rem 0.625rem;
-}
-
-.sponsor[data-variant='compact'] .sponsor__image,
-.sponsor[data-variant='compact'] .sponsor__initial {
-  width: 2rem;
-  height: 2rem;
-}
-
-.sponsor[data-variant='compact'] .sponsor__icon {
-  width: 1rem;
-  height: 1rem;
+  padding: 0.625rem 0.75rem;
 }
 
 .sponsor[data-variant='compact'] .sponsor__name {
-  font-size: 0.8125rem;
-}
-
-.sponsor[data-variant='compact'] .sponsor__tagline {
-  font-size: 0.75rem;
+  font-size: 0.9375rem;
 }
 </style>

@@ -4,14 +4,19 @@ const schema = z.object({
   slot: z.string(),
   // Paise, like every amount in the API.
   amount: z.number().int().positive().max(10_000_000_00),
-  name: text(2, 60),
+  name: text(2, NAME_MAX),
   url: webUrl,
-  image: webUrl.optional().nullable().or(z.literal('')),
-  tagline: optionalText(100)
+  // A logo: an http(s) link or an image this user uploaded through /api/uploads.
+  image: logoUrl.optional().nullable().or(z.literal('')),
+  tagline: optionalText(TAGLINE_MAX),
+  // The card they designed. Optional, so an older client still works; without
+  // one the bid gets the default card.
+  design: designSchema.optional().nullable()
 })
 
 /**
- * A bid. Records a pending bid and a pending payment, then hands back a Dodo
+ * A bid, with the card the sponsor designed (validated against the allow-lists
+ * in server/utils/sponsorDesign.ts). Records a pending bid and a pending payment, then hands back a Dodo
  * checkout link. Nothing is shown on the site until the webhook says it was
  * paid, and the slot changes hands only if it still beats the holder then.
  */
@@ -24,6 +29,15 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, statusMessage: 'slot: no such sponsor slot' })
   }
   await rateLimit(event, sql, `bid:${user.id}`, 10, 3600)
+
+  // An uploaded logo must be this user's own image, not somebody else's file.
+  const media = input.image ? MEDIA_PATH.exec(input.image) : null
+  if (media) {
+    const [owned] = await q(sql, `select 1 from uploads where key = $1 and user_id = $2 and kind = 'image'`, [media[1], user.id])
+    if (!owned) {
+      throw createError({ statusCode: 400, statusMessage: 'image: upload the logo again; that file is not one of yours' })
+    }
+  }
 
   const [holder] = await q<{ amount: number }>(sql,
     `select amount from sponsor_bids where status = 'paid' and slot = $1 order by amount desc limit 1`, [slot])
@@ -38,9 +52,9 @@ export default defineEventHandler(async (event) => {
   const paymentId = payment!.id
 
   await q(sql, `
-    insert into sponsor_bids (slot, user_id, sponsor_name, sponsor_url, image, tagline, amount, payment_id)
-    values ($1, $2, $3, $4, $5, $6, $7, $8)`,
-  [slot, user.id, input.name, input.url, input.image || null, input.tagline ?? null, input.amount, paymentId])
+    insert into sponsor_bids (slot, user_id, sponsor_name, sponsor_url, image, tagline, amount, payment_id, design)
+    values ($1, $2, $3, $4, $5, $6, $7, $8, $9::jsonb)`,
+  [slot, user.id, input.name, input.url, input.image || null, input.tagline ?? null, input.amount, paymentId, JSON.stringify(storedDesign(input.design))])
 
   try {
     const session = await startCheckout(event, {

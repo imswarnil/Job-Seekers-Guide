@@ -5,47 +5,72 @@
 @source "../../../content/**/*";
 
 /* =============================================================================
-   Job Seekers Guide — on the Im Design System
+   Job Seekers Guide · the Swiss system
    =============================================================================
 
-   The visual language here is not its own invention any more. It is the Im
-   Design System (design.imswarnil.com), mapped onto the variable names Nuxt UI
-   and Tailwind already read, so nothing in this repository has to know it
-   changed.
+   One visual language, in the International Typographic Style, defined here
+   once and read by every page and component. Nothing below is decoration: a
+   rule separates, a label names, a number counts.
 
-   The system is VENDORED, not linked. Its three font files live in
-   public/fonts/ and the token values below are copied from
-   design.imswarnil.com/src/foundation/tokens/. The commit they came from is
-   recorded in public/fonts/SOURCE.md. That is the same pattern the site theme
-   uses: a relative path to a sibling folder works on this machine and nowhere
-   else, and CI builds this site on a machine that has never seen the system.
+   THE RULES
+     1. A strict grid. Twelve columns on a wide screen, eight on a tablet, four
+        on a phone, with one fixed gutter. Everything snaps to a column edge.
+     2. Hairlines, not boxes. A thin vertical guide line marks every column in
+        the background of a content band (`.guides`); a 1px horizontal rule
+        separates one band, or one row, from the next (`.rule`, `.row-list`).
+        Lists are rows between rules. A boxed card is the exception.
+     3. Type does the hierarchy. Large, tight, heavy headlines (`.display`,
+        `.headline`); small, uppercase, tracked labels (`.label`); numbers in
+        tabular figures (`.num`). Flush left, ragged right, always.
+     4. One accent. Red (`--ui-primary`) marks the single most important action
+        or state on a screen and nothing else. Track colours appear only as the
+        small mark that identifies a track.
+     5. No shadows, no rounded corners, no gradients. The one exception is the
+        shade over the home page video, which is there so the words can be read.
+     6. Whitespace is structure. Bands breathe (`--band-y`).
 
-   What the system asserts, and what it therefore cost us:
+   THE TOKENS (all on :root, all redefined per breakpoint where they change)
+     --grid-cols     4 · 8 · 12              columns in `.swiss-grid` and `.guides`
+     --gutter        1rem · 1.25rem · 1.5rem the one gutter
+     --margin        side margin of `.frame`
+     --grid-max      76rem                   widest a frame gets
+     --band-y        vertical padding of a band
+     --rule-color    the 1px horizontal rule
+     --guide-color   the vertical guide lines, fainter than a rule
+     --navbar-h      the fixed top bar
+     --sidebar-w     the fixed left sidebar
+     --pager-h       the fixed lesson pagination bar
 
-     · Geist, Geist Mono and Geist Pixel. Nothing else. The previous stack named
-       Inter, Plus Jakarta Sans and JetBrains Mono and shipped none of them, so
-       every visitor read this site in their system font. Now three files load
-       and the page looks the same everywhere.
-     · ONE accent, not two. Indigo-plus-teal is gone. A second brand colour is a
-       second thing to learn, and on a teaching platform the reader's attention
-       is the budget. Red carries every primary action; anything that needs to
-       be told apart from an action uses weight or a border, not a hue.
-     · An ACHROMATIC grey ramp. The greys were tinted toward indigo, which is
-       defensible when indigo is the brand and indefensible the moment a
-       screenshot or a photograph sits beside them. Neutral greys never tint the
-       thing next to them.
-     · A φ ladder for anything the 12-column grid has nothing to say about.
-       Rung 4 is 1rem, so it lands on sizes this codebase already used.
+   THE UTILITIES
+     .frame          centred container, `--grid-max` wide, `--margin` each side
+     .swiss-grid     a `--grid-cols` column grid with `--gutter` gaps. Children
+                     place themselves with Tailwind: `col-span-full md:col-span-4`
+     .guides         paints the column guide lines of a `.frame` behind a band.
+                     Put it on the full-width band, with the `.frame` inside
+     .band           a full-width section: `--band-y` padding and a rule below
+     .rule / .rule-b a 1px rule above / below
+     .label          small uppercase tracked label
+     .num            tabular, lining figures
+     .display        the largest headline: tight, heavy, -0.04em
+     .headline       a section headline
+     .lede           the paragraph under a headline, muted, measure-capped
+     .row-list       a list whose rows are separated by 1px rules
+     .row-link       a whole row that is a link: quiet hover, clear focus
+     .panel          a block (a form, a call to action) under a heavy rule
+     .arrow-link     "All stories →": a text link with an arrow that moves
+     .node           a square timeline node (the journey, the part markers)
+     .card-hover     kept for older markup: a border that darkens on hover
 
-   Amber survives, as it did before, for streaks and milestones only — it is the
-   one place where "warm" is the meaning rather than the decoration, and it is
-   rationed so it keeps meaning something.
+   The other builder's pages (sponsor, stats) read the same tokens and
+   utilities. Change a value here and the whole site moves with it.
+
+   FONTS
+   Geist and Geist Mono, vendored from the Im Design System (public/fonts/,
+   commit in SOURCE.md). Geist Pixel is no longer loaded: `--font-pixel` and
+   `.font-pixel` now resolve to Geist in tabular figures, so older markup that
+   asks for it gets the Swiss number instead of a costume.
    ========================================================================== */
 
-/* Geist, Geist Mono and Geist Pixel — SIL Open Font License 1.1. Copied out of
-   the design system rather than fetched from a CDN: a font is the one asset a
-   page cannot render correctly without, and a third party deciding to move it
-   would reflow every lesson on this site. */
 @font-face {
   font-family: 'Geist';
   font-style: normal;
@@ -62,34 +87,15 @@
   src: url('/fonts/GeistMono-Variable.woff2') format('woff2');
 }
 
-/* A display face, used for exactly one thing: the numbers on a stat. Loaded
-   last and never applied to prose, so a reader on a slow connection is never
-   waiting on it to read a sentence. */
-@font-face {
-  font-family: 'Geist Pixel';
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url('/fonts/GeistPixel-Square.woff2') format('woff2');
-}
-
 @theme static {
-  /* ---- Type ---------------------------------------------------------------
-     One family for everything a reader reads. `--font-display` is kept as a
-     name because a hundred templates reference it, but it now resolves to the
-     same face — the system does not have a second voice, it has weight and
-     tracking. */
-  --font-sans: 'Geist', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-display: 'Geist', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  /* ---- Type -------------------------------------------------------------- */
+  --font-sans: 'Geist', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  --font-display: 'Geist', ui-sans-serif, system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
   --font-mono: 'Geist Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
-  --font-pixel: 'Geist Pixel', 'Geist Mono', ui-monospace, monospace;
+  --font-pixel: 'Geist', ui-sans-serif, system-ui, sans-serif;
 
-  /* ---- Size ---------------------------------------------------------------
-     One notch larger than Tailwind's defaults across the board. The body is
-     17px, not 16, and every `text-*` step moves up with it, so a caption, a
-     sidebar row and a button label all grow together instead of the body
-     outgrowing the interface around it. Spacing is untouched: only type moved.
-     People read this site on cheap phones, for an hour at a time. */
+  /* One notch larger than Tailwind's defaults: the body is 17px. People read
+     this site on cheap phones, for an hour at a time. */
   --text-xs: 0.8125rem;
   --text-xs--line-height: calc(1.125 / 0.8125);
   --text-sm: 0.9375rem;
@@ -103,36 +109,28 @@
   --text-2xl: 1.625rem;
   --text-2xl--line-height: calc(2.125 / 1.625);
   --text-3xl: 2rem;
-  --text-3xl--line-height: calc(2.5 / 2);
+  --text-3xl--line-height: calc(2.375 / 2);
   --text-4xl: 2.5rem;
-  --text-4xl--line-height: calc(2.875 / 2.5);
+  --text-4xl--line-height: calc(2.75 / 2.5);
+  --text-5xl: 3.25rem;
+  --text-5xl--line-height: 1;
+  --text-6xl: 4.25rem;
+  --text-6xl--line-height: 1;
 
-  /* ---- The accent ---------------------------------------------------------
-     `#f22f46` is the system's default accent — the value Ghost injects when a
-     site owner has not chosen one. The ramp around it is built so 600 is that
-     colour: 600 is what Nuxt UI uses for a solid button, and the brand colour
-     belongs on the button rather than three steps away from it.
-
-     Named `guide` rather than `red` or `accent` because every component in this
-     repository already asks for `guide-600`, and a rename buys nothing. */
+  /* ---- The accent: red, and only red ------------------------------------- */
   --color-guide-50: oklch(97.1% 0.014 17.4);
   --color-guide-100: oklch(93.6% 0.032 17.7);
   --color-guide-200: oklch(88.5% 0.062 18.3);
   --color-guide-300: oklch(81.2% 0.106 19.1);
   --color-guide-400: oklch(71.4% 0.162 21.2);
   --color-guide-500: oklch(64.8% 0.201 23.4);
-  --color-guide-600: oklch(60.1% 0.223 24.8);
-  --color-guide-700: oklch(52.4% 0.197 24.6);
+  --color-guide-600: oklch(55% 0.215 25);
+  --color-guide-700: oklch(48.5% 0.19 24.6);
   --color-guide-800: oklch(44.6% 0.164 24.2);
   --color-guide-900: oklch(37.1% 0.132 23.8);
   --color-guide-950: oklch(24.8% 0.088 23.2);
 
-  /* ---- The second colour that is not a second brand ----------------------
-     `spark` was teal and was a rival to indigo. It is now the accent's hue
-     rotated far enough to be told apart in a chart legend and nowhere else:
-     data visualisation genuinely needs more than one colour, and one series
-     against one accent is the smallest set that works. It is not for actions,
-     not for links, and not for emphasis. */
+  /* A second hue for charts only: never for actions, links or emphasis. */
   --color-spark-50: oklch(97.4% 0.013 230);
   --color-spark-100: oklch(94.1% 0.029 230);
   --color-spark-200: oklch(88.9% 0.056 231);
@@ -145,10 +143,7 @@
   --color-spark-900: oklch(34.6% 0.098 245);
   --color-spark-950: oklch(23.4% 0.064 244);
 
-  /* ---- Ink — Tailwind's `neutral` ramp, verbatim -------------------------
-     Achromatic. Zero chroma at every step, which is the whole point: a grey
-     with a hue in it tints the photograph, the screenshot and the terminal
-     capture beside it, and this site is full of all three. */
+  /* ---- Ink: achromatic greys --------------------------------------------- */
   --color-ink-50: oklch(98.5% 0 0);
   --color-ink-100: oklch(97% 0 0);
   --color-ink-200: oklch(92.2% 0 0);
@@ -161,40 +156,27 @@
   --color-ink-900: oklch(20.5% 0 0);
   --color-ink-950: oklch(14.5% 0 0);
 
-  /* ---- Radius ------------------------------------------------------------
-     Square. Cards, panels and tiles have no curve at all; controls (buttons,
-     inputs, badges, the search box) keep a 2px softening so a focus ring does
-     not look chipped. A card is told apart from the page by a crisp 1px
-     border, and shows it is clickable with the offset shadow in `.card-hover`
-     below, not by being rounded. `rounded-full` is untouched: a dot, an avatar
-     or a journey node is still round. */
+  /* ---- Square, everywhere ------------------------------------------------
+     `rounded-full` is untouched: an avatar and a progress dot stay round. */
   --radius-xs: 0;
-  --radius-sm: 2px;
-  --radius-md: 2px;
+  --radius-sm: 0;
+  --radius-md: 0;
   --radius-lg: 0;
   --radius-xl: 0;
   --radius-2xl: 0;
   --radius-3xl: 0;
 
-  /* ---- Shadows -----------------------------------------------------------
-     Neutral-black now that the greys are neutral; the old ones were tinted
-     `16 19 64`, which is indigo, and a blue shadow under a red button reads as
-     a mistake. Borders still do the structural work — a teaching interface that
-     floats everything reads as a marketing site. */
-  --shadow-2xs: 0 1px 2px rgb(0 0 0 / 0.05);
-  --shadow-xs: 0 1px 2px rgb(0 0 0 / 0.05);
-  --shadow-sm: 0 2px 8px rgb(0 0 0 / 0.06), 0 1px 2px rgb(0 0 0 / 0.04);
-  --shadow-md: 0 2px 8px rgb(0 0 0 / 0.06), 0 1px 2px rgb(0 0 0 / 0.04);
-  --shadow-lg: 0 12px 32px rgb(0 0 0 / 0.10), 0 2px 8px rgb(0 0 0 / 0.05);
+  /* ---- Flat, everywhere --------------------------------------------------
+     A menu or a popover is told apart from the page by its 1px border. */
+  --shadow-2xs: 0 0 #0000;
+  --shadow-xs: 0 0 #0000;
+  --shadow-sm: 0 0 #0000;
+  --shadow-md: 0 0 #0000;
+  --shadow-lg: 0 0 #0000;
+  --shadow-xl: 0 0 #0000;
+  --shadow-2xl: 0 0 #0000;
 
-  /* ---- The φ ladder ------------------------------------------------------
-     One step of φ apart, so any two rungs are in the golden ratio and the whole
-     set is one geometric series. Rung 4 is 1rem. Used for the things a
-     12-column grid cannot rule on: how far one block sits from the next inside
-     a section, how much air a stat gets, how tall a band is.
-
-     Exposed as Tailwind spacing, so `p-phi-5` and `gap-phi-4` work in a
-     template without anyone reaching for an arbitrary value. */
+  /* ---- The φ ladder, for spacing the grid has nothing to say about ------- */
   --spacing-phi-1: 0.236rem;
   --spacing-phi-2: 0.382rem;
   --spacing-phi-3: 0.618rem;
@@ -204,23 +186,44 @@
   --spacing-phi-7: 4.236rem;
   --spacing-phi-8: 6.854rem;
 
-  /* ---- Easing ------------------------------------------------------------ */
   --ease-out-im: cubic-bezier(0.2, 0.8, 0.2, 1);
   --ease-in-out-im: cubic-bezier(0.65, 0, 0.35, 1);
 
-  /* Long-form reading measure. Lesson prose is capped here so lines never run
-     past the ~75 characters beyond which readers start losing their place. */
+  /* Lesson prose never runs past ~75 characters a line. */
   --guide-measure: 68ch;
 }
 
-:root {
-  /* Nuxt UI derives its component radii from this. 2px, to match the
-     controls above. */
-  --ui-radius: 2px;
+/* =============================================================================
+   Tokens
+   ========================================================================== */
 
-  /* The system's own names, for the handful of places that want a surface or a
-     rule rather than a Tailwind colour. Same values Nuxt UI resolves to — they
-     exist so a component can read one variable instead of a colour-mix. */
+:root {
+  --ui-radius: 0px;
+
+  /* The accent at 600 in light mode, not Nuxt UI's default 500: white text on
+     a red button and red text on white both clear 4.5:1 there. Dark mode keeps
+     Nuxt UI's 400, which carries dark text and sits well on near-black. */
+  --ui-primary: var(--ui-color-primary-600);
+
+  /* The grid. */
+  --grid-cols: 4;
+  --gutter: 1rem;
+  --margin: 1rem;
+  --grid-max: 76rem;
+  --band-y: 3rem;
+
+  /* The shell. */
+  --navbar-h: 3.5rem;
+  --sidebar-w: 18.5rem;
+  --pager-h: 3.75rem;
+
+  /* Hairlines. The guide lines are half as strong as a rule, so they are seen
+     when you look for them and not otherwise. */
+  --rule-color: var(--ui-border);
+  --rule-strong: var(--ui-text-highlighted);
+  --guide-color: color-mix(in oklab, var(--ui-border) 55%, transparent);
+
+  /* The system's own names, for a surface or a rule. */
   --im-canvas: var(--color-white);
   --im-surface: var(--color-ink-100);
   --im-surface-2: var(--color-ink-200);
@@ -229,23 +232,35 @@
   --im-muted: var(--color-ink-500);
   --im-accent: var(--color-guide-600);
 
-  /* Amber, rationed. Streaks, milestones, "you are further than you think". */
+  /* Amber, rationed: streaks and milestones only. */
   --guide-milestone: #e9a92a;
   --guide-milestone-soft: #fdf3d9;
   --guide-milestone-strong: #b47b11;
 
-  /* Deliberately-dark bands — the hero, the closing CTA, code blocks. These
-     must NOT follow the theme: they are dark by design, so pointing them at an
-     inverted surface renders dark-on-dark once the page itself is dark. Fixed
-     values, light text, both themes.
-
-     Now near-black rather than deep indigo, because the accent has to sit on
-     these bands and a red button on an indigo field is the one pairing this
-     palette cannot carry. */
+  /* Deliberately dark surfaces (code blocks, the video hero). Fixed values:
+     they are dark by design in both colour modes. */
   --guide-inverse-bg: var(--color-ink-950);
   --guide-inverse-ink: #fafafa;
   --guide-inverse-muted: rgb(250 250 250 / 0.72);
   --guide-inverse-line: rgb(255 255 255 / 0.14);
+}
+
+@media (min-width: 640px) {
+  :root {
+    --grid-cols: 8;
+    --gutter: 1.25rem;
+    --margin: 1.5rem;
+    --band-y: 4rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --grid-cols: 12;
+    --gutter: 1.5rem;
+    --margin: 2.5rem;
+    --band-y: 5rem;
+  }
 }
 
 .dark {
@@ -256,24 +271,43 @@
   --im-body: var(--color-ink-300);
   --im-muted: var(--color-ink-400);
 
+  --ui-primary: var(--ui-color-primary-400);
+
   --ui-bg: var(--ui-color-neutral-950);
   --ui-bg-muted: var(--ui-color-neutral-900);
   --ui-bg-elevated: var(--ui-color-neutral-900);
   --ui-bg-accented: var(--ui-color-neutral-800);
 
-  /* Light-mode amber vibrates unpleasantly against a dark surface. */
+  /* A grey border on a near-black page is fainter than on white, so the guide
+     lines lean on it a little harder to stay findable. */
+  --guide-color: color-mix(in oklab, var(--ui-border) 70%, transparent);
+
   --guide-milestone: #f6cf65;
   --guide-milestone-soft: rgb(233 169 42 / 0.16);
   --guide-milestone-strong: #f6cf65;
 
-  /* In dark mode the inverse bands sit against an already-dark page, so they go
-     one step darker to stay distinguishable from the surface behind them. */
   --guide-inverse-bg: #050505;
 }
 
-/* Headings are the same face as the body, one step tighter. The system has no
-   second family, so a heading is distinguished by weight and tracking — which
-   is how a heading has always actually worked. */
+/* =============================================================================
+   Base
+   ========================================================================== */
+
+/* The app is a fixed viewport: the bars stay, the content pane scrolls. The
+   document itself never scrolls, so nothing is lost behind the bars. */
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+body {
+  font-size: var(--text-base);
+  line-height: 1.6;
+  font-feature-settings: 'ss01' off;
+}
+
 h1, h2, h3, h4, .font-display {
   font-family: var(--font-display);
   letter-spacing: -0.02em;
@@ -283,14 +317,253 @@ h1, .text-display {
   letter-spacing: -0.035em;
 }
 
-/* Numbers on a stat, and nothing else. A pixel face is a costume; worn twice it
-   stops being a signal. */
-.font-pixel {
-  font-family: var(--font-pixel);
-  font-feature-settings: 'tnum';
+/* One focus ring for everything that is not a Nuxt UI control: square, 2px,
+   in the text colour, so it is visible on white, on black and on the red. */
+:where(a, button, [tabindex]):focus-visible {
+  outline: 2px solid var(--ui-text-highlighted);
+  outline-offset: 2px;
 }
 
-/* A dark band that ignores the colour mode, used by the hero and the CTA. */
+::selection {
+  background: color-mix(in oklab, var(--ui-primary) 22%, transparent);
+}
+
+/* =============================================================================
+   The grid
+   ========================================================================== */
+
+.frame {
+  width: 100%;
+  max-width: var(--grid-max);
+  margin-inline: auto;
+  padding-inline: var(--margin);
+}
+
+.swiss-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--grid-cols), minmax(0, 1fr));
+  column-gap: var(--gutter);
+}
+
+/* The guide lines: one hairline on each outer edge of the frame and one down
+   the middle of every gutter, so they sit between the columns content snaps
+   to and never through a line of text. Painted by a pseudo-element placed
+   exactly over the frame's content box, behind everything in the band. */
+.guides {
+  position: relative;
+  isolation: isolate;
+}
+
+.guides::before {
+  content: '';
+  position: absolute;
+  inset-block: 0;
+  left: var(--margin);
+  right: var(--margin);
+  max-width: calc(var(--grid-max) - 2 * var(--margin));
+  margin-inline: auto;
+  z-index: -1;
+  pointer-events: none;
+  border-inline: 1px solid var(--guide-color);
+  background-image: linear-gradient(
+    to right,
+    transparent calc(100% - var(--gutter) / 2 - 0.5px),
+    var(--guide-color) calc(100% - var(--gutter) / 2 - 0.5px),
+    var(--guide-color) calc(100% - var(--gutter) / 2 + 0.5px),
+    transparent calc(100% - var(--gutter) / 2 + 0.5px)
+  );
+  background-size: calc((100% + var(--gutter)) / var(--grid-cols)) 100%;
+  background-repeat: repeat-x;
+}
+
+/* =============================================================================
+   Bands and rules
+   ========================================================================== */
+
+.band {
+  padding-block: var(--band-y);
+  border-bottom: 1px solid var(--rule-color);
+}
+
+.rule {
+  border-top: 1px solid var(--rule-color);
+}
+
+.rule-b {
+  border-bottom: 1px solid var(--rule-color);
+}
+
+/* The heavy rule that opens a section: the one place a line is drawn in ink
+   rather than in grey. */
+.rule-strong {
+  border-top: 2px solid var(--rule-strong);
+}
+
+/* =============================================================================
+   Type
+   ========================================================================== */
+
+.label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.6875rem;
+  line-height: 1.3;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ui-text-muted);
+}
+
+.num {
+  font-variant-numeric: tabular-nums lining-nums;
+  font-feature-settings: 'tnum', 'lnum';
+}
+
+.font-pixel {
+  font-family: var(--font-sans);
+  font-variant-numeric: tabular-nums lining-nums;
+  font-feature-settings: 'tnum', 'lnum';
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.display {
+  font-family: var(--font-display);
+  font-size: clamp(2.25rem, 1.4rem + 3.6vw, 4.5rem);
+  line-height: 0.98;
+  font-weight: 700;
+  letter-spacing: -0.045em;
+  color: var(--ui-text-highlighted);
+  text-wrap: balance;
+}
+
+.headline {
+  font-family: var(--font-display);
+  font-size: clamp(1.625rem, 1.2rem + 1.6vw, 2.5rem);
+  line-height: 1.05;
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  color: var(--ui-text-highlighted);
+  text-wrap: balance;
+}
+
+.lede {
+  max-width: 40rem;
+  font-size: var(--text-lg);
+  line-height: 1.55;
+  color: var(--ui-text-muted);
+  text-wrap: pretty;
+}
+
+/* The small red square: the accent, as a mark rather than a fill. */
+.mark {
+  display: inline-block;
+  flex-shrink: 0;
+  width: 0.5rem;
+  height: 0.5rem;
+  background: var(--ui-primary);
+}
+
+.mark[data-live] {
+  background: var(--ui-success);
+  animation: mark-live 1.6s steps(2, jump-none) infinite;
+}
+
+@keyframes mark-live {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+/* =============================================================================
+   Rows
+   ========================================================================== */
+
+.row-list {
+  border-top: 1px solid var(--rule-color);
+}
+
+.row-list > * {
+  border-bottom: 1px solid var(--rule-color);
+}
+
+.row-link {
+  display: block;
+  transition: background-color var(--dgm-t-fast) var(--dgm-ease);
+}
+
+.row-link:hover {
+  background: var(--ui-bg-muted);
+}
+
+.row-link:focus-visible {
+  outline: 2px solid var(--ui-text-highlighted);
+  outline-offset: -2px;
+}
+
+.arrow-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--ui-text-highlighted);
+  text-decoration: none;
+}
+
+.arrow-link .iconify,
+.arrow-link > svg {
+  transition: transform var(--dgm-t-fast) var(--dgm-ease);
+}
+
+.arrow-link:hover {
+  color: var(--ui-primary);
+}
+
+.arrow-link:hover .iconify,
+.arrow-link:hover > svg {
+  transform: translateX(3px);
+}
+
+/* A panel: a block of the page (a form, a call to action) marked by a heavy
+   rule on top rather than drawn in a box. */
+.panel {
+  padding-top: 1.25rem;
+  border-top: 2px solid var(--rule-strong);
+}
+
+.panel--danger {
+  border-top-color: var(--ui-error);
+}
+
+/* A square node on a timeline. */
+.node {
+  display: inline-block;
+  flex-shrink: 0;
+  width: 0.625rem;
+  height: 0.625rem;
+  border: 1px solid var(--ui-text-highlighted);
+  background: var(--ui-bg);
+}
+
+/* Older markup asked for a lifted, shadowed card. What it gets now is a border
+   that darkens: enough to say "this is a link", and nothing that moves. */
+.card-hover {
+  transition:
+    border-color var(--dgm-t-fast) var(--dgm-ease),
+    background-color var(--dgm-t-fast) var(--dgm-ease);
+}
+
+.card-hover:hover,
+.card-hover:focus-visible {
+  border-color: var(--ui-text-highlighted);
+}
+
+/* =============================================================================
+   Surfaces
+   ========================================================================== */
+
 .guide-inverse {
   background-color: var(--guide-inverse-bg);
   color: var(--guide-inverse-ink);
@@ -300,33 +573,16 @@ h1, .text-display {
   color: var(--guide-inverse-muted);
 }
 
-/* The contour backdrop: a faint grid that gives large empty surfaces some
-   structure without becoming decoration you have to look at. 64px was an
-   arbitrary number; it is now four φ-4 units, so it agrees with the spacing
-   everything on top of it uses. */
+/* Kept for older markup: now the same thing as `.guides`, without the frame. */
 .guide-contour {
-  background-image:
-    linear-gradient(to right, color-mix(in oklab, var(--ui-border) 60%, transparent) 1px, transparent 1px),
-    linear-gradient(to bottom, color-mix(in oklab, var(--ui-border) 60%, transparent) 1px, transparent 1px);
-  background-size: 4rem 4rem;
-  mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 40%, transparent 100%);
+  background-image: linear-gradient(to right, var(--guide-color) 1px, transparent 1px);
+  background-size: 4rem 100%;
 }
 
-/* Anything scrolled into view lands below the sticky top bar, not under it. */
-html {
-  scroll-padding-top: 3.5rem;
-}
+/* =============================================================================
+   Lesson prose
+   ========================================================================== */
 
-body {
-  font-size: var(--text-base);
-  line-height: 1.6;
-}
-
-/* Lesson prose. Capped at the reading measure, a size up from the interface,
-   and given generous line height, because these pages are read, not scanned.
-   Nuxt UI's prose sets paragraphs and list items to a fixed 1.75rem leading,
-   which at 18px is tighter than it looks; these rules sit outside the utility
-   layer, so they win. */
 .guide-prose {
   max-width: var(--guide-measure);
   font-size: 1.125rem;
@@ -338,13 +594,17 @@ body {
 }
 
 .guide-prose :where(h2) {
-  font-size: 1.75rem;
-  line-height: 1.25;
+  font-size: 1.875rem;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--rule-color);
 }
 
 .guide-prose :where(h3) {
   font-size: 1.375rem;
-  line-height: 1.3;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
 }
 
 .guide-prose :where(h4) {
@@ -352,10 +612,18 @@ body {
   line-height: 1.35;
 }
 
-/* Code and tables stay a step smaller than the prose around them, so a
-   seventy-character line of Java still fits a phone without scrolling. */
 .guide-prose :where(pre, table) {
   font-size: 0.9375rem;
+}
+
+.guide-prose :where(th) {
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.guide-prose :where(td, th) {
+  font-variant-numeric: tabular-nums;
 }
 
 @media (max-width: 639px) {
@@ -372,18 +640,16 @@ body {
   }
 }
 
-/* An ad dropped into the prose by ~/utils/autoAds.ts rather than written there
-   by an author. Prose sets its own rhythm between paragraphs, and an advert
-   needs to sit further out than a paragraph does or it reads as part of the
-   sentence above it. Global rather than scoped because three components render
-   these and they should all space them the same. */
 .ad-auto {
   margin-block: 2.618rem;
 }
 
-/* Track colour. A component sets `--track` from app/utils/tech.ts and these
-   draw with it. The brand colours are picked for a light page, so in dark mode
-   they lift toward white rather than sinking into the surface. */
+/* =============================================================================
+   Track colour
+   =============================================================================
+   A component sets `--track` from app/utils/tech.ts. Track colour is a mark
+   (a square, a node, an icon), never a fill behind text. */
+
 .track-ink {
   color: var(--track);
 }
@@ -398,37 +664,26 @@ body {
   justify-content: center;
   flex-shrink: 0;
   color: var(--track);
-  background: color-mix(in oklab, var(--track) 13%, transparent);
-  border: 1px solid color-mix(in oklab, var(--track) 24%, transparent);
+  background: transparent;
+  border: 1px solid color-mix(in oklab, var(--track) 45%, transparent);
 }
 
 .dark .track-tile {
   color: color-mix(in oklab, var(--track) 68%, white);
-  background: color-mix(in oklab, var(--track) 22%, transparent);
-  border-color: color-mix(in oklab, var(--track) 36%, transparent);
+  border-color: color-mix(in oklab, var(--track) 55%, transparent);
 }
 
-/* The hover every clickable card shares, now that cards are square: the border
-   darkens and a solid shadow in the card's own colour (`--track`, else the
-   accent) steps out from behind it. Loud enough to read as "this is a link"
-   without a curve or a lift doing the work. */
-.card-hover {
-  transition:
-    border-color var(--dgm-t-fast) var(--dgm-ease),
-    box-shadow var(--dgm-t-fast) var(--dgm-ease),
-    transform var(--dgm-t-fast) var(--dgm-ease);
-}
-
-.card-hover:hover,
-.card-hover:focus-visible {
-  border-color: var(--ui-text-highlighted);
-  box-shadow: 4px 4px 0 0 var(--track, var(--ui-primary));
-  transform: translate(-2px, -2px);
-}
+/* =============================================================================
+   Motion
+   ========================================================================== */
 
 @media (prefers-reduced-motion: reduce) {
-  .card-hover:hover,
-  .card-hover:focus-visible {
+  .mark[data-live] {
+    animation: none;
+  }
+
+  .arrow-link:hover .iconify,
+  .arrow-link:hover > svg {
     transform: none;
   }
 }

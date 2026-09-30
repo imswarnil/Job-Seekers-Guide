@@ -186,61 +186,72 @@ useSeoMeta({
       >{{ voteError }}</span>
     </div>
 
-    <UCard class="mt-10">
-      <p class="font-medium text-highlighted">
+    <section class="story-next">
+      <p class="headline">
         Got somewhere yourself?
       </p>
-      <p class="mt-1 text-sm text-muted">
+      <p class="mt-2 text-muted">
         Your story is the thing that tells the next person it can be done.
       </p>
       <UButton
         to="/stories/new"
-        class="mt-3"
-        icon="i-lucide-pen-line"
+        class="mt-5"
       >
         Share your story
       </UButton>
-    </UCard>
+    </section>
   </CommunityPage>
 </template>
 
 <style scoped>
+/* The facts of a story as a ruled table: started, now, company, package. */
 .story-facts {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
-  gap: 0.75rem;
-  margin-top: 1.5rem;
-  padding: 1rem 1.25rem;
-  border: 1px solid var(--ui-border);
-  border-radius: var(--radius-lg, 0.75rem);
-  background: var(--ui-bg-elevated);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 2rem;
+  border-top: 2px solid var(--rule-strong);
+}
+
+@media (min-width: 640px) {
+  .story-facts {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.story-facts > div {
+  min-width: 0;
+  padding: 0.75rem 0.75rem 0.875rem 0;
+  border-bottom: 1px solid var(--rule-color);
 }
 
 .story-facts dt {
   font-size: 0.6875rem;
   font-weight: 600;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--ui-text-dimmed);
 }
 
 .story-facts dd {
-  margin-top: 0.125rem;
-  font-weight: 550;
+  margin-top: 0.375rem;
+  font-size: var(--text-lg);
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  line-height: 1.25;
   color: var(--ui-text-highlighted);
+  overflow-wrap: anywhere;
 }
 
 .story-media {
   display: grid;
-  gap: 0.75rem;
-  margin-top: 1.5rem;
+  gap: var(--gutter);
+  margin-top: 2rem;
 }
 
 .story-media img,
 .story-media video,
 .story-media iframe {
   width: 100%;
-  border-radius: var(--radius-lg, 0.75rem);
   background: var(--ui-bg-accented);
 }
 
@@ -250,11 +261,18 @@ useSeoMeta({
 }
 
 .story-body {
-  margin-top: 1.75rem;
-  font-size: 1.0625rem;
+  max-width: var(--guide-measure);
+  margin-top: 2rem;
+  font-size: 1.125rem;
   line-height: 1.75;
   white-space: pre-line;
   overflow-wrap: anywhere;
   color: var(--ui-text);
+}
+
+.story-next {
+  margin-top: 4rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--rule-color);
 }
 </style>

@@ -272,7 +272,6 @@ const axis = computed(() => {
   font-size: 0.75rem;
   background: var(--ui-bg);
   border: 1px solid var(--ui-border-accented);
-  box-shadow: var(--shadow-md);
   pointer-events: none;
 }
 </style>

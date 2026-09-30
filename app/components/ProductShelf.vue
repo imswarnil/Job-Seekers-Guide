@@ -24,27 +24,28 @@ const items = computed(() => pick(props.track, props.limit))
     class="shelf"
     aria-label="Products I use"
   >
-    <div class="flex items-end justify-between gap-4 mb-4">
+    <div class="flex flex-wrap items-end justify-between gap-4 mb-8">
       <div>
-        <h2 class="font-display text-lg font-semibold text-highlighted">
+        <h2 class="headline">
           {{ title }}
         </h2>
-        <p class="text-xs text-dimmed mt-1">
+        <p class="text-xs text-dimmed mt-2">
           Some links are affiliate links; buying through them supports this guide at no extra cost to you.
         </p>
       </div>
-      <UButton
+      <NuxtLink
         to="/gear"
-        label="Everything I use"
-        trailing-icon="i-lucide-arrow-right"
-        size="sm"
-        color="neutral"
-        variant="ghost"
-        class="shrink-0"
-      />
+        class="arrow-link shrink-0"
+      >
+        Everything I use
+        <UIcon
+          name="i-lucide-arrow-right"
+          class="size-4"
+        />
+      </NuxtLink>
     </div>
 
-    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <div class="shelf__grid">
       <ProductCard
         v-for="item in items"
         :key="item.name"
@@ -54,3 +55,23 @@ const items = computed(() => pick(props.track, props.limit))
     </div>
   </section>
 </template>
+
+<style scoped>
+.shelf__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2.5rem var(--gutter);
+}
+
+@media (min-width: 640px) {
+  .shelf__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .shelf__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+</style>

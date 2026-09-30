@@ -327,7 +327,8 @@ function usePasted() {
 
 .gif__option[aria-selected='true'] {
   border-color: var(--ui-primary);
-  box-shadow: 3px 3px 0 0 var(--ui-primary);
+  outline: 2px solid var(--ui-primary);
+  outline-offset: 1px;
 }
 
 .gif__powered {

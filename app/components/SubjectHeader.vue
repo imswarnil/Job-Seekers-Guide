@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { PathCollectionItem } from '@nuxt/content'
 import type { Stage } from '~/utils/path'
+import { trackStyle } from '~/utils/tech'
 
 defineProps<{
   page?: PathCollectionItem
@@ -13,6 +14,17 @@ const { subject } = usePathPlayer(() => route.path)
 const { subjectProgress, resume } = useProgress()
 
 const progress = computed(() => subjectProgress(subject.value))
+/** The same number the sidebar and the home page give this track. */
+const number = computed(() => {
+  for (const group of byStage(path.value)) {
+    const index = group.subjects.findIndex(item => item.path === subject.value?.path)
+    if (index >= 0) {
+      return String(group.offset + index + 1).padStart(2, '0')
+    }
+  }
+  return ''
+})
+const color = computed(() => trackStyle(subject.value?.slug, subject.value?.icon).color)
 
 const resumeTo = computed(() => resume(path.value, subject.value)?.path || subject.value?.lessons[0]?.path)
 const resumeLabel = computed(() => {
@@ -24,82 +36,174 @@ const resumeLabel = computed(() => {
 </script>
 
 <template>
-  <div class="grid gap-8 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-stretch">
-    <div class="min-w-0">
-      <div class="flex items-center gap-2 flex-wrap mb-4">
-        <TrackIcon
-          :slug="subject?.slug"
-          :icon="page?.icon"
-          size="xs"
-        />
-        <UBadge
-          v-if="page?.stage"
-          :label="stageLabels[page.stage as Stage]"
-          color="neutral"
-          variant="subtle"
-        />
-        <span
-          v-if="page?.duration"
-          class="text-sm text-muted"
-        >{{ page.duration }}</span>
-        <span
-          v-if="subject?.minutes"
-          class="text-sm text-dimmed"
-        >· {{ formatMinutes(subject.minutes) }} of reading</span>
-        <span
-          v-if="subject?.lessons.length"
-          class="text-sm text-dimmed"
-        >· {{ subject.lessons.length }} lessons</span>
+  <div
+    class="subject-head swiss-grid"
+    :style="{ '--track': color }"
+  >
+    <p class="subject-head__kicker label">
+      <span
+        class="subject-head__swatch"
+        aria-hidden="true"
+      />
+      <span
+        v-if="number"
+        class="num"
+      >Track {{ number }}</span>
+      <template v-if="page?.stage">
+        <span aria-hidden="true">·</span>
+        {{ stageLabels[page.stage as Stage] }}
+      </template>
+    </p>
+
+    <h1 class="subject-head__title display">
+      {{ page?.title || subject?.title }}
+    </h1>
+
+    <p
+      v-if="page?.description || subject?.description"
+      class="subject-head__lede lede"
+    >
+      {{ page?.description || subject?.description }}
+    </p>
+
+    <dl class="subject-head__facts">
+      <div v-if="subject?.lessons.length">
+        <dt class="label">
+          Lessons
+        </dt>
+        <dd class="num">
+          {{ subject.lessons.length }}
+        </dd>
       </div>
+      <div v-if="subject?.modules.length">
+        <dt class="label">
+          Chapters
+        </dt>
+        <dd class="num">
+          {{ subject.modules.length }}
+        </dd>
+      </div>
+      <div v-if="subject?.minutes">
+        <dt class="label">
+          Reading
+        </dt>
+        <dd class="num">
+          {{ formatMinutes(subject.minutes) }}
+        </dd>
+      </div>
+      <div v-if="page?.duration">
+        <dt class="label">
+          Takes
+        </dt>
+        <dd>{{ page.duration }}</dd>
+      </div>
+    </dl>
 
-      <h1 class="font-display text-3xl sm:text-4xl xl:text-5xl font-bold text-highlighted tracking-tight text-balance">
-        {{ page?.title || subject?.title }}
-      </h1>
-
-      <p
-        v-if="page?.description || subject?.description"
-        class="mt-3 text-lg text-muted text-balance max-w-3xl"
-      >
-        {{ page?.description || subject?.description }}
-      </p>
-
-      <div class="mt-6 flex flex-wrap items-center gap-x-6 gap-y-4">
-        <ClientOnly>
+    <div class="subject-head__actions">
+      <ClientOnly>
+        <UButton
+          :to="resumeTo"
+          :label="resumeLabel"
+          trailing-icon="i-lucide-arrow-right"
+          size="lg"
+        />
+        <template #fallback>
           <UButton
-            :to="resumeTo"
-            :label="resumeLabel"
+            :to="subject?.lessons[0]?.path"
+            label="Start this track"
             trailing-icon="i-lucide-arrow-right"
             size="lg"
           />
+        </template>
+      </ClientOnly>
 
-          <template #fallback>
-            <UButton
-              :to="subject?.lessons[0]?.path"
-              label="Start this track"
-              trailing-icon="i-lucide-arrow-right"
-              size="lg"
-            />
-          </template>
-        </ClientOnly>
-
-        <ClientOnly>
-          <PlayerProgress
-            v-if="progress.started"
-            :progress="progress"
-            :label="`${progress.completed} of ${progress.total} finished`"
-            class="w-full sm:w-56"
-          />
-        </ClientOnly>
-      </div>
+      <ClientOnly>
+        <PlayerProgress
+          v-if="progress.started"
+          :progress="progress"
+          :label="`${progress.completed} of ${progress.total} finished`"
+          class="subject-head__progress"
+        />
+      </ClientOnly>
     </div>
-
-    <TrackThumb
-      :slug="subject?.slug"
-      :icon="page?.icon"
-      :image="page?.image || subject?.image"
-      :label="page?.stage ? stageLabels[page.stage as Stage] : undefined"
-      variant="banner"
-      class="hidden sm:block"
-    />
   </div>
 </template>
+
+<style scoped>
+.subject-head > * {
+  grid-column: 1 / -1;
+}
+
+.subject-head__swatch {
+  width: 0.625rem;
+  height: 0.625rem;
+  background: var(--track);
+}
+
+.subject-head__title {
+  margin-top: 1.25rem;
+}
+
+.subject-head__lede {
+  margin-top: 1.25rem;
+}
+
+.subject-head__facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 2.5rem;
+  border-top: 1px solid var(--rule-color);
+}
+
+.subject-head__facts > div {
+  padding: 0.75rem 1rem 0.75rem 0;
+  border-bottom: 1px solid var(--rule-color);
+}
+
+.subject-head__facts dd {
+  margin-top: 0.375rem;
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: var(--ui-text-highlighted);
+}
+
+.subject-head__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1.25rem 2rem;
+  margin-top: 2rem;
+}
+
+.subject-head__progress {
+  width: 100%;
+  max-width: 16rem;
+}
+
+@media (min-width: 640px) {
+  .subject-head__facts {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .subject-head__facts > div + div {
+    padding-left: 1rem;
+    border-left: 1px solid var(--rule-color);
+  }
+}
+
+@media (min-width: 1024px) {
+  .subject-head__title {
+    grid-column: 1 / span 10;
+  }
+
+  .subject-head__lede {
+    grid-column: 1 / span 7;
+  }
+
+  .subject-head__facts {
+    grid-column: 1 / span 8;
+  }
+}
+</style>

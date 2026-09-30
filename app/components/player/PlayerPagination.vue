@@ -2,174 +2,286 @@
 import type { Lesson } from '~/utils/path'
 
 /**
- * The end of a lesson, given the width it deserves.
+ * The lesson bar, fixed to the bottom of the content pane.
  *
- * Previously two small cards inside the reading column. The move to the next
- * lesson is the single most important action on the page — it is the mechanism
- * by which somebody finishes a curriculum — so it gets a full-width band and
- * looks like a decision rather than a footnote.
+ *   ← Previous        LESSON 42 OF 418        [Mark as finished] [Next →]
+ *     its title       ──────────■────────────                     its title
+ *
+ * Moving on is the single most important action in the app (it is how a
+ * curriculum gets finished), so it is always in reach and it is the one red
+ * thing on the bar. The thin line along the top edge is where this lesson
+ * sits on the whole path.
  */
-defineProps<{
+const props = defineProps<{
   previous?: Lesson
   next?: Lesson
   crossesSubject?: boolean
   position: { n: number, total: number }
 }>()
+
+const route = useRoute()
+const { isComplete, toggleComplete } = useProgress()
+const mounted = useMounted()
+
+const complete = computed(() => mounted.value && isComplete(route.path))
+const percent = computed(() => props.position.total ? (props.position.n / props.position.total) * 100 : 0)
 </script>
 
 <template>
   <nav
-    class="pagination"
+    class="pager"
     aria-label="Lessons"
+    :style="{ '--pct': `${percent}%` }"
   >
+    <div
+      class="pager__line"
+      aria-hidden="true"
+    />
+
     <NuxtLink
       v-if="previous"
       :to="previous.path"
-      class="pagination__card pagination__card--prev card-hover"
+      class="pager__prev"
+      :aria-label="`Previous lesson: ${previous.title}`"
     >
-      <span class="pagination__label">
-        <UIcon
-          name="i-lucide-arrow-left"
-          class="size-3.5"
-        />
-        Previous
-      </span>
-      <span class="pagination__title">{{ previous.title }}</span>
-      <span class="pagination__meta">{{ previous.subjectTitle }}</span>
-    </NuxtLink>
-    <span v-else />
-
-    <div class="pagination__centre">
-      <p class="text-xs text-dimmed tabular-nums">
-        Lesson {{ position.n }} of {{ position.total }}
-      </p>
-      <div class="pagination__bar">
-        <div
-          class="pagination__fill"
-          :style="{ width: `${position.total ? (position.n / position.total) * 100 : 0}%` }"
-        />
-      </div>
-      <UButton
-        to="/"
-        label="The whole guide"
-        icon="i-lucide-route"
-        color="neutral"
-        variant="ghost"
-        size="xs"
+      <UIcon
+        name="i-lucide-arrow-left"
+        class="size-4 shrink-0"
       />
-    </div>
-
-    <NuxtLink
-      v-if="next"
-      :to="next.path"
-      class="pagination__card pagination__card--next card-hover"
-    >
-      <span class="pagination__label">
-        <!-- Crossing into a new subject is the moment the path stops feeling
-             like a course, so it says so rather than showing a bare title. -->
-        {{ crossesSubject ? `Next track · ${next.subjectTitle}` : 'Next' }}
-        <UIcon
-          name="i-lucide-arrow-right"
-          class="size-3.5"
-        />
+      <span class="pager__text">
+        <span class="label">Previous</span>
+        <span class="pager__title">{{ previous.title }}</span>
       </span>
-      <span class="pagination__title">{{ next.title }}</span>
-      <span class="pagination__meta">{{ crossesSubject ? 'A new track starts here' : next.moduleTitle }}</span>
     </NuxtLink>
-
-    <NuxtLink
+    <span
       v-else
-      to="/"
-      class="pagination__card pagination__card--next card-hover"
-    >
-      <span class="pagination__label">
-        Finished
+      class="pager__prev pager__prev--none"
+    />
+
+    <p class="pager__where num">
+      <span class="pager__where-long">Lesson {{ position.n }} of {{ position.total }}</span>
+      <span
+        class="pager__where-short"
+        aria-hidden="true"
+      >{{ position.n }}/{{ position.total }}</span>
+    </p>
+
+    <div class="pager__end">
+      <button
+        type="button"
+        class="pager__done"
+        :aria-pressed="complete"
+        :data-done="complete || undefined"
+        :title="complete ? 'Finished. Press to undo' : 'Mark as finished (M)'"
+        @click="toggleComplete(route.path)"
+      >
         <UIcon
-          name="i-lucide-flag"
-          class="size-3.5"
+          :name="complete ? 'i-lucide-circle-check' : 'i-lucide-circle'"
+          class="size-4 shrink-0"
         />
-      </span>
-      <span class="pagination__title">That is the end of the guide</span>
-      <span class="pagination__meta">Now go and get the job. Then write yours down.</span>
-    </NuxtLink>
+        <span class="pager__done-text">{{ complete ? 'Finished' : 'Mark as finished' }}</span>
+      </button>
+
+      <NuxtLink
+        :to="next?.path || '/'"
+        class="pager__next"
+        :aria-label="next ? `Next lesson: ${next.title}` : 'That was the last lesson. Back to the start'"
+      >
+        <span class="pager__text">
+          <span class="label">{{ next ? (crossesSubject ? 'Next track' : 'Next') : 'Finished' }}</span>
+          <span class="pager__title">{{ next ? (crossesSubject ? next.subjectTitle : next.title) : 'The end of the guide' }}</span>
+        </span>
+        <UIcon
+          :name="next ? 'i-lucide-arrow-right' : 'i-lucide-flag'"
+          class="size-4 shrink-0"
+        />
+      </NuxtLink>
+    </div>
   </nav>
 </template>
 
 <style scoped>
-.pagination {
+.pager {
+  position: relative;
   display: grid;
-  gap: 1rem;
-}
-
-@media (min-width: 768px) {
-  .pagination {
-    grid-template-columns: 1fr auto 1fr;
-    align-items: center;
-    gap: 2rem;
-  }
-}
-
-.pagination__card {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  padding: 1rem 1.25rem;
-  border: 1px solid var(--ui-border);
-  border-radius: 0;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: stretch;
+  height: var(--pager-h);
+  border-top: 1px solid var(--rule-color);
   background: var(--ui-bg);
 }
 
-.pagination__card--next {
-  text-align: right;
-  align-items: flex-end;
+/* Where this lesson sits on the whole path: a 2px line in ink over the rule. */
+.pager__line {
+  position: absolute;
+  left: 0;
+  top: -1px;
+  height: 2px;
+  width: var(--pct);
+  background: var(--ui-text-highlighted);
+  transition: width var(--dgm-t-base) var(--dgm-ease);
 }
 
-.pagination__label {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
-  font-size: 0.6875rem;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--ui-text-dimmed);
-}
-
-.pagination__card:hover .pagination__label {
-  color: var(--ui-primary);
-}
-
-.pagination__title {
-  font-family: var(--font-display);
-  font-weight: 600;
-  color: var(--ui-text-highlighted);
-  text-wrap: balance;
-}
-
-.pagination__meta {
-  font-size: 0.75rem;
-  color: var(--ui-text-dimmed);
-}
-
-.pagination__centre {
+.pager__prev,
+.pager__next {
   display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+  padding-inline: 0.875rem;
+  transition:
+    background-color var(--dgm-t-fast) var(--dgm-ease),
+    color var(--dgm-t-fast) var(--dgm-ease);
+}
+
+.pager__prev {
+  color: var(--ui-text-muted);
+}
+
+.pager__prev:hover {
+  color: var(--ui-text-highlighted);
+  background: var(--ui-bg-muted);
+}
+
+.pager__text {
+  display: none;
   flex-direction: column;
+  min-width: 0;
+}
+
+.pager__text .label {
+  font-size: 0.625rem;
+  color: inherit;
+  opacity: 0.8;
+}
+
+.pager__title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.pager__where {
+  display: flex;
+  align-items: center;
+  padding-inline: 0.75rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ui-text-muted);
+  white-space: nowrap;
+}
+
+.pager__where-long {
+  display: none;
+}
+
+.pager__end {
+  display: flex;
+  justify-content: flex-end;
+  min-width: 0;
+}
+
+.pager__done {
+  display: flex;
   align-items: center;
   gap: 0.5rem;
-  min-width: 10rem;
+  flex: none;
+  padding-inline: 0.875rem;
+  border-left: 1px solid var(--rule-color);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--ui-text-muted);
+  transition:
+    background-color var(--dgm-t-fast) var(--dgm-ease),
+    color var(--dgm-t-fast) var(--dgm-ease);
 }
 
-.pagination__bar {
-  width: 8rem;
-  height: 0.25rem;
-  border-radius: 999px;
-  background: var(--ui-bg-accented);
-  overflow: hidden;
+.pager__done:hover {
+  color: var(--ui-text-highlighted);
+  background: var(--ui-bg-muted);
 }
 
-.pagination__fill {
-  height: 100%;
-  border-radius: 999px;
-  background: linear-gradient(to right, var(--ui-primary), var(--ui-secondary));
-  transition: width var(--dgm-t-base) var(--dgm-ease);
+.pager__done[data-done] {
+  color: var(--ui-success);
+}
+
+.pager__done-text {
+  display: none;
+}
+
+/* Next: the one red cell. */
+.pager__next {
+  flex: none;
+  justify-content: flex-end;
+  max-width: 100%;
+  background: var(--color-guide-600);
+  color: #fff;
+  text-align: right;
+}
+
+.pager__next:hover {
+  background: var(--color-guide-700);
+}
+
+.pager__next .label {
+  color: #fff;
+}
+
+.pager__prev:focus-visible,
+.pager__done:focus-visible,
+.pager__next:focus-visible {
+  outline: 2px solid var(--ui-text-highlighted);
+  outline-offset: -4px;
+}
+
+.pager__next:focus-visible {
+  outline-color: #fff;
+}
+
+@media (min-width: 640px) {
+  .pager__done-text {
+    display: inline;
+  }
+}
+
+@media (min-width: 768px) {
+  .pager__where-long {
+    display: inline;
+  }
+
+  .pager__where-short {
+    display: none;
+  }
+
+  .pager__prev,
+  .pager__next {
+    padding-inline: var(--margin);
+  }
+
+  .pager__text {
+    display: flex;
+  }
+
+  .pager__next {
+    flex: 0 1 auto;
+    min-width: 0;
+  }
+}
+
+@media (min-width: 1280px) {
+  .pager__next {
+    min-width: 16rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pager__line {
+    transition: none;
+  }
 }
 </style>
