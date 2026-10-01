@@ -1,19 +1,31 @@
 <script setup lang="ts">
-import type { SponsorCardData, SponsorCardDesign } from '~/components/SponsorCard.vue'
-
 /**
- * A sponsor spot, sold on the outbid model in docs/api-contract.md: the highest
- * single paid bid holds it, with no expiry, until somebody pays more.
+ * The site sponsor, wherever the site shows them.
  *
- * The site sells exactly one spot, `brand`, shown in two places: a band on the
- * home page and the sticky card beside every lesson. The holder is drawn by
- * `SponsorCard`, in the card they designed on /sponsor (the server resolves
- * the design, and gives a bid from before designs existed the default card).
+ * There is one spot, `brand`, sold on the outbid model in
+ * docs/api-contract.md: the highest single paid bid holds it, with no expiry,
+ * until somebody pays more. Whoever holds it is the site sponsor, and their
+ * card is drawn by `SponsorCard` from the design they made on /sponsor, in
+ * one of two standard shapes:
  *
- * Fetched in the browser only. Every page is prerendered, and a holder baked
- * into the HTML would stay there after they were outbid. While it loads, and
- * whenever the request fails, the placeholder shows; a failed request just
- * loses the price, never the invitation.
+ *   `leaderboard`  a wide, slim strip across the full grid (728×90 in spirit).
+ *                  Home, and the top of /stories, /guestbook and /stats (and
+ *                  of /sponsor itself, when somebody holds the spot).
+ *   `square`       a compact near-square card (300×250 in spirit) for a side
+ *                  column. Beside every lesson, and in the left sidebar.
+ *
+ * Every instance is marked "Site sponsor" and the card's link carries
+ * `rel="sponsored noopener"` (SponsorCard sets it). Beside the mark sits a
+ * second, smaller link, "See all sponsors", to the leaderboard on /sponsor.
+ * It is outside the card on purpose: the card is the sponsor's link and goes
+ * to the sponsor, this one is the site's and stays on the site.
+ *
+ * The holder is fetched in the browser only, once for the whole page (see
+ * useSponsorSlot). Until the answer is in, a strip holds its height and says
+ * nothing, because "this spot is open" would be untrue for a moment on a site
+ * that has a sponsor. When nobody holds the spot, the page says so in one
+ * honest line that links to /sponsor. `hide-empty` is for the sidebar, where
+ * an empty spot shows nothing at all.
  */
 const props = withDefaults(defineProps<{
   /**
@@ -23,190 +35,178 @@ const props = withDefaults(defineProps<{
    */
   name?: string
   slot?: string
-  /** `card` for a column, `banner` for a full-width band, `compact` for the sidebar. */
-  variant?: 'card' | 'banner' | 'compact'
+  /** The shape: a full-width strip, or a compact card for a side column. */
+  format?: 'leaderboard' | 'square'
+  /** Render nothing unless somebody holds the spot. */
+  hideEmpty?: boolean
 }>(), {
   name: 'brand',
   slot: undefined,
-  variant: 'card'
+  format: 'square',
+  hideEmpty: false
 })
 
-interface Holder {
-  name: string
-  url: string
-  image?: string | null
-  tagline?: string | null
-  amount?: number
-  design?: SponsorCardDesign
-}
+const { holder, price, loaded, load } = useSponsorSlot(() => props.slot || props.name || 'brand')
 
-interface SlotResponse {
-  slot: string
-  holder: Holder | null
-  minimumNextBid?: number
-}
+onMounted(load)
 
-const slotName = computed(() => props.slot || props.name || 'brand')
-
-const data = ref<SlotResponse | null>(null)
-
-onMounted(async () => {
-  if (!slotName.value) {
-    return
+/** A square that has not heard back yet takes no room; a strip keeps its place. */
+const shown = computed(() => {
+  if (holder.value) {
+    return true
   }
-  try {
-    data.value = await $fetch<SlotResponse>(`/api/sponsors/slot/${encodeURIComponent(slotName.value)}`, {
-      timeout: 6000
-    })
-  } catch {
-    data.value = null
+  if (props.hideEmpty) {
+    return false
   }
-})
-
-/** Only a plain web link is ever a destination, whatever a bidder typed in. */
-const isWeb = (value?: string | null) => Boolean(value && /^https?:\/\//i.test(value))
-
-const DEFAULT_DESIGN: SponsorCardDesign = { layout: 'logo-left', accent: '#111111', ink: '#FFFFFF', cta: null }
-
-const holder = computed<SponsorCardData | null>(() => {
-  const h = data.value?.holder
-  if (!h || !h.name || !isWeb(h.url)) {
-    return null
-  }
-  return { name: h.name, url: h.url, image: h.image ?? null, tagline: h.tagline ?? null, design: h.design ?? DEFAULT_DESIGN }
-})
-
-const inr = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 })
-
-/** Money arrives in paise. */
-const price = computed(() => {
-  const paise = data.value?.minimumNextBid
-  return typeof paise === 'number' && paise > 0 ? inr.format(paise / 100) : undefined
+  return loaded.value || props.format === 'leaderboard'
 })
 </script>
 
 <template>
   <aside
+    v-if="shown"
     class="sponsor"
-    :data-variant="variant"
-    :aria-label="holder ? `Sponsored by ${holder.name}` : 'Sponsor spot'"
+    :data-format="format"
+    :aria-label="holder ? `Site sponsor: ${holder.name}` : 'Site sponsor spot'"
   >
+    <p class="sponsor__head">
+      <span class="label">Site sponsor</span>
+      <NuxtLink
+        v-if="holder"
+        to="/sponsor#leaderboard"
+        class="sponsor__all"
+      >
+        See all sponsors
+        <UIcon
+          name="i-lucide-arrow-right"
+          class="size-3"
+        />
+      </NuxtLink>
+    </p>
+
     <SponsorCard
       v-if="holder"
       :sponsor="holder"
-      :size="variant === 'banner' ? 'band' : 'column'"
+      :format="format"
+    />
+
+    <div
+      v-else-if="!loaded"
+      class="sponsor__wait"
+      aria-hidden="true"
     />
 
     <NuxtLink
       v-else
       to="/sponsor"
-      class="sponsor__empty"
+      class="sponsor__open"
     >
-      <span class="sponsor__label">Sponsor spot</span>
-      <span class="sponsor__name">Your ad here</span>
-      <span
-        v-if="variant !== 'compact'"
-        class="sponsor__text"
-      >
-        Design your card, outbid the holder and keep this spot for as long as nobody pays more.
+      <span class="sponsor__open-text">
+        This spot is open: sponsor the guide<template v-if="price"> from <span class="num">{{ price }}</span></template>
       </span>
-      <span class="sponsor__foot">
-        <span
-          v-if="price"
-          class="sponsor__price"
-        >From {{ price }}</span>
-        <span class="sponsor__go">
-          Sponsor
-          <UIcon
-            name="i-lucide-arrow-right"
-            class="size-4"
-          />
-        </span>
-      </span>
+      <UIcon
+        name="i-lucide-arrow-right"
+        class="sponsor__open-arrow size-4"
+      />
     </NuxtLink>
   </aside>
 </template>
 
 <style scoped>
-.sponsor__empty {
+.sponsor {
+  min-width: 0;
+}
+
+.sponsor__head {
   display: flex;
-  flex-direction: column;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.125rem 0.75rem;
+  margin-bottom: 0.375rem;
+}
+
+.sponsor[data-format='square'] .sponsor__head {
+  max-width: 18.75rem;
+}
+
+/* The site's own link beside the sponsor's card: small, and quiet until
+   pointed at. */
+.sponsor__all {
+  display: inline-flex;
+  align-items: center;
   gap: 0.25rem;
-  padding: 1rem;
-  border: 1px solid var(--rule-color, var(--ui-border));
-  border-top: 3px solid var(--ui-text-highlighted);
-  border-radius: 0;
-  text-decoration: none;
-  transition: border-color var(--dgm-t-fast, 120ms) var(--dgm-ease, ease);
-}
-
-.sponsor__empty:hover,
-.sponsor__empty:focus-visible {
-  border-color: var(--ui-text-highlighted);
-}
-
-.sponsor__label {
-  font-size: 0.6875rem;
+  font-size: 0.75rem;
   line-height: 1.3;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  font-weight: 500;
   color: var(--ui-text-muted);
+  white-space: nowrap;
+  transition: color var(--dgm-t-fast, 120ms) var(--dgm-ease, ease);
 }
 
-.sponsor__name {
-  font-size: 1.125rem;
-  font-weight: 700;
-  letter-spacing: -0.02em;
+.sponsor__all:hover,
+.sponsor__all:focus-visible {
+  color: var(--ui-primary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* The open spot and the strip that is still loading: the same hairline box,
+   the same height as a sponsor's strip, so nothing on the page moves when the
+   answer arrives. */
+.sponsor__wait,
+.sponsor__open {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--rule-color, var(--ui-border));
+  border-radius: 0;
+}
+
+.sponsor__open {
+  font-size: var(--text-sm, 0.875rem);
+  line-height: 1.4;
+  color: var(--ui-text-muted);
+  text-decoration: none;
+  transition:
+    border-color var(--dgm-t-fast, 120ms) var(--dgm-ease, ease),
+    color var(--dgm-t-fast, 120ms) var(--dgm-ease, ease);
+}
+
+.sponsor__open:hover,
+.sponsor__open:focus-visible {
+  border-color: var(--ui-text-highlighted);
   color: var(--ui-text-highlighted);
 }
 
-.sponsor__text {
-  font-size: 0.875rem;
-  line-height: 1.45;
-  color: var(--ui-text-muted);
+.sponsor__open-text {
+  min-width: 0;
   text-wrap: pretty;
 }
 
-.sponsor__foot {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 0.75rem;
-  margin-top: 0.5rem;
-  padding-top: 0.5rem;
-  border-top: 1px solid var(--rule-color, var(--ui-border));
-}
-
-.sponsor__price {
-  font-size: 0.8125rem;
-  font-variant-numeric: tabular-nums lining-nums;
-  color: var(--ui-text-muted);
-}
-
-.sponsor__go {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
-  margin-left: auto;
-  font-size: 0.8125rem;
-  font-weight: 600;
+.sponsor__open-arrow {
+  flex-shrink: 0;
   color: var(--ui-primary);
 }
 
-.sponsor[data-variant='banner'] .sponsor__empty {
-  padding: 1.25rem 1.5rem;
+.sponsor[data-format='leaderboard'] .sponsor__wait,
+.sponsor[data-format='leaderboard'] .sponsor__open {
+  min-height: 5.625rem;
 }
 
-.sponsor[data-variant='banner'] .sponsor__name {
-  font-size: 1.5rem;
+.sponsor[data-format='leaderboard'] .sponsor__open {
+  padding-inline: 1.25rem;
 }
 
-.sponsor[data-variant='compact'] .sponsor__empty {
-  padding: 0.625rem 0.75rem;
+.sponsor[data-format='square'] .sponsor__open {
+  align-items: flex-start;
+  max-width: 18.75rem;
 }
 
-.sponsor[data-variant='compact'] .sponsor__name {
-  font-size: 0.9375rem;
+.sponsor[data-format='square'] .sponsor__open-arrow {
+  margin-top: 0.125rem;
 }
 </style>

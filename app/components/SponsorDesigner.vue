@@ -98,8 +98,9 @@ export function draftProblems(draft: SponsorDraft, options: SponsorDesignOptions
 /**
  * The card designer on /sponsor. The sponsor fills in who they are, picks a
  * layout, a colour and a call to action, and sees the card exactly as the
- * site will draw it (the same `SponsorCard`), in both places it appears and in
- * both colour modes, before they pay anything.
+ * site will draw it (the same `SponsorCard`), in both shapes it comes in (the
+ * leaderboard strip and the square) and in both colour modes, before they pay
+ * anything.
  */
 const draft = defineModel<SponsorDraft>({ required: true })
 
@@ -430,7 +431,7 @@ const taglineLeft = computed(() => props.options.limits.tagline - draft.value.ta
       <div class="lg:sticky lg:top-4 space-y-6">
         <div>
           <p class="label mb-2">
-            Preview · home page band
+            Preview · leaderboard strip · home and the top of the community pages
           </p>
           <div class="space-y-px">
             <div
@@ -440,7 +441,7 @@ const taglineLeft = computed(() => props.options.limits.tagline - draft.value.ta
               <span class="stage__tag">Light</span>
               <SponsorCard
                 :sponsor="card"
-                size="band"
+                format="leaderboard"
                 theme="light"
                 preview
               />
@@ -452,7 +453,7 @@ const taglineLeft = computed(() => props.options.limits.tagline - draft.value.ta
               <span class="stage__tag">Dark</span>
               <SponsorCard
                 :sponsor="card"
-                size="band"
+                format="leaderboard"
                 theme="dark"
                 preview
               />
@@ -462,7 +463,7 @@ const taglineLeft = computed(() => props.options.limits.tagline - draft.value.ta
 
         <div>
           <p class="label mb-2">
-            Preview · beside every lesson
+            Preview · square · beside every lesson and in the sidebar
           </p>
           <div class="grid gap-px sm:grid-cols-2">
             <div
@@ -472,7 +473,7 @@ const taglineLeft = computed(() => props.options.limits.tagline - draft.value.ta
               <span class="stage__tag">Light</span>
               <SponsorCard
                 :sponsor="card"
-                size="column"
+                format="square"
                 theme="light"
                 preview
               />
@@ -484,7 +485,7 @@ const taglineLeft = computed(() => props.options.limits.tagline - draft.value.ta
               <span class="stage__tag">Dark</span>
               <SponsorCard
                 :sponsor="card"
-                size="column"
+                format="square"
                 theme="dark"
                 preview
               />
@@ -707,7 +708,8 @@ const taglineLeft = computed(() => props.options.limits.tagline - draft.value.ta
   color: #737373;
 }
 
+/* The square is drawn at its real size, centred on its stage. */
 .stage--column :deep(.sc) {
-  max-width: 18rem;
+  margin-inline: auto;
 }
 </style>

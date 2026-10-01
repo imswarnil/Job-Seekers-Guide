@@ -13,7 +13,8 @@
     "db:migrate": "node --env-file-if-exists=.env scripts/db-migrate.mjs",
     "db:status": "node --env-file-if-exists=.env scripts/db-migrate.mjs --status",
     "neon": "neonctl --project-id green-mouse-68892907",
-    "db:sql": "neonctl sql --project-id green-mouse-68892907"
+    "db:sql": "neonctl sql --project-id green-mouse-68892907",
+    "ship": "pnpm check:lessons && pnpm lint && pnpm typecheck && nuxt build && wrangler deploy"
   },
   "dependencies": {
     "@iconify-json/lucide": "^1.2.122",

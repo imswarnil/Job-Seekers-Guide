@@ -14,7 +14,7 @@ The endpoint-by-endpoint contract is [`api-contract.md`](api-contract.md).
 browser ──► Cloudflare (jobseekers.imswarnil.com)
               │
               ├─ static assets (.output/public) ── every lesson, /, /stats, /stories,
-              │                                    /guestbook, /sponsor, /support, /login …
+              │                                    /guestbook, /sponsor, /support/thanks, /login …
               │                                    (prerendered shells; data fetched in the browser)
               │
               └─ Worker "jobseekers" (Nuxt server, nitro preset cloudflare_module)
@@ -96,8 +96,8 @@ app/composables/useUser.ts /api/me, sign-in and sign-out
 app/plugins/auth.client.ts finishes an OAuth return, then loads the user
 app/plugins/track.client.ts page views
 app/middleware/{auth,admin}.ts
-app/pages/{login,account,stats,guestbook,leaderboard,sponsor}.vue
-app/pages/stories/{index,new,[id]}.vue, app/pages/support/{index,thanks}.vue
+app/pages/{login,account,stats,guestbook,sponsor}.vue (sponsor.vue is also the leaderboard and the donation form)
+app/pages/stories/{index,new,[id]}.vue, app/pages/support/thanks.vue
 app/pages/admin/{index,live,traffic,content,tables,payments,audit}.vue (+ content sub-pages)
 app/components/{LessonComments,CommunityPage,StoryCard,GifPicker,ViewsChart,AdminShell}.vue
 ```
@@ -170,7 +170,7 @@ Everything below in **test mode** first (the dashboard's mode switch).
    For local testing: `dodo wh listen http://localhost:3500/api/webhooks/dodo`
    (Dodo CLI), or send an example from the endpoint's Testing tab.
 4. Pay with a test card (see Dodo's testing docs), then check `/admin/payments`
-   shows the payment as `paid` and, for a bid, `/leaderboard` lists it.
+   shows the payment as `paid` and, for a bid, `/sponsor#leaderboard` lists it.
 5. **Going live**: repeat 1 to 3 in live mode (keys, products and webhook
    secrets are separate per mode), put the live values in the Worker secrets,
    and set `DODO_ENV` to `live_mode` in `wrangler.jsonc`.
@@ -265,3 +265,21 @@ pnpm db:migrate                  # apply db/migrations to DATABASE_URL
 First time on a new machine: `npx neonctl auth` opens the browser to sign in,
 then `npx neonctl connection-string --project-id green-mouse-68892907 --pooled`
 prints the DATABASE_URL for `.env`.
+
+## Shipping
+
+```bash
+pnpm ship        # lesson checks, lint, typecheck, build, then deploy
+```
+
+Deploys use the Cloudflare CLI login (`npx wrangler login`), which needs no
+API token. Do not put `CLOUDFLARE_API_TOKEN` in `.env`: wrangler prefers it
+over the login, and a token without Workers Scripts: Edit makes every deploy
+fail with "No access to the specified resource". GitHub Actions runs the
+checks on every push; it deploys by itself only if a repo secret
+`CLOUDFLARE_API_TOKEN` with Workers Scripts: Edit exists, which can only be
+created in the Cloudflare dashboard (the CLI login is not allowed to mint
+tokens).
+
+Cloudflare sometimes fails a large upload with "Upload took too long". Run
+the deploy again: it resumes from the assets already uploaded.

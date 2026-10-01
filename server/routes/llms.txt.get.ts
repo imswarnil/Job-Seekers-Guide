@@ -37,9 +37,7 @@ const COMMUNITY: { path: string, title: string, note: string }[] = [
   { path: '/stories/new', title: 'Share your story', note: 'Post your own route to a first job.' },
   { path: '/guestbook', title: 'Guestbook', note: 'One line from readers: what they learned, where they are.' },
   { path: '/stats', title: 'Stats', note: 'Live, public numbers: readers, countries, stories, jobs got.' },
-  { path: '/leaderboard', title: 'Supporters', note: 'Everyone who has sponsored or supported the guide.' },
-  { path: '/sponsor', title: 'Sponsor', note: 'The one sponsor spot, held by the highest bid.' },
-  { path: '/support', title: 'Support', note: 'Keep the guide free with a one-time gift.' },
+  { path: '/sponsor', title: 'Sponsors and supporters', note: 'Everyone who has sponsored the guide, ranked, and the two ways to back it: a one-time gift of any amount, or the one site sponsor spot, held by the highest bid.' },
   { path: '/contact', title: 'Contact', note: 'How to reach Swarnil.' }
 ]
 

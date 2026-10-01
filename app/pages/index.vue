@@ -330,12 +330,12 @@ useSchemaOrg(schemaNodes as unknown as Parameters<typeof useSchemaOrg>[0])
       </div>
     </section>
 
-    <!-- The site's one sponsor spot, once, between the story and the guide. -->
+    <!-- The site sponsor, as the leaderboard strip, between the story and the guide. -->
     <div class="band band--thin guides">
       <div class="frame">
         <SponsorSlot
           name="brand"
-          variant="banner"
+          format="leaderboard"
         />
       </div>
     </div>

@@ -108,20 +108,22 @@ SQLite), the trap people fall into, and the interview questions it answers.
 - **Comment** under any lesson (five comments per person per page) and react: 👍 ❤️ 💡 😂 🙏.
 - **Live stats** at `/stats`: readers right now, total page views, daily
   visitor and sign-up charts, countries, jobs got, all in the open.
-- **Support** it with any amount, or **sponsor** it: design your own card
-  (layout, colour, logo, button) in the page, then bid for the one brand spot.
-  The highest bid holds it with no expiry until someone pays more, and every
-  sponsor is ranked on a leaderboard.
+- **Back it** on one page (`/sponsor`): tip any amount, or sponsor it by
+  designing your own card (creator, project or company) and bidding for the
+  spot. The top sponsor is the site sponsor, shown across the site as a
+  leaderboard strip and a square card, and everyone stands on a podium
+  leaderboard. A bid holds the spot with no expiry until someone pays more.
 - **Gear** I actually used in the PG, with affiliate links.
 - **Your account**, which you can delete along with everything you wrote.
 
 <p>
   <img src="docs/screenshots/stats-page.png" alt="Public stats with daily charts" width="49%">
-  <img src="docs/screenshots/sponsor.png" alt="Designing a sponsor card" width="49%">
+  <img src="docs/screenshots/sponsor.png" alt="The sponsor podium and site sponsor strip" width="49%">
 </p>
 <p>
-  <img src="docs/screenshots/track-dark.png" alt="A track page in dark mode" width="73%">
-  <img src="docs/screenshots/mobile.png" alt="On a phone" width="24%">
+  <img src="docs/screenshots/guestbook.png" alt="The guestbook notes wall" width="49%">
+  <img src="docs/screenshots/track-dark.png" alt="A track page in dark mode" width="49%">
+  
 </p>
 
 The admin (`/admin`) has live analytics (who is reading right now, on which

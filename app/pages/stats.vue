@@ -151,6 +151,16 @@ usePageSeo({
       </div>
     </header>
 
+    <!-- The site sponsor, as the leaderboard strip ------------------------------- -->
+    <div class="band guides stats-sponsor">
+      <div class="frame">
+        <SponsorSlot
+          name="brand"
+          format="leaderboard"
+        />
+      </div>
+    </div>
+
     <!-- The journey, in one strip -------------------------------------------------- -->
     <section
       class="band guides"
@@ -434,7 +444,7 @@ usePageSeo({
             Become a sponsor
           </UButton>
           <NuxtLink
-            to="/support"
+            to="/sponsor#support"
             class="arrow-link"
           >
             Or give any amount
@@ -507,6 +517,11 @@ usePageSeo({
 </template>
 
 <style scoped>
+/* The sponsor's strip sits in a thin band of its own, not a full one. */
+.stats-sponsor {
+  padding-block: 2rem;
+}
+
 .stat {
   padding-top: 0.75rem;
   border-top: 2px solid var(--rule-strong);

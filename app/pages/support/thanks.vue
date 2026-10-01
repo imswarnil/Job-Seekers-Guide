@@ -1,6 +1,8 @@
 <script setup lang="ts">
 /**
  * Where Dodo sends people back after paying (a donation or a sponsor bid).
+ * Both start on /sponsor; this page kept its address when /support was folded
+ * into it, because the return URL is set on the server for every checkout.
  * The redirect proves nothing by itself, so this page asks our server, which
  * only marks a payment paid when the signed webhook arrives. It checks a few
  * times, because the webhook and the redirect race.
@@ -115,14 +117,14 @@ useSeoMeta({ title: 'Thank you', robots: 'noindex' })
       <div class="mt-6 flex flex-wrap gap-2">
         <UButton
           v-if="kind === 'bid'"
-          to="/leaderboard"
+          to="/sponsor#leaderboard"
           icon="i-lucide-trophy"
         >
           See the leaderboard
         </UButton>
         <UButton
           v-if="state === 'failed'"
-          :to="kind === 'bid' ? '/sponsor' : '/support'"
+          :to="kind === 'bid' ? '/sponsor#bid' : '/sponsor#support'"
           icon="i-lucide-rotate-ccw"
         >
           Try again

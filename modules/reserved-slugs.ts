@@ -25,8 +25,11 @@ const RESERVED = [
   'stats',
   'stories',
   'guestbook',
-  'leaderboard',
   'sponsor',
+  // Folded into /sponsor, and still taken: `/leaderboard` and `/support`
+  // redirect there (app/middleware/legacy.global.ts), and `/support/thanks`
+  // is where Dodo returns people after paying.
+  'leaderboard',
   'support',
   // Build and framework prefixes.
   'api',

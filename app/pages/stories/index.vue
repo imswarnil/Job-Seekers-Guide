@@ -60,6 +60,12 @@ usePageSeo({
       </NuxtLink>
     </template>
 
+    <SponsorSlot
+      name="brand"
+      format="leaderboard"
+      class="mb-10"
+    />
+
     <UTabs
       v-model="sort"
       :items="tabs"

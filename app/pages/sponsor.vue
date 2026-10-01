@@ -1,16 +1,25 @@
 <script setup lang="ts">
 import type { SponsorDraft, SponsorDesignOptions } from '~/components/SponsorDesigner.vue'
-import type { SponsorCardData, SponsorCardDesign } from '~/components/SponsorCard.vue'
+import type { SponsorCardDesign } from '~/components/SponsorCard.vue'
 import { draftProblems } from '~/components/SponsorDesigner.vue'
 
 /**
- * Sponsor the site's one spot, on the outbid model: pay once, keep it for as
- * long as nobody pays more. No monthly fee, no expiry.
+ * Sponsors and supporters: the one page for the people who pay for this guide
+ * and for joining them. Three pages became this one; `/leaderboard` and
+ * `/support` now redirect to its sections (middleware/legacy.global.ts).
+ *
+ *   #leaderboard  everybody who has sponsored, ranked: the first three on a
+ *                 podium, the rest as a list (SponsorPodium).
+ *   #support      pay what you want, once, no account (SupportForm, which
+ *                 posts to /api/support/checkout).
+ *   #sponsor      the site's one spot, on the outbid model: pay once, keep it
+ *                 for as long as nobody pays more. No monthly fee, no expiry.
+ *                 Whoever holds it is the site sponsor, shown across the site.
  *
  * The sponsor designs their card here first (SponsorDesigner, previewed with
- * the real SponsorCard), then bids and pays through Dodo. The design travels
- * with the bid and is checked by the server against the same lists the
- * designer offers (GET /api/sponsors/design).
+ * the real SponsorCard in both shapes), then bids and pays through Dodo. The
+ * design travels with the bid and is checked by the server against the same
+ * lists the designer offers (GET /api/sponsors/design).
  *
  * An old link that still says `?slot=sidebar` lands here and bids on `brand`,
  * which is what the server does with the old names too.
@@ -37,10 +46,6 @@ const { data: options, status: optionsStatus, refresh: reloadOptions } = useFetc
 })
 
 const current = computed(() => data.value?.items.find(s => s.slot === 'brand') || data.value?.items[0])
-const holderCard = computed<SponsorCardData | null>(() => {
-  const h = current.value?.holder
-  return h ? { name: h.name, url: h.url, image: h.image, tagline: h.tagline, design: h.design } : null
-})
 
 // ---- The draft, kept in this browser so signing in halfway loses nothing ----
 const DRAFT_KEY = 'jsg-sponsor-draft'
@@ -123,46 +128,59 @@ async function submit() {
   }
 }
 
+/** The outbid model, in three lines. */
+const steps = [
+  { title: 'Outbid to take it', text: 'The highest single payment holds the spot. The next bid has to beat it by 10%, and by at least ₹10.' },
+  { title: 'Keep it with no end date', text: 'There is no monthly fee and no expiry. The spot is yours until somebody pays more.' },
+  { title: 'Companies or people', text: 'An institute, a company that hires freshers, or someone who wants to say thank you. Your card, shown as you designed it.' }
+]
+
+/** Where the site sponsor shows, by shape. The same two shapes the designer previews. */
+const placements = [
+  { format: 'Leaderboard', where: 'A full-width strip on the home page, and at the top of Stories, the Guestbook, Stats and the Leaderboard' },
+  { format: 'Square', where: 'A compact card beside every lesson, which stays in view as the reader scrolls, and in the sidebar on every page' }
+]
+
 usePageSeo({
-  title: 'Sponsor the guide',
-  description: 'Design your card, pay once and keep the spot on the Bangalore Job Seekers Guide until somebody outbids you. Companies and individuals welcome.',
-  headline: 'Sponsor'
+  title: 'Sponsors and supporters',
+  description: 'Everybody who has paid to keep the Bangalore Job Seekers Guide free, ranked, and the two ways to join them: give any amount, once, or design a card and hold the site sponsor spot until somebody outbids you.',
+  headline: 'Sponsors'
 })
 </script>
 
 <template>
   <div class="sponsor-page">
     <!-- Head ------------------------------------------------------------------- -->
-    <header class="band guides">
+    <header class="band guides sponsor-page__head">
       <div class="frame swiss-grid">
         <div class="col-span-full lg:col-span-9">
           <p class="label">
             <span class="mark" />
-            Sponsor
+            Sponsors and supporters
           </p>
           <h1 class="display mt-4">
-            Put your name in front of thousands of job seekers
+            Back this guide
           </h1>
           <p class="lede mt-5">
-            Design your card, pay once, and the spot is yours for as long as
-            nobody pays more. No monthly fee and no expiry. If somebody outbids
-            you, your name stays on the all-time leaderboard, and you can always
-            take the spot back.
+            Everything here is free to read, and it stays free. These are the
+            people and companies who pay for that, and the two ways to join
+            them: give any amount, once, or put your name in front of every
+            reader as the site sponsor.
           </p>
           <div class="mt-6 flex flex-wrap gap-x-6 gap-y-2">
             <NuxtLink
-              to="#design"
+              to="#support"
               class="arrow-link"
             >
-              Design your card
+              Give any amount
               <UIcon name="i-lucide-arrow-down" />
             </NuxtLink>
             <NuxtLink
-              to="/leaderboard"
+              to="#sponsor"
               class="arrow-link"
             >
-              The leaderboard
-              <UIcon name="i-lucide-arrow-right" />
+              Become the site sponsor
+              <UIcon name="i-lucide-arrow-down" />
             </NuxtLink>
             <NuxtLink
               to="/stats"
@@ -176,70 +194,117 @@ usePageSeo({
       </div>
     </header>
 
-    <!-- How it works ------------------------------------------------------------ -->
+    <!-- The leaderboard: the podium, then everybody else ---------------------------- -->
     <section
-      class="band guides"
-      aria-labelledby="how-title"
+      id="leaderboard"
+      class="band guides scroll-mt-8"
+      aria-labelledby="leaderboard-title"
     >
-      <div class="frame swiss-grid gap-y-8">
-        <h2
-          id="how-title"
-          class="label col-span-full"
-        >
-          How it works
-        </h2>
-        <div
-          v-for="(step, i) in [
-            { title: 'Outbid to take it', text: 'The highest single payment holds the spot. The next bid has to beat it by 10%, and by at least ₹10.' },
-            { title: 'Keep it forever', text: 'There is no end date. The spot is yours until somebody pays more.' },
-            { title: 'Companies or people', text: 'An institute, a company that hires freshers, or someone who wants to say thank you. Your card, shown as you designed it.' }
-          ]"
-          :key="step.title"
-          class="step col-span-full sm:col-span-4"
-        >
-          <span class="step__n num">0{{ i + 1 }}</span>
-          <p class="step__title">
-            {{ step.title }}
-          </p>
-          <p class="step__text">
-            {{ step.text }}
-          </p>
+      <div class="frame">
+        <div class="swiss-grid mb-10">
+          <div class="col-span-full lg:col-span-8">
+            <p class="label">
+              <UIcon
+                name="i-lucide-trophy"
+                class="size-3.5"
+              />
+              Leaderboard
+            </p>
+            <h2
+              id="leaderboard-title"
+              class="headline mt-2"
+            >
+              Sponsors of all time
+            </h2>
+            <p class="mt-3 text-muted max-w-2xl">
+              Ranked by everything they have put in. The sponsor spot can be
+              outbid. A place on this list cannot.
+            </p>
+          </div>
         </div>
+
+        <!-- The card the site is showing now, when somebody holds the spot. -->
+        <SponsorSlot
+          name="brand"
+          format="leaderboard"
+          hide-empty
+          class="mb-12"
+        />
+
+        <SponsorPodium />
       </div>
     </section>
 
-    <!-- The spot ---------------------------------------------------------------- -->
+    <!-- The two ways to join, side by side ----------------------------------------- -->
     <section
       class="band guides"
-      aria-labelledby="spot-title"
+      aria-label="Two ways to back the guide"
     >
-      <div class="frame swiss-grid gap-y-6">
-        <div class="col-span-full lg:col-span-4">
-          <h2
-            id="spot-title"
-            class="headline"
-          >
-            The spot
+      <div class="frame swiss-grid gap-y-12">
+        <!-- Way one: support -->
+        <div
+          id="support"
+          class="way col-span-full lg:col-span-6 scroll-mt-8"
+        >
+          <p class="label">
+            <span class="way__n num">01</span>
+            Support
+          </p>
+          <h2 class="headline mt-3">
+            Pay what you want
           </h2>
-          <ul class="row-list mt-5 text-sm">
-            <li class="py-2.5 flex gap-3">
-              <span class="label w-16 shrink-0">Home</span>
-              A band on the home page, under my journey
-            </li>
-            <li class="py-2.5 flex gap-3">
-              <span class="label w-16 shrink-0">Lessons</span>
-              The card beside every lesson, which stays in view as the reader scrolls
-            </li>
-          </ul>
+          <p class="way__text">
+            I paid for the institute, the PG and the train out of savings and
+            my sister's faith. If this guide saved you a coaching fee, or a few
+            bad weeks, a small amount keeps it online and keeps me writing.
+          </p>
+
+          <SupportForm class="mt-6" />
+
+          <p class="way__aside">
+            No money? That is fine.
+            <NuxtLink
+              to="/guestbook"
+              class="way__inline"
+            >Sign the guestbook</NuxtLink>
+            or
+            <NuxtLink
+              to="/stories/new"
+              class="way__inline"
+            >share your story</NuxtLink>.
+            It helps more than you think.
+          </p>
         </div>
 
-        <div class="col-span-full lg:col-span-7 lg:col-start-6">
-          <USkeleton
-            v-if="status === 'pending' || status === 'idle'"
-            class="h-32 w-full"
-          />
-          <template v-else>
-            <dl class="facts">
+        <!-- Way two: sponsor -->
+        <div
+          id="sponsor"
+          class="way col-span-full lg:col-span-6 scroll-mt-8"
+        >
+          <p class="label">
+            <span class="way__n num">02</span>
+            Sponsor
+          </p>
+          <h2 class="headline mt-3">
+            Design your card and bid for the spot
+          </h2>
+          <p class="way__text">
+            There is one sponsor spot. Whoever holds it is the site sponsor:
+            their card sits on the home page, beside every lesson, in the
+            sidebar and at the top of the community pages. If somebody outbids
+            you, your name stays on the leaderboard, and you can always take
+            the spot back.
+          </p>
+
+          <div class="mt-6">
+            <USkeleton
+              v-if="status === 'pending' || status === 'idle'"
+              class="h-24 w-full"
+            />
+            <dl
+              v-else
+              class="facts"
+            >
               <div>
                 <dt class="label">
                   Held by
@@ -265,19 +330,61 @@ usePageSeo({
                 </dd>
               </div>
             </dl>
-            <div
-              v-if="holderCard"
-              class="mt-6"
+          </div>
+
+          <ul class="row-list mt-6 text-sm">
+            <li
+              v-for="place in placements"
+              :key="place.format"
+              class="py-3 flex gap-4"
             >
-              <p class="label mb-2">
-                On the site now
-              </p>
-              <SponsorCard
-                :sponsor="holderCard"
-                size="band"
-              />
-            </div>
-          </template>
+              <span class="label w-24 shrink-0 pt-0.5">{{ place.format }}</span>
+              <span class="text-muted">{{ place.where }}</span>
+            </li>
+          </ul>
+
+          <div class="mt-6">
+            <UButton
+              to="#design"
+              size="xl"
+              icon="i-lucide-pencil-ruler"
+            >
+              Design your card
+            </UButton>
+          </div>
+          <p class="mt-4 text-xs text-muted">
+            One card, drawn in two standard shapes from the same design. Every
+            one is marked "Site sponsor", and the link is marked as sponsored
+            for search engines.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- How it works ------------------------------------------------------------ -->
+    <section
+      class="band guides"
+      aria-labelledby="how-title"
+    >
+      <div class="frame swiss-grid gap-y-8">
+        <h2
+          id="how-title"
+          class="label col-span-full"
+        >
+          How the sponsor spot works
+        </h2>
+        <div
+          v-for="(step, i) in steps"
+          :key="step.title"
+          class="step col-span-full sm:col-span-4"
+        >
+          <span class="step__n num">0{{ i + 1 }}</span>
+          <p class="step__title">
+            {{ step.title }}
+          </p>
+          <p class="step__text">
+            {{ step.text }}
+          </p>
         </div>
       </div>
     </section>
@@ -303,9 +410,9 @@ usePageSeo({
             <p class="lede mt-3">
               First say who you are: a creator, a builder or a company. Then
               your name, your link, one line and a logo, in one of four
-              layouts and one of six colours. The preview is the card the site
-              will show, on the home page and beside every lesson, in light
-              and dark.
+              layouts and one of six colours. The previews are the card the
+              site will show, as the leaderboard strip and as the square, in
+              light and dark.
             </p>
           </div>
         </div>
@@ -437,6 +544,48 @@ usePageSeo({
 </template>
 
 <style scoped>
+/* The head is a short introduction; the board and the two ways are the page. */
+.sponsor-page__head {
+  padding-bottom: 2.5rem;
+}
+
+/* One of the two ways: a column under a heavy rule. */
+.way {
+  min-width: 0;
+  padding-top: 0.875rem;
+  border-top: 2px solid var(--rule-strong);
+}
+
+.way__n {
+  color: var(--ui-primary);
+}
+
+.way__text {
+  margin-top: 0.75rem;
+  max-width: 34rem;
+  color: var(--ui-text-muted);
+  text-wrap: pretty;
+}
+
+.way__aside {
+  margin-top: 1.5rem;
+  padding-top: 0.875rem;
+  border-top: 1px solid var(--rule-color);
+  font-size: var(--text-sm);
+  color: var(--ui-text-muted);
+}
+
+.way__inline {
+  color: var(--ui-text-highlighted);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.way__inline:hover {
+  color: var(--ui-primary);
+}
+
+/* The outbid model, as three columns under heavy rules. */
 .step {
   padding-top: 0.75rem;
   border-top: 2px solid var(--rule-strong);
@@ -466,18 +615,18 @@ usePageSeo({
 
 .facts {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(8.5rem, 1fr));
   gap: var(--gutter);
 }
 
 .facts > div {
   padding-top: 0.75rem;
-  border-top: 2px solid var(--rule-strong);
+  border-top: 1px solid var(--rule-color);
 }
 
 .facts__value {
   margin-top: 0.5rem;
-  font-size: 1.5rem;
+  font-size: 1.375rem;
   font-weight: 700;
   letter-spacing: -0.03em;
   color: var(--ui-text-highlighted);

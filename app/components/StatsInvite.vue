@@ -65,7 +65,7 @@ const money = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR
         />
       </NuxtLink>
       <NuxtLink
-        to="/support"
+        to="/sponsor#support"
         class="invite__quiet"
       >
         Support

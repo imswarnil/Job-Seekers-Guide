@@ -113,6 +113,12 @@ usePageSeo({
     description="If the guide helped you, even a little, leave a line here. Tell me one thing you learned. I read every one of these, and on bad days they are the reason I keep writing."
     width="wide"
   >
+    <SponsorSlot
+      name="brand"
+      format="leaderboard"
+      class="mb-10"
+    />
+
     <section
       class="gb-form"
       aria-label="Sign the guestbook"
@@ -303,7 +309,7 @@ usePageSeo({
         small contribution keeps it online for the next person.
       </p>
       <div class="mt-5 flex flex-wrap gap-3">
-        <UButton to="/support">
+        <UButton to="/sponsor#support">
           Support the guide
         </UButton>
         <UButton

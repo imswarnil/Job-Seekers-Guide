@@ -38,9 +38,12 @@ A signed-in request is recognised by the Neon Auth cookies, or by
 
 ## Sponsor spots (the outbid model)
 
-There is one **slot**, `brand` (the list lives in `server/utils/sponsors.ts`).
-It shows in two places: a band on the home page and the sticky card beside
-every lesson. The retired names (`home-hero`, `home-footer`, `sidebar`,
+There is one **slot**, `brand` (the list lives in `server/utils/sponsors.ts`),
+and whoever holds it is the **site sponsor**. Their card shows across the site
+in two standard shapes drawn from the one design: a `leaderboard` strip (wide
+and slim, 728×90 in spirit) on the home page and at the top of `/stories`,
+`/guestbook`, `/stats` and `/sponsor`, and a `square` (300×250 in spirit)
+beside every lesson and in the left sidebar. The retired names (`home-hero`, `home-footer`, `sidebar`,
 `lesson-aside`, `lesson-footer`, `story-footer`, `gear`, `stats`) are still
 accepted by `/api/sponsors/slot/:slot` and `/api/sponsors/bid` as aliases of
 `brand`. The highest single paid bid holds it, with no expiry, until someone
@@ -87,10 +90,24 @@ existed reads as `company`; a stored CTA its type no longer offers is dropped
 on its own rather than taking the whole card down. Hiding a bid
 (`status: hidden` in the admin data manager) takes the card off the site.
 
-The front end's `<SponsorSlot name="…">` draws the holder with `<SponsorCard>`
-(the same component the designer previews with), marked "Sponsored", linked
-with `rel="sponsored noopener"`, or a "Your ad here, from ₹X" placeholder
-linking to `/sponsor`.
+The front end's `<SponsorSlot name="…" format="leaderboard|square">` draws the
+holder with `<SponsorCard>` (the same component the designer previews with, in
+both shapes), marked "Site sponsor", linked with `rel="sponsored noopener"`,
+with a separate small "See all sponsors" link to `/sponsor#leaderboard`. With
+no holder it shows one line, "This spot is open: sponsor the guide from ₹X",
+linking to `/sponsor`; with `hide-empty` (the sidebar) it shows nothing. Every
+slot on a page shares one request (`app/composables/useSponsorSlot.ts`).
+
+**One page.** The leaderboard, the donation form and the sponsor designer all
+live on `/sponsor` (`#leaderboard`, `#support`, `#sponsor`, `#design`, `#bid`).
+`/leaderboard` and `/support` redirect to those sections
+(`app/middleware/legacy.global.ts`). `/support/thanks` is still its own page,
+because it is the return URL of every checkout. No endpoint changed shape.
+
+**Ranking and holding are two measures.** `/api/sponsors/leaderboard` ranks by
+the total a sponsor has ever paid; the slot is held by the highest single paid
+bid. They are usually the same sponsor, but need not be. On the podium the
+"Site sponsor" label follows `slots` (who holds `brand`), not `rank`.
 
 ## Support / donations
 

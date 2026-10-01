@@ -108,8 +108,8 @@ export default defineNuxtConfig({
       // shells and fetch their data in the browser.
       routes: [
         '/', '/privacy', '/terms', '/contact',
-        '/stats', '/stories', '/stories/new', '/guestbook', '/leaderboard',
-        '/sponsor', '/support', '/support/thanks', '/login',
+        '/stats', '/stories', '/stories/new', '/guestbook',
+        '/sponsor', '/support/thanks', '/login',
         // The llms.txt map (server/routes/llms.txt.get.ts), baked to a static
         // file so serving it never queries the content database.
         '/llms.txt'

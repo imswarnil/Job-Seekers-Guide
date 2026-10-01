@@ -9,9 +9,12 @@
  * Four layouts, all on the Swiss rules: hairlines, square corners, no shadow,
  * an uppercase "Sponsored" label, type doing the hierarchy.
  *
- * `size` is where it sits: `band` (the full-width band on the home page) or
- * `column` (the card beside a lesson). `theme` forces light or dark for the
- * designer's side-by-side previews; `auto` follows the page.
+ * `format` is the shape, and there are two, the standard ones an ad comes in:
+ * `leaderboard` (a wide, slim strip across the full grid, 728×90 in spirit)
+ * and `square` (a compact near-square card for a side column, 300×250 in
+ * spirit). Both are drawn from the same design, so a sponsor designs once.
+ * `theme` forces light or dark for the designer's side-by-side previews;
+ * `auto` follows the page.
  */
 export interface SponsorCardDesign {
   /** Who the sponsor is: `creator`, `builder` or `company` (the default). */
@@ -32,12 +35,12 @@ export interface SponsorCardData {
 
 const props = withDefaults(defineProps<{
   sponsor: SponsorCardData
-  size?: 'band' | 'column'
+  format?: 'leaderboard' | 'square'
   theme?: 'auto' | 'light' | 'dark'
   /** A preview: drawn exactly the same, but not a link. */
   preview?: boolean
 }>(), {
-  size: 'column',
+  format: 'square',
   theme: 'auto',
   preview: false
 })
@@ -95,7 +98,7 @@ const host = computed(() => {
     :aria-label="preview ? undefined : `Sponsored: ${sponsor.name}${sponsor.tagline ? `. ${sponsor.tagline}` : ''}`"
     class="sc"
     :data-layout="layout"
-    :data-size="size"
+    :data-format="format"
     :data-theme="theme"
     :data-type="type"
     :style="{ '--sc-accent': accent, '--sc-on-accent': ink }"
@@ -109,7 +112,7 @@ const host = computed(() => {
       <span class="sc__label">{{ badge }}</span>
       <span class="sc__name sc__name--inline">{{ sponsor.name }}</span>
       <span
-        v-if="sponsor.tagline && size === 'band'"
+        v-if="sponsor.tagline"
         class="sc__tagline sc__tagline--inline"
       >{{ sponsor.tagline }}</span>
       <span class="sc__cta">
@@ -161,7 +164,7 @@ const host = computed(() => {
           class="sc__tagline"
         >{{ sponsor.tagline }}</span>
       </span>
-      <span class="sc__cta sc__cta--end">
+      <span class="sc__cta">
         <span>{{ cta || host }}</span>
         <UIcon
           name="i-lucide-arrow-up-right"
@@ -192,23 +195,23 @@ const host = computed(() => {
       <span class="sc__body">
         <span class="sc__label">{{ badge }}</span>
         <span class="sc__name">{{ sponsor.name }}</span>
-        <span
-          v-if="sponsor.tagline"
-          class="sc__tagline"
-        >{{ sponsor.tagline }}</span>
-        <span
-          v-if="cta"
-          class="sc__cta sc__cta--below"
-        >
-          <span>{{ cta }}</span>
-          <UIcon
-            name="i-lucide-arrow-right"
-            class="size-4"
-          />
-        </span>
+      </span>
+      <span
+        v-if="sponsor.tagline"
+        class="sc__tagline"
+      >{{ sponsor.tagline }}</span>
+      <span
+        v-if="cta"
+        class="sc__cta sc__cta--go"
+      >
+        <span>{{ cta }}</span>
+        <UIcon
+          name="i-lucide-arrow-right"
+          class="size-4"
+        />
       </span>
       <UIcon
-        v-if="!cta"
+        v-else
         name="i-lucide-arrow-up-right"
         class="sc__corner size-4"
       />
@@ -338,17 +341,24 @@ a.sc:focus-visible {
   white-space: nowrap;
 }
 
-.sc__cta--below {
-  margin-top: 0.5rem;
+/* ---- The two shapes ---------------------------------------------------------
+   A leaderboard is a strip: 90px tall at least, as wide as the grid. A square
+   is 6:5 and never wider than 300px. Both grow rather than clip when a
+   sponsor's words need the room. */
+.sc[data-format='leaderboard'] {
+  align-items: center;
+  min-height: 5.625rem;
+  padding: 0.75rem 1.25rem;
 }
 
-.sc__cta--end {
-  align-self: flex-end;
+.sc[data-format='square'] {
+  max-width: 18.75rem;
+  aspect-ratio: 6 / 5;
 }
 
 /* ---- Logo left ------------------------------------------------------------- */
 .sc[data-layout='logo-left'] {
-  align-items: flex-start;
+  display: grid;
   border-top: 3px solid var(--sc-accent);
 }
 
@@ -383,32 +393,92 @@ a.sc:focus-visible {
   color: var(--sc-muted);
 }
 
-.sc[data-layout='logo-left'][data-size='band'] .sc__logo {
-  width: 4.5rem;
-  height: 4.5rem;
+/* Square: the logo and the name share the top row, the line runs under them
+   and the button sits on the floor of the card. */
+.sc[data-layout='logo-left'][data-format='square'] {
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-rows: auto auto 1fr;
+  gap: 0.75rem;
+  align-items: start;
 }
 
-.sc[data-layout='logo-left'][data-size='band'] .sc__logo[data-fallback] {
-  font-size: 1.75rem;
+.sc[data-layout='logo-left'][data-format='square'] .sc__body {
+  align-self: center;
 }
 
-.sc[data-layout='logo-left'][data-size='band'] .sc__name {
-  font-size: 1.375rem;
+.sc[data-layout='logo-left'][data-format='square'] .sc__name {
+  font-size: 1.125rem;
 }
 
-.sc[data-layout='logo-left'][data-size='band'] .sc__tagline {
-  font-size: 1rem;
+.sc[data-layout='logo-left'][data-format='square'] .sc__tagline {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  margin-top: 0;
+}
+
+.sc[data-layout='logo-left'][data-format='square'] .sc__cta--go {
+  grid-column: 1 / -1;
+  grid-row: 3;
+  align-self: end;
+  justify-self: start;
+}
+
+.sc[data-layout='logo-left'][data-format='square'] .sc__corner {
+  grid-column: 1 / -1;
+  grid-row: 3;
+  align-self: end;
+  justify-self: end;
+}
+
+/* Leaderboard: logo, words, button, left to right on one line. */
+.sc[data-layout='logo-left'][data-format='leaderboard'] {
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-rows: auto auto;
+  column-gap: 1rem;
+  row-gap: 0;
+  align-content: center;
+}
+
+.sc[data-layout='logo-left'][data-format='leaderboard'] .sc__logo {
+  grid-row: 1 / span 2;
+  width: 3.75rem;
+  height: 3.75rem;
+}
+
+.sc[data-layout='logo-left'][data-format='leaderboard'] .sc__logo[data-fallback] {
+  font-size: 1.5rem;
+}
+
+.sc[data-layout='logo-left'][data-format='leaderboard'] .sc__body {
+  grid-column: 2;
+  grid-row: 1;
+  gap: 0.125rem;
+}
+
+.sc[data-layout='logo-left'][data-format='leaderboard'] .sc__name {
+  font-size: 1.1875rem;
+}
+
+.sc[data-layout='logo-left'][data-format='leaderboard'] .sc__tagline {
+  grid-column: 2;
+  grid-row: 2;
+  margin-top: 0.125rem;
+}
+
+.sc[data-layout='logo-left'][data-format='leaderboard'] .sc__cta--go,
+.sc[data-layout='logo-left'][data-format='leaderboard'] .sc__corner {
+  grid-column: 3;
+  grid-row: 1 / span 2;
 }
 
 /* ---- Wordmark -------------------------------------------------------------- */
 .sc[data-layout='wordmark'] {
-  flex-direction: column;
   border-left: 6px solid var(--sc-accent);
 }
 
 .sc__wordmark {
   display: block;
-  font-size: 1.5rem;
+  font-size: 1.75rem;
   line-height: 1;
   font-weight: 800;
   letter-spacing: -0.045em;
@@ -417,24 +487,32 @@ a.sc:focus-visible {
   text-wrap: balance;
 }
 
-.sc[data-layout='wordmark'][data-size='band'] {
-  padding: 1.25rem 1.5rem;
+.sc[data-layout='wordmark'][data-format='square'] {
+  flex-direction: column;
 }
 
-.sc[data-layout='wordmark'][data-size='band'] .sc__wordmark {
-  font-size: clamp(1.75rem, 1rem + 4cqi, 3rem);
+.sc[data-layout='wordmark'][data-format='square'] .sc__body {
+  gap: 0.5rem;
 }
 
-/* In the band, the words and the link share a row when there is room and
-   stack when there is not. */
-.sc[data-layout='wordmark'][data-size='band'] {
-  flex-flow: row wrap;
-  align-items: flex-end;
+.sc[data-layout='wordmark'][data-format='square'] .sc__cta {
+  align-self: flex-start;
+}
+
+.sc[data-layout='wordmark'][data-format='leaderboard'] {
   justify-content: space-between;
 }
 
-.sc[data-layout='wordmark'][data-size='band'] .sc__body {
-  flex: 1 1 18rem;
+.sc[data-layout='wordmark'][data-format='leaderboard'] .sc__body {
+  gap: 0.125rem;
+}
+
+.sc[data-layout='wordmark'][data-format='leaderboard'] .sc__wordmark {
+  font-size: clamp(1.375rem, 0.9rem + 2cqi, 2rem);
+}
+
+.sc[data-layout='wordmark'][data-format='leaderboard'] .sc__tagline {
+  margin-top: 0.125rem;
 }
 
 /* ---- Statement ------------------------------------------------------------- */
@@ -442,8 +520,6 @@ a.sc:focus-visible {
   --sc-fg: var(--sc-on-accent);
   --sc-muted: var(--sc-on-accent);
 
-  flex-direction: column;
-  gap: 0.75rem;
   background: var(--sc-accent);
   border-color: var(--sc-accent);
 }
@@ -478,7 +554,7 @@ a.sc[data-layout='statement']:focus-visible {
 
 .sc__statement {
   display: block;
-  font-size: 1.25rem;
+  font-size: 1.375rem;
   line-height: 1.15;
   font-weight: 700;
   letter-spacing: -0.03em;
@@ -500,20 +576,46 @@ a.sc[data-layout='statement']:focus-visible {
   min-width: 0;
 }
 
-.sc[data-layout='statement'][data-size='band'] {
-  padding: 1.5rem;
+.sc[data-layout='statement'][data-format='square'] {
+  flex-direction: column;
+  gap: 0.75rem;
 }
 
-.sc[data-layout='statement'][data-size='band'] .sc__statement {
-  font-size: clamp(1.5rem, 1rem + 3cqi, 2.5rem);
-  max-width: 28ch;
+.sc[data-layout='statement'][data-format='square'] .sc__foot {
+  margin-top: auto;
+}
+
+/* Leaderboard: badge, the line as the headline, then who and where, in a row.
+   Too narrow for a row and they stack, which is the square's order. */
+.sc[data-layout='statement'][data-format='leaderboard'] {
+  flex-flow: row wrap;
+  gap: 0.5rem 1.25rem;
+}
+
+.sc[data-layout='statement'][data-format='leaderboard'] .sc__top {
+  flex: none;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.sc[data-layout='statement'][data-format='leaderboard'] .sc__statement {
+  flex: 1 1 14rem;
+  font-size: clamp(1.125rem, 0.75rem + 1.8cqi, 1.75rem);
+}
+
+.sc[data-layout='statement'][data-format='leaderboard'] .sc__foot {
+  flex: 0 1 auto;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.25rem;
+  max-width: 40%;
+  padding: 0 0 0 1.25rem;
+  border-top: 0;
+  border-left: 1px solid var(--sc-on-accent);
 }
 
 /* ---- Minimal --------------------------------------------------------------- */
 .sc[data-layout='minimal'] {
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem 0;
   border-inline: 0;
 }
 
@@ -525,37 +627,116 @@ a.sc[data-layout='statement']:focus-visible {
   outline: 1px solid var(--sc-line);
 }
 
-.sc__name--inline {
-  flex-shrink: 1;
+.sc__name--inline,
+.sc__tagline--inline {
   min-width: 0;
+}
+
+/* Leaderboard: one line between two rules. */
+.sc[data-layout='minimal'][data-format='leaderboard'] {
+  gap: 0.75rem;
+  padding-inline: 0;
+}
+
+.sc[data-layout='minimal'][data-format='leaderboard'] .sc__name--inline {
+  flex-shrink: 1;
   overflow: hidden;
+  font-size: 1.125rem;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.sc__tagline--inline {
+.sc[data-layout='minimal'][data-format='leaderboard'] .sc__tagline--inline {
   flex: 1;
-  min-width: 0;
   margin-top: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.sc[data-layout='minimal'] .sc__cta {
+.sc[data-layout='minimal'][data-format='leaderboard'] .sc__cta {
   margin-left: auto;
 }
 
-.sc[data-layout='minimal'][data-size='band'] {
-  padding-block: 1rem;
+/* Square: the same quiet card, set as a short column between its two rules. */
+.sc[data-layout='minimal'][data-format='square'] {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-rows: auto auto auto 1fr;
+  align-items: center;
+  gap: 0.5rem 0.625rem;
+  padding: 1rem 0;
 }
 
-.sc[data-layout='minimal'][data-size='band'] .sc__name {
-  font-size: 1.125rem;
+.sc[data-layout='minimal'][data-format='square'] .sc__name--inline {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  font-size: 1.375rem;
+}
+
+.sc[data-layout='minimal'][data-format='square'] .sc__tagline--inline {
+  grid-column: 1 / -1;
+  grid-row: 3;
+  margin-top: 0;
+}
+
+.sc[data-layout='minimal'][data-format='square'] .sc__cta {
+  grid-column: 1 / -1;
+  grid-row: 4;
+  align-self: end;
+  justify-self: start;
+}
+
+/* ---- A strip on a narrow screen ----------------------------------------------
+   The card is its own container, so these read the strip's width, not the
+   window's: a leaderboard on a phone keeps its one line by letting go of the
+   least important words first. */
+.sc[data-format='leaderboard'] .sc__tagline {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+  line-clamp: 1;
+}
+
+.sc[data-layout='minimal'][data-format='leaderboard'] .sc__tagline {
+  display: block;
+}
+
+@container (max-width: 34rem) {
+  .sc[data-format='leaderboard'] .sc__tagline {
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+  }
+
+  .sc[data-layout='logo-left'][data-format='leaderboard'] .sc__cta > span,
+  .sc[data-layout='wordmark'][data-format='leaderboard'] .sc__cta > span,
+  .sc[data-layout='minimal'][data-format='leaderboard'] .sc__cta > span {
+    display: none;
+  }
+
+  .sc[data-layout='minimal'][data-format='leaderboard'] .sc__tagline {
+    display: none;
+  }
+
+  .sc[data-layout='statement'][data-format='leaderboard'] .sc__top {
+    flex: 1 1 100%;
+    flex-direction: row;
+  }
+
+  .sc[data-layout='statement'][data-format='leaderboard'] .sc__foot {
+    flex: 1 1 100%;
+    flex-direction: row;
+    align-items: baseline;
+    max-width: none;
+    padding: 0.5rem 0 0;
+    border-left: 0;
+    border-top: 1px solid var(--sc-on-accent);
+  }
 }
 
 @container (max-width: 22rem) {
-  .sc[data-layout='minimal'] .sc__label {
+  .sc[data-layout='minimal'][data-format='leaderboard'] .sc__label {
     display: none;
   }
 }

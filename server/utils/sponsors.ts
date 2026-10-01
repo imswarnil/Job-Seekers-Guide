@@ -5,13 +5,14 @@
  * expiry, until somebody pays more. The next bid has to beat the holder by 10%
  * (and by at least ₹10), so a slot cannot be taken for one rupee more.
  *
- * There is exactly one slot, `brand`. It shows in two places, one band on the
- * home page and the sticky card beside every lesson, and whoever holds it holds
- * both. Bids placed on the older, retired slot names stay in the database and
- * on the leaderboard, but no longer hold anything.
+ * There is exactly one slot, `brand`, and whoever holds it is the site sponsor.
+ * Their card shows across the site in two shapes: a leaderboard strip on the
+ * home page and at the top of the community pages, and a square beside every
+ * lesson and in the sidebar. Bids placed on the older, retired slot names stay
+ * in the database and on the leaderboard, but no longer hold anything.
  */
 export const SLOTS = {
-  brand: { label: 'The brand spot: on the home page and beside every lesson', floor: 2_900 }
+  brand: { label: 'The site sponsor spot: shown across the whole site', floor: 2_900 }
 } as const satisfies Record<string, { label: string, floor: number }>
 
 export type SlotName = keyof typeof SLOTS

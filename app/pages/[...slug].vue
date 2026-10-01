@@ -138,14 +138,17 @@ usePageSeo({
         <PageActions :file="file" />
       </div>
 
-      <!-- Last to arrive, last to pin: the site's single sponsor spot, and the
+      <!-- Last to arrive, last to pin: the site sponsor as the square, and the
            one sidebar ad unit (off in app.config.ts; it renders nothing until
            that boolean flips). Nothing else paid lives in this column. -->
       <div
         v-if="view === 'lesson'"
         class="shell-stick shell-stick--paid"
       >
-        <SponsorSlot name="brand" />
+        <SponsorSlot
+          name="brand"
+          format="square"
+        />
         <AdSlot
           placement="sidebar"
           variant="card"

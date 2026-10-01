@@ -5,7 +5,8 @@ import { footLinks } from '~/utils/links'
  * The guide, as one line you travel down.
  *
  * Where you left off at the top, then the timeline of every track (see
- * PlayerRail), then one quiet row of small links and the colour-mode switch.
+ * PlayerRail), the site sponsor's card when there is one, then one quiet row
+ * of small links and the colour-mode switch.
  * The brand, the search and the community pages live in the top bar.
  */
 defineProps<{
@@ -124,6 +125,16 @@ const money = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR
         @navigate="emit('navigate')"
       />
 
+      <!-- The site sponsor, as the square. Only when somebody holds the spot:
+           an open spot shows nothing here, the pages carry that invitation. -->
+      <SponsorSlot
+        name="brand"
+        format="square"
+        hide-empty
+        class="sidebar__sponsor"
+        @click="emit('navigate')"
+      />
+
       <section
         class="sidebar__how"
         aria-label="How this guide works"
@@ -175,7 +186,7 @@ const money = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR
             </div>
           </dl>
           <NuxtLink
-            to="/support"
+            to="/sponsor#support"
             class="arrow-link sidebar__support"
             @click="emit('navigate')"
           >
@@ -293,7 +304,8 @@ const money = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR
   padding-block: 0.75rem 1.5rem;
 }
 
-/* ── The two quiet blocks under the timeline ─────────────────────────── */
+/* ── The quiet blocks under the timeline ─────────────────────────────── */
+.sidebar__sponsor,
 .sidebar__how,
 .sidebar__pulse {
   padding: 0.875rem 1rem 1rem 1.25rem;

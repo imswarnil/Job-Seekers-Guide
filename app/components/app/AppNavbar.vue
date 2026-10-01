@@ -9,7 +9,7 @@ import type { DropdownMenuItem } from '@nuxt/ui'
  * search, the community pages (each behind a small icon), the GitHub link,
  * and who you are.
  *
- * The community links show as many as fit: all seven on a very wide screen,
+ * The community links show as many as fit: all five on a very wide screen,
  * fewer as it narrows, with the rest in "More". On a phone they all live in
  * the menu button. Which ones show is decided by CSS, so the right set is
  * there before the page has hydrated; the "More" menu reads the same
@@ -32,10 +32,9 @@ const links: NavLink[] = [
   { label: 'Stories', to: '/stories', icon: 'i-lucide-message-square-heart', from: 'lg' },
   { label: 'Guestbook', to: '/guestbook', icon: 'i-lucide-book-open-text', from: 'lg' },
   { label: 'Stats', to: '/stats', icon: 'i-lucide-chart-column', from: 'xl' },
-  { label: 'Leaderboard', to: '/leaderboard', icon: 'i-lucide-trophy', from: 'xl' },
-  { label: 'Gear', to: '/gear', icon: 'i-lucide-backpack', from: '2xl' },
-  { label: 'Support', to: '/support', icon: 'i-lucide-heart-handshake', from: '2xl' },
-  { label: 'Sponsor', to: '/sponsor', icon: 'i-lucide-megaphone', from: '2xl' }
+  // One page for the leaderboard, supporting and sponsoring.
+  { label: 'Sponsors', to: '/sponsor', icon: 'i-lucide-heart-handshake', from: 'xl' },
+  { label: 'Gear', to: '/gear', icon: 'i-lucide-backpack', from: '2xl' }
 ]
 
 const shownClass: Record<NavLink['from'], string> = {

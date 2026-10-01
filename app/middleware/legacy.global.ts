@@ -5,9 +5,10 @@
  * file for and leaves the requested URL in the address bar, so the app boots,
  * this middleware sees where the reader was trying to go, and sends them on.
  *
- * Two generations of URL land here: the pages of the old marketing site, and
+ * Three generations of URL land here: the pages of the old marketing site,
  * the tracks of the old course that were removed or renamed when it became the
- * Bangalore guide on 2026-09-29.
+ * Bangalore guide on 2026-09-29, and pages of this site that have since been
+ * folded into another (`/support` and `/leaderboard` into `/sponsor`).
  */
 
 /** Exact matches, checked first. */
@@ -24,7 +25,12 @@ const exact: Record<string, string> = {
   '/search': '/',
   // `/login` is a real page again (sign-in for stories and the guestbook).
   '/signup': '/login',
-  '/series': '/my-story'
+  '/series': '/my-story',
+  // Supporting, sponsoring and the leaderboard are one page now.
+  // `/support/thanks` is still a real page: Dodo sends people back there
+  // after paying.
+  '/support': '/sponsor#support',
+  '/leaderboard': '/sponsor#leaderboard'
 }
 
 /**
