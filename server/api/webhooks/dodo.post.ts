@@ -77,6 +77,11 @@ export default defineEventHandler(async (event) => {
       // keeps the original time, so the holder's tie-break never moves.
       sql`update sponsor_bids set status = 'paid', paid_at = coalesce(paid_at, now())
           where payment_id = ${ref}::uuid and status in ('pending', 'failed')
+            and exists (select 1 from payments where id = ${ref}::uuid and status = 'paid')`,
+      // A guestbook note signed with a tip was inserted hidden; the paid tip
+      // reveals it. Idempotent: revealing twice is revealing once.
+      sql`update guestbook set hidden = false
+          where payment_id = ${ref}::uuid
             and exists (select 1 from payments where id = ${ref}::uuid and status = 'paid')`
     )
   } else if (isPayment && (type === 'payment.failed' || type === 'payment.cancelled')) {
@@ -85,12 +90,19 @@ export default defineEventHandler(async (event) => {
       sql`update payments set status = ${next}, dodo_payment_id = coalesce(dodo_payment_id, ${dodoPaymentId}),
             updated_at = now()
           where id = ${ref}::uuid and status = 'pending'`,
-      sql`update sponsor_bids set status = 'failed' where payment_id = ${ref}::uuid and status = 'pending'`
+      sql`update sponsor_bids set status = 'failed' where payment_id = ${ref}::uuid and status = 'pending'`,
+      // A tip that never went through takes its hidden note with it. Only a
+      // still-hidden note: a paid one stays even if a late `failed` arrives.
+      sql`delete from guestbook where payment_id = ${ref}::uuid and hidden`
     )
   } else if (isRefund) {
     statements.push(
       sql`update payments set status = 'refunded', updated_at = now() where dodo_payment_id = ${dodoPaymentId}`,
       sql`update sponsor_bids set status = 'failed'
+          where payment_id in (select id from payments where dodo_payment_id = ${dodoPaymentId})`,
+      // A refunded tip hides the note again rather than deleting it: the
+      // words were published once, and an admin can still see why.
+      sql`update guestbook set hidden = true
           where payment_id in (select id from payments where dodo_payment_id = ${dodoPaymentId})`
     )
   }

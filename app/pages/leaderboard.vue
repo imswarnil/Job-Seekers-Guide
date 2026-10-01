@@ -5,6 +5,8 @@ interface Sponsor {
   name: string
   url: string
   image: string | null
+  /** Who they are, from their latest paid bid: creator, builder or company. */
+  type?: 'creator' | 'builder' | 'company' | string
   total: number
   slots: string[]
   since: string
@@ -17,6 +19,9 @@ const { data, status } = useFetch<{ items: Sponsor[] }>('/api/sponsors/leaderboa
 })
 
 const isWeb = (v?: string | null) => Boolean(v && /^https?:\/\//i.test(v))
+
+/** The badge word for each kind of sponsor; the same words the cards use. */
+const TYPE_BADGE: Record<string, string> = { creator: 'Creator', builder: 'Project', company: 'Sponsor' }
 
 usePageSeo({
   title: 'Sponsors of all time',
@@ -77,17 +82,23 @@ usePageSeo({
           size="md"
         />
         <div class="min-w-0 flex-1">
-          <a
-            v-if="isWeb(s.url)"
-            :href="s.url"
-            target="_blank"
-            rel="sponsored noopener"
-            class="font-semibold text-highlighted hover:text-primary truncate block"
-          >{{ s.name }}</a>
-          <span
-            v-else
-            class="font-semibold text-highlighted truncate block"
-          >{{ s.name }}</span>
+          <p class="flex min-w-0 items-baseline gap-2">
+            <a
+              v-if="isWeb(s.url)"
+              :href="s.url"
+              target="_blank"
+              rel="sponsored noopener"
+              class="font-semibold text-highlighted hover:text-primary truncate"
+            >{{ s.name }}</a>
+            <span
+              v-else
+              class="font-semibold text-highlighted truncate"
+            >{{ s.name }}</span>
+            <span
+              class="board__type label"
+              :data-type="s.type || 'company'"
+            >{{ TYPE_BADGE[s.type || 'company'] || 'Sponsor' }}</span>
+          </p>
           <p class="text-xs text-muted">
             Since {{ formatDay(s.since) }}
             <template v-if="s.slots.length">
@@ -140,5 +151,24 @@ usePageSeo({
 
 .board__row[data-rank='1'] .board__rank {
   color: var(--ui-primary);
+}
+
+/* Who each sponsor is, as a quiet bordered word beside the name. */
+.board__type {
+  flex-shrink: 0;
+  padding: 0.0625rem 0.3125rem;
+  border: 1px solid var(--ui-border-accented);
+  font-size: 0.625rem;
+  color: var(--ui-text-muted);
+}
+
+.board__type[data-type='creator'] {
+  border-color: var(--ui-primary);
+  color: var(--ui-primary);
+}
+
+.board__type[data-type='builder'] {
+  color: var(--ui-text-highlighted);
+  border-color: var(--ui-text-highlighted);
 }
 </style>

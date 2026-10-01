@@ -10,11 +10,19 @@ const props = defineProps<{
   kind?: string
 }>()
 
-const color = computed(() => trackStyle(trackSlug(props.lesson?.subjectPath)).color)
+const slug = computed(() => trackSlug(props.lesson?.subjectPath))
+const color = computed(() => trackStyle(slug.value).color)
 </script>
 
 <template>
   <header class="lesson-head swiss-grid">
+    <div
+      class="lesson-head__art"
+      aria-hidden="true"
+    >
+      <TrackIllustration :slug="slug" />
+    </div>
+
     <nav
       class="lesson-head__crumbs"
       aria-label="Where this lesson sits"
@@ -78,8 +86,30 @@ const color = computed(() => trackStyle(trackSlug(props.lesson?.subjectPath)).co
 </template>
 
 <style scoped>
+.lesson-head {
+  position: relative;
+}
+
 .lesson-head > * {
   grid-column: 1 / -1;
+}
+
+/* The track's line drawing: on the right, out of the layout entirely so the
+   hero band never grows for it. Wide screens only. */
+.lesson-head__art {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .lesson-head__art {
+    display: block;
+    position: absolute;
+    inset-block: 0;
+    right: 0;
+    width: calc(25% - 0.75 * var(--gutter));
+    max-width: 13rem;
+    pointer-events: none;
+  }
 }
 
 .lesson-head__crumbs {
@@ -133,7 +163,7 @@ const color = computed(() => trackStyle(trackSlug(props.lesson?.subjectPath)).co
   margin-top: 0.25rem;
 }
 
-@media (min-width: 1280px) {
+@media (min-width: 1024px) {
   .lesson-head__title,
   .lesson-head__lede {
     grid-column: 1 / span 9;

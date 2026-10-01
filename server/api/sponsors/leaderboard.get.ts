@@ -3,6 +3,7 @@ interface Row {
   name: string
   url: string
   image: string | null
+  design: unknown
   total: string
   since: string
 }
@@ -21,12 +22,12 @@ export default defineEventHandler(async (event) => {
         with paid as (
           select *, coalesce(user_id, sponsor_url) as sponsor_key from sponsor_bids where status = 'paid'
         ), latest as (
-          select distinct on (sponsor_key) sponsor_key, sponsor_name as name, sponsor_url as url, image
+          select distinct on (sponsor_key) sponsor_key, sponsor_name as name, sponsor_url as url, image, design
           from paid order by sponsor_key, paid_at desc
         )
-        select l.sponsor_key, l.name, l.url, l.image, sum(p.amount) as total, min(p.paid_at) as since
+        select l.sponsor_key, l.name, l.url, l.image, l.design, sum(p.amount) as total, min(p.paid_at) as since
         from paid p join latest l using (sponsor_key)
-        group by l.sponsor_key, l.name, l.url, l.image
+        group by l.sponsor_key, l.name, l.url, l.image, l.design
         order by total desc, since asc
         limit 200`),
       q<{ slot: string, user_id: string | null, url: string }>(sql, HOLDERS_SQL)
@@ -38,6 +39,9 @@ export default defineEventHandler(async (event) => {
         name: row.name,
         url: row.url,
         image: row.image,
+        // Who they are (creator / builder / company), from their latest paid
+        // bid's design; older bids read as `company`.
+        type: resolveDesign(row.design).type,
         total: num(row.total),
         slots: holders.filter(h => (h.user_id ?? h.url) === row.sponsor_key).map(h => h.slot),
         since: row.since

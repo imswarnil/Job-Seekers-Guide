@@ -14,6 +14,8 @@
  * designer's side-by-side previews; `auto` follows the page.
  */
 export interface SponsorCardDesign {
+  /** Who the sponsor is: `creator`, `builder` or `company` (the default). */
+  type?: 'creator' | 'builder' | 'company' | string
   layout: 'wordmark' | 'logo-left' | 'statement' | 'minimal' | string
   accent: string
   ink: string
@@ -60,6 +62,21 @@ watch(image, () => {
 
 const initial = computed(() => (props.sponsor.name || '?').trim().slice(0, 1).toUpperCase() || '?')
 const cta = computed(() => props.sponsor.design?.cta || null)
+const type = computed(() => {
+  const t = props.sponsor.design?.type
+  return t === 'creator' || t === 'builder' ? t : 'company'
+})
+
+/** The badge word: who this is, not just that it paid. */
+const badge = computed(() => {
+  if (type.value === 'creator') {
+    return 'Creator'
+  }
+  if (type.value === 'builder') {
+    return 'Project'
+  }
+  return cta.value === 'We are hiring' ? 'Hiring' : 'Sponsor'
+})
 const host = computed(() => {
   try {
     return new URL(props.sponsor.url).host.replace(/^www\./, '')
@@ -80,6 +97,7 @@ const host = computed(() => {
     :data-layout="layout"
     :data-size="size"
     :data-theme="theme"
+    :data-type="type"
     :style="{ '--sc-accent': accent, '--sc-on-accent': ink }"
   >
     <!-- Minimal: one line between two rules. -->
@@ -88,7 +106,7 @@ const host = computed(() => {
         class="sc__square"
         aria-hidden="true"
       />
-      <span class="sc__label">Sponsored</span>
+      <span class="sc__label">{{ badge }}</span>
       <span class="sc__name sc__name--inline">{{ sponsor.name }}</span>
       <span
         v-if="sponsor.tagline && size === 'band'"
@@ -106,7 +124,7 @@ const host = computed(() => {
     <!-- Statement: the card in the sponsor's colour, their line as the headline. -->
     <template v-else-if="layout === 'statement'">
       <span class="sc__top">
-        <span class="sc__label">Sponsored</span>
+        <span class="sc__label">{{ badge }}</span>
         <span
           v-if="image && !failed"
           class="sc__chip"
@@ -136,7 +154,7 @@ const host = computed(() => {
     <!-- Wordmark: the name as the mark, a bar of colour down the left edge. -->
     <template v-else-if="layout === 'wordmark'">
       <span class="sc__body">
-        <span class="sc__label">Sponsored</span>
+        <span class="sc__label">{{ badge }}</span>
         <span class="sc__wordmark">{{ sponsor.name }}</span>
         <span
           v-if="sponsor.tagline"
@@ -172,7 +190,7 @@ const host = computed(() => {
         >{{ initial }}</span>
       </span>
       <span class="sc__body">
-        <span class="sc__label">Sponsored</span>
+        <span class="sc__label">{{ badge }}</span>
         <span class="sc__name">{{ sponsor.name }}</span>
         <span
           v-if="sponsor.tagline"
@@ -254,6 +272,33 @@ a.sc:focus-visible {
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--sc-muted);
+}
+
+/* A quiet per-type accent on the badge: a filled square for a creator, an
+   outlined one for a builder, nothing for a company. Swiss, not a sticker. */
+.sc[data-type='creator'] .sc__label::before,
+.sc[data-type='builder'] .sc__label::before {
+  content: '';
+  display: inline-block;
+  width: 0.5em;
+  height: 0.5em;
+  margin-right: 0.5em;
+  vertical-align: 6%;
+  background: var(--sc-accent);
+}
+
+.sc[data-type='builder'] .sc__label::before {
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--sc-accent);
+}
+
+/* On the statement layout the accent is the background; draw in the ink. */
+.sc[data-layout='statement'][data-type='creator'] .sc__label::before {
+  background: var(--sc-on-accent);
+}
+
+.sc[data-layout='statement'][data-type='builder'] .sc__label::before {
+  box-shadow: inset 0 0 0 1px var(--sc-on-accent);
 }
 
 .sc__name {

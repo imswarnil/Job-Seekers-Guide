@@ -95,16 +95,38 @@ useSchemaOrg(schemaNodes as unknown as Parameters<typeof useSchemaOrg>[0])
         </p>
 
         <h1 class="display hero__title">
-          I got off the train in Bangalore knowing nothing.
-          <span class="hero__title-2">This is the route I wish someone had handed me.</span>
+          I got off the train knowing nothing.
+          <span class="hero__title-2">This is the route.</span>
         </h1>
 
-        <p class="lede hero__lede">
-          Where to live, how to learn, what to study, how to clear the written
-          round and what to say in the interview. I started writing it down as a
-          job seeker in a PG in BTM, and promised myself that once I got a job it
-          would become a path for the next person like me.
-        </p>
+        <!-- The pitch, as three facts instead of a paragraph. Each pair is a
+             claim and the line that makes it land. -->
+        <dl class="hero__pairs">
+          <div class="hero__pair">
+            <dt class="hero__pair-lead hero__pair-lead--mono num">
+              ₹13,000 a month → ₹2,70,000 a month
+            </dt>
+            <dd class="hero__pair-sub">
+              the same person, eight years apart
+            </dd>
+          </div>
+          <div class="hero__pair">
+            <dt class="hero__pair-lead">
+              33 walk-ins said no. The 34th said yes.
+            </dt>
+            <dd class="hero__pair-sub hero__pair-sub--hand handnote handnote--ink">
+              nothing changed except practice
+            </dd>
+          </div>
+          <div class="hero__pair">
+            <dt class="hero__pair-lead hero__pair-lead--label label">
+              startup → service → product → Europe
+            </dt>
+            <dd class="hero__pair-sub">
+              the ladder, one rung at a time
+            </dd>
+          </div>
+        </dl>
 
         <div class="hero__actions">
           <ClientOnly>
@@ -175,21 +197,6 @@ useSchemaOrg(schemaNodes as unknown as Parameters<typeof useSchemaOrg>[0])
               </dd>
             </div>
           </dl>
-
-          <!-- A margin note in my own hand, because the numbers above are the
-               course and this one is the point. -->
-          <p class="hero__note handnote">
-            <span class="hero__note-line">₹13,000 a month → ₹2,70,000 a month</span>
-            <svg
-              class="handnote__stroke"
-              viewBox="0 0 176 10"
-              aria-hidden="true"
-              focusable="false"
-            >
-              <path d="M2 7 C 34 3, 70 9, 108 5 S 158 2, 174 6" />
-            </svg>
-            <span class="handnote__sub">the same person, eight years apart</span>
-          </p>
         </div>
 
         <ClientOnly>
@@ -544,13 +551,52 @@ useSchemaOrg(schemaNodes as unknown as Parameters<typeof useSchemaOrg>[0])
   margin-top: 1.5rem;
 }
 
+/* The second thought, in the accent: the one red thing on this screen. */
 .hero__title-2 {
   display: block;
+  color: var(--ui-primary);
+}
+
+/* ── The phrase pairs: a claim, and the line that makes it land ─────── */
+.hero__pairs {
+  display: flex;
+  flex-direction: column;
+  gap: 1.125rem;
+  margin-top: 1.75rem;
+  max-width: 40rem;
+}
+
+.hero__pair-lead {
+  font-size: clamp(1.125rem, 1rem + 0.7vw, 1.4375rem);
+  line-height: 1.2;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--ui-text-highlighted);
+  text-wrap: balance;
+}
+
+.hero__pair-lead--mono {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+/* `.label` supplies the tracked uppercase; it just needs to speak up. */
+.hero__pair-lead--label {
+  font-size: 0.875rem;
+  letter-spacing: 0.14em;
+  color: var(--ui-text-highlighted);
+}
+
+.hero__pair-sub {
+  margin-top: 0.25rem;
+  font-size: var(--text-sm);
   color: var(--ui-text-muted);
 }
 
-.hero__lede {
-  margin-top: 1.75rem;
+.hero__pair-sub--hand {
+  font-size: 1.25rem;
+  opacity: 0.92;
 }
 
 .hero__actions {
@@ -629,9 +675,14 @@ useSchemaOrg(schemaNodes as unknown as Parameters<typeof useSchemaOrg>[0])
     font-size: clamp(2.25rem, 0.9rem + 2.5vw, 3.375rem);
   }
 
-  .hero__lede {
+  .hero__pairs {
     grid-column: 1 / span 7;
-    margin-top: 1rem;
+    gap: 0.875rem;
+    margin-top: 1.25rem;
+  }
+
+  .hero__pair-lead {
+    font-size: clamp(1.0625rem, 0.7rem + 0.75vw, 1.3125rem);
   }
 
   .hero__actions {
@@ -652,10 +703,6 @@ useSchemaOrg(schemaNodes as unknown as Parameters<typeof useSchemaOrg>[0])
 
   .hero__facts dd {
     font-size: clamp(1.875rem, 1.1rem + 1.5vw, 2.75rem);
-  }
-
-  .hero__note {
-    margin-bottom: 0.375rem;
   }
 
   .hero__progress {
@@ -711,23 +758,11 @@ useSchemaOrg(schemaNodes as unknown as Parameters<typeof useSchemaOrg>[0])
   }
 
   .hero[data-video] .hero__title-2 {
-    color: rgb(255 255 255 / 0.62);
+    color: var(--color-guide-400);
   }
 }
 
 /* ── The handwritten notes ───────────────────────────────────────────── */
-.hero__note {
-  max-width: 22rem;
-}
-
-.hero__note-line {
-  display: block;
-}
-
-.hero__note .handnote__stroke {
-  width: min(100%, 13rem);
-}
-
 /* The scribbled quote between the journey and the guide: real words, not
    decoration, written large in the hand rather than set in Geist. */
 .handband__quote {

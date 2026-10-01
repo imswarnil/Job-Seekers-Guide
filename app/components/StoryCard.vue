@@ -26,14 +26,19 @@ const thumb = computed(() => {
     return null
   }
   if (m.kind === 'image') {
-    return { src: m.url, video: false }
+    return { src: m.url, poster: null, video: false }
   }
   if (m.kind === 'youtube') {
     const src = youtubeThumb(m.url)
-    return src ? { src, video: true } : null
+    return src ? { src, poster: null, video: true } : null
   }
-  return { src: null, video: true }
+  // An uploaded video: its own first frame is the poster (metadata preload
+  // fetches just enough of the file to draw it), with a play mark on top.
+  return { src: null, poster: m.url, video: true }
 })
+
+/** The letter shown on a story with no media at all. */
+const initial = computed(() => (props.story.title || '?').trim().slice(0, 1).toUpperCase() || '?')
 </script>
 
 <template>
@@ -52,11 +57,27 @@ const thumb = computed(() => {
         loading="lazy"
         decoding="async"
       >
+      <video
+        v-else-if="thumb.poster"
+        :src="thumb.poster"
+        preload="metadata"
+        muted
+        playsinline
+        tabindex="-1"
+        aria-hidden="true"
+      />
       <UIcon
         v-if="thumb.video"
         name="i-lucide-circle-play"
         class="story-card__play"
       />
+    </div>
+    <div
+      v-else
+      class="story-card__media story-card__media--empty"
+      aria-hidden="true"
+    >
+      <span class="story-card__initial num">{{ initial }}</span>
     </div>
 
     <div class="story-card__body">
@@ -140,15 +161,39 @@ const thumb = computed(() => {
   background: var(--ui-bg-muted);
 }
 
-.story-card__media img {
+.story-card__media img,
+.story-card__media video {
   width: 100%;
   height: 100%;
   object-fit: cover;
   transition: transform var(--dgm-t-base) var(--dgm-ease);
+  pointer-events: none;
 }
 
-.story-card:hover .story-card__media img {
+.story-card:hover .story-card__media img,
+.story-card:hover .story-card__media video {
   transform: scale(1.02);
+}
+
+.story-card:hover .story-card__media {
+  outline: 1px solid var(--ui-text-highlighted);
+  outline-offset: -1px;
+}
+
+/* No media: a tinted panel carrying the story's first letter, so the grid
+   keeps its rhythm without a grey hole. */
+.story-card__media--empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in srgb, var(--ui-primary) 5%, var(--ui-bg-muted));
+}
+
+.story-card__initial {
+  font-size: 3rem;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  color: color-mix(in srgb, var(--ui-primary) 45%, var(--ui-text-dimmed));
 }
 
 .story-card__play {
@@ -242,7 +287,8 @@ const thumb = computed(() => {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .story-card:hover .story-card__media img {
+  .story-card:hover .story-card__media img,
+  .story-card:hover .story-card__media video {
     transform: none;
   }
 }

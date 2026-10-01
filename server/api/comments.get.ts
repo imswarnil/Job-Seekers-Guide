@@ -15,8 +15,8 @@ export default defineEventHandler(async (event) => {
   setResponseHeader(event, 'cache-control', 'private, no-store')
 
   return await softRead(event, { items: [] as unknown[], used: 0, limit: COMMENTS_PER_PAGE }, async (sql) => {
-    const rows = await q<{ id: string, body: string, ts: string, user_id: string, name: string | null, image: string | null, sample: boolean }>(sql, `
-      select c.id, c.body, c.ts, c.user_id, c.sample, p.name, p.image
+    const rows = await q<{ id: string, body: string, gif: string | null, ts: string, user_id: string, name: string | null, image: string | null, sample: boolean }>(sql, `
+      select c.id, c.body, c.gif, c.ts, c.user_id, c.sample, p.name, p.image
       from comments c left join profiles p on p.id = c.user_id
       where c.path = $1 order by c.ts asc limit 300`, [path])
     const reactions = await reactionsFor(sql, rows.map(r => Number(r.id)), user?.id ?? null)
@@ -24,6 +24,7 @@ export default defineEventHandler(async (event) => {
       items: rows.map(r => ({
         id: Number(r.id),
         body: r.body,
+        gif: r.gif && isAllowedGif(r.gif) ? r.gif : null,
         createdAt: r.ts,
         author: { name: r.name || 'A reader', image: r.image },
         mine: Boolean(user && r.user_id === user.id),

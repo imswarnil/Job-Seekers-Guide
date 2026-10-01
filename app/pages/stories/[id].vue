@@ -12,6 +12,7 @@ interface Story {
   company: string | null
   package: string | null
   body: string
+  bodyRich?: unknown
   media: { kind: 'image' | 'video' | 'youtube', url: string }[]
   votes: number
   featured: boolean
@@ -159,9 +160,10 @@ useSeoMeta({
       </template>
     </div>
 
-    <div class="story-body">
-      {{ story.body }}
-    </div>
+    <StoryBody
+      :body="story.body"
+      :rich="story.bodyRich"
+    />
 
     <div class="mt-8 flex flex-wrap items-center gap-3">
       <UButton
@@ -186,6 +188,15 @@ useSeoMeta({
       >{{ voteError }}</span>
     </div>
 
+    <ClientOnly>
+      <LessonComments
+        :path="`/stories/${story.id}`"
+        title="What readers said"
+        intro="A word from you here reaches the person who wrote this. GIFs welcome."
+        gifs
+      />
+    </ClientOnly>
+
     <section class="story-next">
       <p class="headline">
         Got somewhere yourself?
@@ -205,6 +216,7 @@ useSeoMeta({
 
 <style scoped>
 /* The facts of a story as a ruled table: started, now, company, package. */
+/* The body itself is rendered by <StoryBody>, which carries its own styles. */
 .story-facts {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -258,16 +270,6 @@ useSeoMeta({
 .story-media iframe {
   aspect-ratio: 16 / 9;
   border: 0;
-}
-
-.story-body {
-  max-width: var(--guide-measure);
-  margin-top: 2rem;
-  font-size: 1.125rem;
-  line-height: 1.75;
-  white-space: pre-line;
-  overflow-wrap: anywhere;
-  color: var(--ui-text);
 }
 
 .story-next {

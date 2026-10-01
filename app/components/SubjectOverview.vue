@@ -156,6 +156,8 @@ function toggleAll() {
         numbered
       />
     </div>
+
+    <StatsInvite />
   </div>
 </template>
 

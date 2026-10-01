@@ -3,7 +3,7 @@
  *
  * The outbid model: the highest single paid bid on a slot holds it, with no
  * expiry, until somebody pays more. The next bid has to beat the holder by 10%
- * (and by at least ₹100), so a slot cannot be taken for one rupee more.
+ * (and by at least ₹10), so a slot cannot be taken for one rupee more.
  *
  * There is exactly one slot, `brand`. It shows in two places, one band on the
  * home page and the sticky card beside every lesson, and whoever holds it holds
@@ -11,7 +11,7 @@
  * on the leaderboard, but no longer hold anything.
  */
 export const SLOTS = {
-  brand: { label: 'The brand spot: on the home page and beside every lesson', floor: 99_900 }
+  brand: { label: 'The brand spot: on the home page and beside every lesson', floor: 2_900 }
 } as const satisfies Record<string, { label: string, floor: number }>
 
 export type SlotName = keyof typeof SLOTS
@@ -41,7 +41,7 @@ export function minimumNextBid(slot: SlotName, holderAmount: number | null | und
   if (!holderAmount) {
     return floor
   }
-  const raised = Math.max(Math.ceil(holderAmount * 1.1), holderAmount + 10_000)
+  const raised = Math.max(Math.ceil(holderAmount * 1.1), holderAmount + 1_000)
   // Round up to a whole rupee.
   return Math.max(floor, Math.ceil(raised / 100) * 100)
 }

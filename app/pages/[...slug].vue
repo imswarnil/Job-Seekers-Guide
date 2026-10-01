@@ -113,11 +113,13 @@ usePageSeo({
 
     <template #aside>
       <!-- The order is the order of importance: where you are in this page,
-           who wrote it, how to fix it, and only then anything paid. Nothing
-           here scrolls inside a box except a very long contents. -->
+           who wrote it, how to fix it, and only then anything paid. Each
+           direct child is a `.shell-stick`: as the pane scrolls, they pin one
+           after another under the one before (PlayerShell measures them and
+           staggers the offsets), so nothing here ever scrolls inside a box. -->
       <div
         v-if="toc.length"
-        class="shell-toc"
+        class="shell-stick shell-toc"
       >
         <UContentToc
           :links="toc"
@@ -128,18 +130,26 @@ usePageSeo({
         />
       </div>
 
-      <AuthorCard />
+      <div class="shell-stick">
+        <AuthorCard />
+      </div>
 
-      <PageActions :file="file" />
+      <div class="shell-stick">
+        <PageActions :file="file" />
+      </div>
 
-      <!-- The one block in the column that holds its place: once the reader
-           has scrolled down to it, it stays in view for the rest of the page.
-           The site's single sponsor spot, and nothing else paid. -->
+      <!-- Last to arrive, last to pin: the site's single sponsor spot, and the
+           one sidebar ad unit (off in app.config.ts; it renders nothing until
+           that boolean flips). Nothing else paid lives in this column. -->
       <div
         v-if="view === 'lesson'"
-        class="shell-sticky"
+        class="shell-stick shell-stick--paid"
       >
         <SponsorSlot name="brand" />
+        <AdSlot
+          placement="sidebar"
+          variant="card"
+        />
       </div>
     </template>
 

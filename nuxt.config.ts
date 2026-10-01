@@ -83,6 +83,11 @@ export default defineNuxtConfig({
     // share form opt back in; only `/stories/:id` is rendered per request.
     '/stories': { prerender: true },
     '/stories/new': { prerender: true },
+    // Their payloads too: without these the wildcard above swallows
+    // `/stories/_payload.json`, every link prefetch 404s as "Story not found"
+    // and wakes the Worker for nothing.
+    '/stories/_payload.json': { prerender: true },
+    '/stories/new/_payload.json': { prerender: true },
     '/account': { prerender: false },
     '/admin/**': { prerender: false, robots: false }
   },

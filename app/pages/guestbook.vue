@@ -1,24 +1,19 @@
 <script setup lang="ts">
-/**
- * The guestbook. Say hello, add a GIF, and tell me one thing you learned here.
- * Reading needs nothing; signing needs an account (it is how I keep spam out).
- */
-interface Entry {
-  id: number
-  name: string
-  image: string | null
-  message: string
-  gif: string | null
-  learned: string | null
-  createdAt: string
-  /** Seeded example content. Optional: not every API response carries it. */
-  sample?: boolean
-}
+import type { GuestbookEntry } from '~/components/GuestbookNote.vue'
 
+/**
+ * The guestbook, drawn as a wall of notes. Say hello, add a GIF, tell me one
+ * thing you learned here, and, if you want, attach a small tip. Reading needs
+ * nothing; signing needs an account (it is how I keep spam out).
+ *
+ * A signing with a tip goes through Dodo first: the note is created hidden
+ * and appears on the wall once the payment clears (the webhook reveals it).
+ * Coming back from the checkout lands on `/guestbook?thanks=1`.
+ */
 const { user, ready } = useUser()
 const route = useRoute()
 
-const { data, status } = useFetch<{ items: Entry[] }>('/api/guestbook', {
+const { data, status } = useFetch<{ items: GuestbookEntry[] }>('/api/guestbook', {
   server: false,
   lazy: true,
   default: () => ({ items: [] })
@@ -28,6 +23,34 @@ const form = reactive({ name: '', message: '', learned: '', gif: null as string 
 const saving = ref(false)
 const error = ref('')
 const done = ref(false)
+
+/** Back from a tip checkout: a quiet line, no banner. */
+const thanked = computed(() => route.query.thanks === '1')
+
+// ---- The tip -----------------------------------------------------------------
+const TIPS = [4_900, 9_900, 19_900] as const
+const tip = ref(0)
+const customTip = ref<number | null>(null)
+const customOn = ref(false)
+
+function pickTip(paise: number) {
+  customOn.value = false
+  customTip.value = null
+  tip.value = tip.value === paise ? 0 : paise
+}
+
+function pickCustom() {
+  customOn.value = true
+  tip.value = 0
+}
+
+const tipAmount = computed(() => {
+  if (customOn.value) {
+    const rupees = customTip.value
+    return rupees && Number.isFinite(rupees) ? Math.round(rupees * 100) : 0
+  }
+  return tip.value
+})
 
 watch(user, (u) => {
   if (u && !form.name) {
@@ -41,12 +64,28 @@ async function submit() {
     error.value = 'Write a few words first.'
     return
   }
+  if (customOn.value && tipAmount.value > 0 && tipAmount.value < 1_000) {
+    error.value = 'The smallest tip is ₹10.'
+    return
+  }
   saving.value = true
   try {
-    const entry = await $fetch<Entry>('/api/guestbook', {
-      method: 'POST',
-      body: { name: form.name || undefined, message: form.message, learned: form.learned || undefined, gif: form.gif || undefined }
-    })
+    const body = {
+      name: form.name || undefined,
+      message: form.message,
+      learned: form.learned || undefined,
+      gif: form.gif || undefined
+    }
+    if (tipAmount.value >= 1_000) {
+      // The note is created hidden; Dodo takes over, and the webhook shows it.
+      const { checkoutUrl } = await $fetch<{ checkoutUrl: string }>('/api/guestbook/tip', {
+        method: 'POST',
+        body: { ...body, amount: tipAmount.value }
+      })
+      window.location.href = checkoutUrl
+      return
+    }
+    const entry = await $fetch<GuestbookEntry>('/api/guestbook', { method: 'POST', body })
     data.value = { items: [entry, ...(data.value?.items || [])] }
     form.message = ''
     form.learned = ''
@@ -72,11 +111,21 @@ usePageSeo({
     icon="i-lucide-book-open-text"
     title="Sign the guestbook"
     description="If the guide helped you, even a little, leave a line here. Tell me one thing you learned. I read every one of these, and on bad days they are the reason I keep writing."
+    width="wide"
   >
     <section
       class="gb-form"
       aria-label="Sign the guestbook"
     >
+      <p
+        v-if="thanked"
+        class="text-sm text-success mb-4"
+        role="status"
+      >
+        Thank you for the tip. Your note goes up on the wall the moment the
+        payment clears, usually within a minute.
+      </p>
+
       <!-- Who is signed in is only known in the browser, so all of this is
            drawn there: the prerendered page carries the placeholder. -->
       <ClientOnly>
@@ -104,81 +153,126 @@ usePageSeo({
 
         <form
           v-else
-          class="space-y-4"
+          class="gb-fields"
           @submit.prevent="submit"
         >
-          <UFormField label="Your name">
-            <UInput
-              v-model="form.name"
-              maxlength="60"
-              class="w-full"
-            />
-          </UFormField>
-          <UFormField
-            label="Your message"
-            required
-          >
-            <UTextarea
-              v-model="form.message"
-              :rows="3"
-              maxlength="500"
-              autoresize
-              placeholder="Hello from a PG in Marathahalli…"
-              class="w-full"
-            />
-          </UFormField>
-          <UFormField
-            label="What did you learn here?"
-            hint="Optional"
-          >
-            <UTextarea
-              v-model="form.learned"
-              :rows="2"
-              maxlength="500"
-              autoresize
-              placeholder="That a walk-in is a numbers game, and how to read the aptitude round against a clock."
-              class="w-full"
-            />
-          </UFormField>
-          <GifPicker v-model="form.gif" />
+          <div class="space-y-4">
+            <UFormField label="Your name">
+              <UInput
+                v-model="form.name"
+                maxlength="60"
+                class="w-full"
+              />
+            </UFormField>
+            <UFormField
+              label="Your message"
+              required
+            >
+              <UTextarea
+                v-model="form.message"
+                :rows="3"
+                maxlength="500"
+                autoresize
+                placeholder="Hello from a PG in Marathahalli…"
+                class="w-full"
+              />
+            </UFormField>
+            <UFormField
+              label="What did you learn here?"
+              hint="Optional"
+            >
+              <UTextarea
+                v-model="form.learned"
+                :rows="2"
+                maxlength="500"
+                autoresize
+                placeholder="That a walk-in is a numbers game, and how to read the aptitude round against a clock."
+                class="w-full"
+              />
+            </UFormField>
+            <GifPicker v-model="form.gif" />
+          </div>
 
-          <p
-            v-if="error"
-            class="text-sm text-error"
-            role="alert"
-          >
-            {{ error }}
-          </p>
-          <p
-            v-else-if="done"
-            class="text-sm text-success"
-          >
-            Thank you. It is up.
-          </p>
+          <div class="space-y-4">
+            <UFormField
+              label="Add a tip"
+              hint="Optional"
+            >
+              <div class="tips">
+                <button
+                  v-for="t in TIPS"
+                  :key="t"
+                  type="button"
+                  class="tips__pick num"
+                  :aria-pressed="!customOn && tip === t"
+                  @click="pickTip(t)"
+                >
+                  {{ formatPaise(t) }}
+                </button>
+                <button
+                  type="button"
+                  class="tips__pick"
+                  :aria-pressed="customOn"
+                  @click="pickCustom"
+                >
+                  Custom
+                </button>
+                <UInput
+                  v-if="customOn"
+                  v-model.number="customTip"
+                  type="number"
+                  min="10"
+                  step="1"
+                  placeholder="₹"
+                  class="w-24 num"
+                  aria-label="Tip amount in rupees"
+                />
+              </div>
+              <p class="mt-2 text-xs text-muted">
+                A tip goes through Dodo Payments and your note shows a small
+                {{ formatPaise(9_900) }}-style badge. Without one, signing is
+                free and instant, as always.
+              </p>
+            </UFormField>
 
-          <UButton
-            type="submit"
-            :loading="saving"
-            size="lg"
-          >
-            Sign the guestbook
-          </UButton>
+            <p
+              v-if="error"
+              class="text-sm text-error"
+              role="alert"
+            >
+              {{ error }}
+            </p>
+            <p
+              v-else-if="done"
+              class="text-sm text-success"
+            >
+              Thank you. It is up.
+            </p>
+
+            <UButton
+              type="submit"
+              :loading="saving"
+              size="lg"
+            >
+              {{ tipAmount >= 1000 ? `Tip ${formatPaise(tipAmount)} and sign` : 'Sign the guestbook' }}
+            </UButton>
+          </div>
         </form>
       </ClientOnly>
     </section>
 
     <h2 class="label gb-heading">
-      Signed so far
+      The wall
     </h2>
 
     <div
       v-if="status === 'pending' || status === 'idle'"
-      class="space-y-4"
+      class="gb-wall"
     >
       <USkeleton
-        v-for="n in 4"
+        v-for="n in 6"
         :key="n"
-        class="h-24 w-full"
+        class="h-40 w-full mb-4"
       />
     </div>
 
@@ -189,55 +283,16 @@ usePageSeo({
       description="Be the first."
     />
 
-    <ol
+    <div
       v-else
-      class="guestbook"
+      class="gb-wall"
     >
-      <li
+      <GuestbookNote
         v-for="entry in data.items"
         :key="entry.id"
-        class="guestbook__entry"
-      >
-        <UAvatar
-          :src="entry.image || undefined"
-          :alt="entry.name"
-          size="md"
-        />
-        <div class="min-w-0 flex-1">
-          <p class="text-sm">
-            <span class="font-semibold text-highlighted">{{ entry.name }}</span>
-            <span class="text-dimmed"> · {{ formatAgo(entry.createdAt) }}</span>
-            <UBadge
-              v-if="entry.sample"
-              color="neutral"
-              variant="outline"
-              size="sm"
-              class="ml-2 align-middle"
-            >
-              Sample
-            </UBadge>
-          </p>
-          <p class="mt-1 whitespace-pre-line text-default">
-            {{ entry.message }}
-          </p>
-          <p
-            v-if="entry.learned"
-            class="guestbook__learned"
-          >
-            <span class="guestbook__learned-label">Learned here</span>
-            {{ entry.learned }}
-          </p>
-          <img
-            v-if="entry.gif"
-            :src="entry.gif"
-            alt=""
-            loading="lazy"
-            referrerpolicy="no-referrer"
-            class="mt-3 max-h-56 max-w-full border border-default"
-          >
-        </div>
-      </li>
-    </ol>
+        :entry="entry"
+      />
+    </div>
 
     <section class="gb-more">
       <p class="headline">
@@ -270,40 +325,72 @@ usePageSeo({
   border-top: 2px solid var(--rule-strong);
 }
 
+.gb-fields {
+  display: grid;
+  gap: 1.5rem var(--gutter, 1.5rem);
+}
+
+@media (min-width: 768px) {
+  .gb-fields {
+    grid-template-columns: 3fr 2fr;
+    align-items: start;
+  }
+}
+
 .gb-heading {
   margin-top: 4rem;
-  margin-bottom: 0.75rem;
+  margin-bottom: 1rem;
 }
 
-/* Every entry is a row between rules. */
-.guestbook {
-  border-top: 1px solid var(--rule-color);
+/* The wall: masonry-ish columns; each note keeps itself whole. */
+.gb-wall {
+  columns: 1;
+  column-gap: var(--gutter, 1.5rem);
 }
 
-.guestbook__entry {
+@media (min-width: 640px) {
+  .gb-wall {
+    columns: 2;
+  }
+}
+
+@media (min-width: 1024px) {
+  .gb-wall {
+    columns: 3;
+  }
+}
+
+.gb-wall > * {
+  break-inside: avoid;
+  margin-bottom: var(--gutter, 1.5rem);
+}
+
+/* The tip amounts, in the same voice as the designer's CTA picks. */
+.tips {
   display: flex;
-  gap: 0.875rem;
-  padding-block: 1.25rem;
-  border-bottom: 1px solid var(--rule-color);
-  overflow-wrap: anywhere;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
 }
 
-.guestbook__learned {
-  margin-top: 0.75rem;
-  padding-left: 0.875rem;
-  border-left: 2px solid var(--ui-primary);
-  font-size: 0.9375rem;
-  white-space: pre-line;
-}
-
-.guestbook__learned-label {
-  display: block;
-  margin-bottom: 0.125rem;
-  font-size: 0.6875rem;
+.tips__pick {
+  padding: 0.375rem 0.75rem;
+  font-size: 0.8125rem;
   font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--ui-text-dimmed);
+  color: var(--ui-text-highlighted);
+  border: 1px solid var(--rule-color, var(--ui-border));
+  background: transparent;
+  cursor: pointer;
+}
+
+.tips__pick:hover {
+  border-color: var(--ui-text-highlighted);
+}
+
+.tips__pick[aria-pressed='true'] {
+  color: var(--ui-bg);
+  background: var(--ui-text-highlighted);
+  border-color: var(--ui-text-highlighted);
 }
 
 .gb-more {

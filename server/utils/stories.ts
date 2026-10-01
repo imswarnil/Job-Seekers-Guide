@@ -6,6 +6,7 @@ export interface StoryRow {
   company: string | null
   package: string | null
   body: string
+  body_rich?: unknown
   status: string
   votes: number
   created_at: string
@@ -36,7 +37,7 @@ export function storyOut(row: StoryRow, media: MediaRow[], full = false) {
     to: row.to_place,
     company: row.company,
     package: row.package,
-    ...(full ? { body: row.body } : { snippet: snippet(row.body) }),
+    ...(full ? { body: row.body, bodyRich: row.body_rich ?? null } : { snippet: snippet(row.body) }),
     media: full ? own.map(m => ({ kind: m.kind, url: m.url })) : own.slice(0, 1).map(m => ({ kind: m.kind, url: m.url })),
     votes: num(row.votes),
     featured: row.status === 'featured',
@@ -47,7 +48,7 @@ export function storyOut(row: StoryRow, media: MediaRow[], full = false) {
 }
 
 export const STORY_SELECT = `
-  select s.id, s.title, s.from_place, s.to_place, s.company, s.package, s.body, s.status, s.votes,
+  select s.id, s.title, s.from_place, s.to_place, s.company, s.package, s.body, s.body_rich, s.status, s.votes,
          s.created_at, s.user_id, s.sample, p.name as author_name, p.image as author_image
   from stories s left join profiles p on p.id = s.user_id`
 

@@ -44,13 +44,13 @@ const holderCard = computed<SponsorCardData | null>(() => {
 
 // ---- The draft, kept in this browser so signing in halfway loses nothing ----
 const DRAFT_KEY = 'jsg-sponsor-draft'
-const draft = ref<SponsorDraft>({ name: '', url: '', tagline: '', image: '', layout: 'logo-left', palette: 'ink', cta: null })
+const draft = ref<SponsorDraft>({ type: 'company', name: '', url: '', tagline: '', image: '', layout: 'logo-left', palette: 'ink', cta: null })
 
 onMounted(() => {
   try {
     const saved = JSON.parse(localStorage.getItem(DRAFT_KEY) || 'null')
     if (saved && typeof saved === 'object') {
-      for (const key of ['name', 'url', 'tagline', 'image', 'layout', 'palette'] as const) {
+      for (const key of ['type', 'name', 'url', 'tagline', 'image', 'layout', 'palette'] as const) {
         if (typeof saved[key] === 'string') {
           draft.value[key] = saved[key].slice(0, 500)
         }
@@ -113,7 +113,7 @@ async function submit() {
         url: d.url.trim(),
         image: d.image.trim() || undefined,
         tagline: d.tagline.trim() || undefined,
-        design: { layout: d.layout, palette: d.palette, cta: d.cta }
+        design: { type: d.type, layout: d.layout, palette: d.palette, cta: d.cta }
       }
     })
     window.location.href = checkoutUrl
@@ -190,7 +190,7 @@ usePageSeo({
         </h2>
         <div
           v-for="(step, i) in [
-            { title: 'Outbid to take it', text: 'The highest single payment holds the spot. The next bid has to beat it by 10%, and by at least ₹100.' },
+            { title: 'Outbid to take it', text: 'The highest single payment holds the spot. The next bid has to beat it by 10%, and by at least ₹10.' },
             { title: 'Keep it forever', text: 'There is no end date. The spot is yours until somebody pays more.' },
             { title: 'Companies or people', text: 'An institute, a company that hires freshers, or someone who wants to say thank you. Your card, shown as you designed it.' }
           ]"
@@ -301,9 +301,11 @@ usePageSeo({
               Design your card
             </h2>
             <p class="lede mt-3">
-              Your name, your link, one line and a logo, in one of four layouts
-              and one of six colours. The preview is the card the site will
-              show, on the home page and beside every lesson, in light and dark.
+              First say who you are: a creator, a builder or a company. Then
+              your name, your link, one line and a logo, in one of four
+              layouts and one of six colours. The preview is the card the site
+              will show, on the home page and beside every lesson, in light
+              and dark.
             </p>
           </div>
         </div>

@@ -12,7 +12,8 @@ const { subject, module } = usePathPlayer(() => route.path)
 const { moduleProgress, isComplete } = useProgress()
 
 const progress = computed(() => moduleProgress(module.value))
-const color = computed(() => trackStyle(subject.value?.slug, subject.value?.icon).color)
+const slug = computed(() => subject.value?.slug)
+const color = computed(() => trackStyle(slug.value, subject.value?.icon).color)
 
 const number = computed(() => {
   const index = subject.value?.modules.findIndex(item => item.path === module.value?.path) ?? -1
@@ -29,6 +30,13 @@ const start = computed(() =>
     class="module-head swiss-grid"
     :style="{ '--track': color }"
   >
+    <div
+      class="module-head__art"
+      aria-hidden="true"
+    >
+      <TrackIllustration :slug="slug" />
+    </div>
+
     <p class="module-head__kicker label">
       <NuxtLink
         v-if="subject"
@@ -98,8 +106,30 @@ const start = computed(() =>
 </template>
 
 <style scoped>
+.module-head {
+  position: relative;
+}
+
 .module-head > * {
   grid-column: 1 / -1;
+}
+
+/* The track's line drawing, same treatment as the track page: absolute on the
+   right so the band never grows for it, wide screens only. */
+.module-head__art {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .module-head__art {
+    display: block;
+    position: absolute;
+    inset-block: 0;
+    right: 0;
+    width: calc(33.333% - 0.667 * var(--gutter));
+    max-width: 16rem;
+    pointer-events: none;
+  }
 }
 
 .module-head__kicker {
@@ -160,7 +190,7 @@ const start = computed(() =>
 
 @media (min-width: 1024px) {
   .module-head__title {
-    grid-column: 1 / span 10;
+    grid-column: 1 / span 8;
   }
 
   .module-head__lede {

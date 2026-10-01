@@ -7,8 +7,10 @@
 export default defineEventHandler((event) => {
   setResponseHeader(event, 'cache-control', 'public, max-age=3600, s-maxage=3600')
   return {
+    types: SPONSOR_TYPES,
     layouts: SPONSOR_LAYOUTS,
     palette: SAFE_PALETTE,
+    // Every label across the types; which apply to a bid depends on its type.
     ctas: SPONSOR_CTAS,
     limits: { name: NAME_MAX, tagline: TAGLINE_MAX },
     default: resolveDesign(DEFAULT_DESIGN)

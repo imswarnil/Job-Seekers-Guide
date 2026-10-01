@@ -22,9 +22,18 @@ const props = withDefaults(defineProps<{
   /** Names the chart for assistive technology and captions the table. */
   caption: string
   height?: number
+  /** How values read: plain counts, or rupees (`inr`, values already in ₹). */
+  format?: 'count' | 'inr'
 }>(), {
-  height: 260
+  height: 260,
+  format: 'count'
 })
+
+/**
+ * The picked day, two-way: two charts over the same days can share one ref
+ * and their crosshairs move together (`v-model:active` on both).
+ */
+const active = defineModel<number | null>('active', { default: null })
 
 const box = ref<HTMLElement | null>(null)
 const { width: measured } = useElementSize(box)
@@ -75,8 +84,12 @@ function areaPath(values: number[]) {
   return `${linePath(values)}L${x(values.length - 1).toFixed(1)},${base}L${x(0).toFixed(1)},${base}Z`
 }
 
-const fmtCount = new Intl.NumberFormat('en-IN')
-const compact = new Intl.NumberFormat('en-IN', { notation: 'compact', maximumFractionDigits: 1 })
+const fmtPlain = new Intl.NumberFormat('en-IN')
+const fmtRupees = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 })
+const compactPlain = new Intl.NumberFormat('en-IN', { notation: 'compact', maximumFractionDigits: 1 })
+
+const fmtValue = (v: number) => (props.format === 'inr' ? fmtRupees.format(v) : fmtPlain.format(v))
+const fmtAxis = (v: number) => (props.format === 'inr' ? `₹${compactPlain.format(v)}` : compactPlain.format(v))
 const dayLong = new Intl.DateTimeFormat('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' })
 const dayShort = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' })
 const monthShort = new Intl.DateTimeFormat('en-GB', { month: 'short', year: '2-digit', timeZone: 'UTC' })
@@ -102,9 +115,7 @@ const xLabels = computed(() => {
   return out
 })
 
-// ---- The picked day ----------------------------------------------------------
-const active = ref<number | null>(null)
-
+// ---- The picked day (shared through the `active` model) ----------------------
 function pick(event: PointerEvent) {
   const svg = event.currentTarget as SVGSVGElement
   const rect = svg.getBoundingClientRect()
@@ -147,7 +158,7 @@ const tip = computed(() => {
     left,
     flip: left > width.value * 0.62,
     day: dayLong.format(asDate(props.days[i]!)),
-    rows: props.series.map(s => ({ label: s.label, value: fmtCount.format(s.values[i] ?? 0) }))
+    rows: props.series.map(s => ({ label: s.label, value: fmtValue(s.values[i] ?? 0) }))
   }
 })
 
@@ -157,7 +168,7 @@ const summary = computed(() => {
   if (!n.value) {
     return `${props.caption}: no data yet.`
   }
-  const parts = props.series.map((s, k) => `${s.label}: ${fmtCount.format(totals.value[k]!)} in total, peak ${fmtCount.format(Math.max(...s.values))}`)
+  const parts = props.series.map((s, k) => `${s.label}: ${fmtValue(totals.value[k]!)} in total, peak ${fmtValue(Math.max(...s.values))}`)
   return `${props.caption}, ${dayShort.format(asDate(props.days[0]!))} to ${dayShort.format(asDate(props.days[n.value - 1]!))}. ${parts.join('. ')}. Use the left and right arrow keys to read each day.`
 })
 </script>
@@ -175,7 +186,7 @@ const summary = computed(() => {
           aria-hidden="true"
         />
         <span class="label">{{ s.label }}</span>
-        <span class="chart__total num">{{ fmtCount.format(active !== null ? (s.values[active] ?? 0) : totals[k]!) }}</span>
+        <span class="chart__total num">{{ fmtValue(active !== null ? (s.values[active] ?? 0) : totals[k]!) }}</span>
         <span class="chart__when">{{ active !== null ? 'that day' : 'in range' }}</span>
       </li>
     </ul>
@@ -217,7 +228,7 @@ const summary = computed(() => {
               :y="y(t)"
               text-anchor="end"
               dominant-baseline="middle"
-            >{{ compact.format(t) }}</text>
+            >{{ fmtAxis(t) }}</text>
           </template>
         </g>
 
@@ -344,7 +355,7 @@ const summary = computed(() => {
                 :key="s.key"
                 class="num"
               >
-                {{ fmtCount.format(s.values[days.length - 1 - i] ?? 0) }}
+                {{ fmtValue(s.values[days.length - 1 - i] ?? 0) }}
               </td>
             </tr>
           </tbody>

@@ -221,3 +221,24 @@ create table if not exists comment_reactions (
   primary key (comment_id, user_id, kind)
 );
 create index if not exists comment_reactions_user_idx on comment_reactions (user_id);
+
+-- From 0004_sponsor_types_rich_stories_tips.
+
+-- A story's rich body: a tiptap JSON document validated against the strict
+-- allow-list in server/utils/richText.ts (paragraphs, level-3 headings, lists,
+-- blockquotes, bold / italic / http(s) links), never HTML. `body` keeps the
+-- derived plain text for cards, snippets and search. Older stories have null
+-- here and render as plain paragraphs.
+alter table stories add column if not exists body_rich jsonb;
+
+-- A guestbook note with a tip attached: inserted hidden with a pending
+-- payment, revealed by the Dodo webhook on payment.succeeded, deleted on
+-- failed or cancelled. `amount` is paise and shows as a badge on the note.
+alter table guestbook add column if not exists amount integer
+  check (amount is null or amount > 0);
+alter table guestbook add column if not exists payment_id uuid
+  unique references payments (id) on delete cascade;
+
+-- A comment may carry a GIF (GIPHY / Tenor hosts only, checked on write and
+-- read). Story comments use it; lesson comments ignore it.
+alter table comments add column if not exists gif text;

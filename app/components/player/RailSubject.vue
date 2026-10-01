@@ -36,7 +36,8 @@ const statusText = computed(() => ({
   done: 'finished'
 })[status.value])
 
-const color = computed(() => trackStyle(props.subject.slug, props.subject.icon).color)
+const style = computed(() => trackStyle(props.subject.slug, props.subject.icon))
+const color = computed(() => style.value.color)
 
 const open = ref(props.expanded)
 watch(() => props.expanded, (value) => {
@@ -94,6 +95,11 @@ const here = computed(() => props.current === props.subject.path)
           aria-hidden="true"
         />
         <span class="tl-track__n num">{{ String(index + 1).padStart(2, '0') }}</span>
+        <UIcon
+          :name="style.icon"
+          class="tl-track__icon"
+          aria-hidden="true"
+        />
         <span class="tl-track__title">{{ subject.title }}</span>
         <span class="sr-only">, {{ statusText }}</span>
       </NuxtLink>
@@ -203,6 +209,19 @@ const here = computed(() => props.current === props.subject.path)
   width: 1.375rem;
   font-size: 0.75rem;
   color: var(--ui-text-dimmed);
+}
+
+/* The track's mark, in its own colour, sized to the row's cap height so the
+   timeline stays a quiet line of rows. */
+.tl-track__icon {
+  flex: none;
+  width: 0.875rem;
+  height: 0.875rem;
+  color: var(--track);
+}
+
+.dark .tl-track__icon {
+  color: color-mix(in oklab, var(--track) 68%, white);
 }
 
 .tl-track__title {

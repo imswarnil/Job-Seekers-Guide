@@ -51,5 +51,7 @@ const { module } = usePathPlayer(() => route.path)
     />
 
     <AdSlot placement="in-article" />
+
+    <StatsInvite />
   </div>
 </template>

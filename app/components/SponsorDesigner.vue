@@ -1,8 +1,9 @@
 <script lang="ts">
 import type { SponsorCardData } from '~/components/SponsorCard.vue'
 
-/** What the sponsor is designing. Name, link, line and logo, plus the three choices. */
+/** What the sponsor is designing. Who they are, name, link, line and logo, plus the choices. */
 export interface SponsorDraft {
+  type: string
   name: string
   url: string
   tagline: string
@@ -14,10 +15,39 @@ export interface SponsorDraft {
 
 /** `GET /api/sponsors/design`: the only choices the server accepts. */
 export interface SponsorDesignOptions {
+  types: { id: string, label: string, description: string, badge: string, ctas: string[] }[]
   layouts: { id: string, label: string, description: string }[]
   palette: { id: string, label: string, bg: string, ink: string, contrast: number }[]
   ctas: string[]
   limits: { name: number, tagline: number }
+}
+
+/**
+ * The words the form uses for each kind of sponsor. The fields are the same;
+ * what they mean to a creator, a builder and a company is not.
+ */
+export const TYPE_COPY: Record<string, { nameLabel: string, namePlaceholder: string, urlLabel: string, urlPlaceholder: string, taglinePlaceholder: string }> = {
+  creator: {
+    nameLabel: 'Your name or channel',
+    namePlaceholder: 'Asha Talks Tech',
+    urlLabel: 'Your channel or handle link',
+    urlPlaceholder: 'https://youtube.com/@yourchannel',
+    taglinePlaceholder: 'Java, DSA and job talk, twice a week'
+  },
+  builder: {
+    nameLabel: 'Your project',
+    namePlaceholder: 'MockRound',
+    urlLabel: 'Your project link',
+    urlPlaceholder: 'https://yourproject.dev',
+    taglinePlaceholder: 'A mock interview tool built for freshers'
+  },
+  company: {
+    nameLabel: 'Name to show',
+    namePlaceholder: 'Your company, or you',
+    urlLabel: 'Careers or product page',
+    urlPlaceholder: 'https://company.com/careers',
+    taglinePlaceholder: 'Hiring Java freshers in Bangalore'
+  }
 }
 
 const WEB = /^https?:\/\/[^\s/$.?#][^\s]*$/i
@@ -29,6 +59,9 @@ const MEDIA = /^\/api\/media\/stories\/[\w-]+\/[\w.-]+$/
  */
 export function draftProblems(draft: SponsorDraft, options: SponsorDesignOptions | null | undefined): Partial<Record<keyof SponsorDraft, string>> {
   const out: Partial<Record<keyof SponsorDraft, string>> = {}
+  if (options && !options.types.some(t => t.id === draft.type)) {
+    out.type = 'Pick who you are.'
+  }
   const nameMax = options?.limits.name ?? 60
   const taglineMax = options?.limits.tagline ?? 90
   const name = draft.name.trim()
@@ -53,7 +86,8 @@ export function draftProblems(draft: SponsorDraft, options: SponsorDesignOptions
   if (options && !options.palette.some(p => p.id === draft.palette)) {
     out.palette = 'Pick a colour.'
   }
-  if (options && draft.cta && !options.ctas.includes(draft.cta)) {
+  const typeCtas = options?.types.find(t => t.id === draft.type)?.ctas
+  if (typeCtas && draft.cta && !typeCtas.includes(draft.cta)) {
     out.cta = 'Pick one of the labels.'
   }
   return out
@@ -82,6 +116,19 @@ const problem = (field: keyof SponsorDraft) => (props.showProblems ? problems.va
 
 const colour = computed(() => props.options.palette.find(p => p.id === draft.value.palette) ?? props.options.palette[0])
 
+const activeType = computed(() => props.options.types.find(t => t.id === draft.value.type) ?? props.options.types.find(t => t.id === 'company') ?? props.options.types[0])
+const copy = computed(() => TYPE_COPY[activeType.value?.id ?? 'company'] ?? TYPE_COPY.company!)
+/** The labels this type may use; the server refuses anything else. */
+const ctas = computed(() => activeType.value?.ctas ?? [])
+
+// Changing who you are changes which labels exist; a label that no longer
+// applies is let go rather than silently sent and refused.
+watch(() => draft.value.type, () => {
+  if (draft.value.cta && !ctas.value.includes(draft.value.cta)) {
+    draft.value.cta = null
+  }
+})
+
 /** The card as it will appear, with placeholders where nothing is typed yet. */
 const card = computed<SponsorCardData>(() => {
   const image = draft.value.image.trim()
@@ -91,6 +138,7 @@ const card = computed<SponsorCardData>(() => {
     tagline: draft.value.tagline.trim() || null,
     image: image && (WEB.test(image) || MEDIA.test(image)) ? image : null,
     design: {
+      type: draft.value.type,
       layout: draft.value.layout,
       accent: colour.value?.bg ?? '#111111',
       ink: colour.value?.ink ?? '#FFFFFF',
@@ -146,29 +194,57 @@ const taglineLeft = computed(() => props.options.limits.tagline - draft.value.ta
     <div class="designer__fields col-span-full lg:col-span-5">
       <fieldset class="designer__group">
         <legend class="label">
-          01 · Who you are
+          01 · Who is this for
+        </legend>
+        <div
+          class="types"
+          role="radiogroup"
+          aria-label="Who you are"
+        >
+          <label
+            v-for="t in options.types"
+            :key="t.id"
+            class="type-tile"
+            :data-on="draft.type === t.id ? '' : undefined"
+          >
+            <input
+              v-model="draft.type"
+              type="radio"
+              name="sponsor-type"
+              :value="t.id"
+              class="sr-only"
+            >
+            <span class="type-tile__title">{{ t.label }}</span>
+            <span class="type-tile__text">{{ t.description }}</span>
+          </label>
+        </div>
+      </fieldset>
+
+      <fieldset class="designer__group">
+        <legend class="label">
+          02 · Who you are
         </legend>
         <UFormField
-          label="Name to show"
+          :label="copy.nameLabel"
           :error="problem('name')"
           required
         >
           <UInput
             v-model="draft.name"
             :maxlength="options.limits.name"
-            placeholder="Your company, or you"
+            :placeholder="copy.namePlaceholder"
             class="w-full"
           />
         </UFormField>
         <UFormField
-          label="Link"
+          :label="copy.urlLabel"
           :error="problem('url')"
           required
         >
           <UInput
             v-model="draft.url"
             type="url"
-            placeholder="https://"
+            :placeholder="copy.urlPlaceholder"
             class="w-full"
           />
         </UFormField>
@@ -185,7 +261,7 @@ const taglineLeft = computed(() => props.options.limits.tagline - draft.value.ta
           <UInput
             v-model="draft.tagline"
             :maxlength="options.limits.tagline"
-            placeholder="Hiring Java freshers in Bangalore"
+            :placeholder="copy.taglinePlaceholder"
             class="w-full"
           />
         </UFormField>
@@ -193,7 +269,7 @@ const taglineLeft = computed(() => props.options.limits.tagline - draft.value.ta
 
       <fieldset class="designer__group">
         <legend class="label">
-          02 · Logo
+          03 · Logo
         </legend>
         <UFormField
           label="Image link"
@@ -253,7 +329,7 @@ const taglineLeft = computed(() => props.options.limits.tagline - draft.value.ta
 
       <fieldset class="designer__group">
         <legend class="label">
-          03 · Layout
+          04 · Layout
         </legend>
         <div
           class="choices row-list"
@@ -287,7 +363,7 @@ const taglineLeft = computed(() => props.options.limits.tagline - draft.value.ta
 
       <fieldset class="designer__group">
         <legend class="label">
-          04 · Colour
+          05 · Colour
         </legend>
         <div
           class="swatches"
@@ -324,7 +400,7 @@ const taglineLeft = computed(() => props.options.limits.tagline - draft.value.ta
 
       <fieldset class="designer__group">
         <legend class="label">
-          05 · Button label
+          06 · Button label
         </legend>
         <div class="ctas">
           <button
@@ -336,7 +412,7 @@ const taglineLeft = computed(() => props.options.limits.tagline - draft.value.ta
             None
           </button>
           <button
-            v-for="c in options.ctas"
+            v-for="c in ctas"
             :key="c"
             type="button"
             class="cta-pick"
@@ -448,6 +524,44 @@ const taglineLeft = computed(() => props.options.limits.tagline - draft.value.ta
   width: 100%;
   margin-bottom: 0.25rem;
   padding: 0;
+}
+
+/* ---- The type tiles: three, side by side where there is room. ------------- */
+.types {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: 0.5rem;
+}
+
+.type-tile {
+  display: grid;
+  gap: 0.25rem;
+  align-content: start;
+  padding: 0.75rem;
+  border: 1px solid var(--rule-color, var(--ui-border));
+  cursor: pointer;
+}
+
+.type-tile[data-on] {
+  border-color: var(--ui-text-highlighted);
+  box-shadow: inset 0 2px 0 var(--ui-primary);
+}
+
+.type-tile:has(input:focus-visible) {
+  outline: 2px solid var(--ui-text-highlighted);
+  outline-offset: 2px;
+}
+
+.type-tile__title {
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--ui-text-highlighted);
+}
+
+.type-tile__text {
+  font-size: 0.8125rem;
+  color: var(--ui-text-muted);
+  text-wrap: pretty;
 }
 
 /* ---- Layout choices: rows between rules, the chosen one marked in red. ---- */

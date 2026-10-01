@@ -28,8 +28,8 @@ interface Details {
 
 interface Trend {
   range: number
-  totals: { visitors: number, views: number, signups: number }
-  days: { day: string, visitors: number, views: number, signups: number }[]
+  totals: { visitors: number, views: number, signups: number, raised: number }
+  days: { day: string, visitors: number, views: number, signups: number, raised: number }[]
 }
 
 const RANGES = [
@@ -73,7 +73,26 @@ const trafficSeries = computed(() => [
 const signupSeries = computed(() => [
   { key: 'signups', label: 'New accounts', values: trend.value?.days.map(d => d.signups) ?? [] }
 ])
+// Paise from the API, rupees on the chart.
+const raisedSeries = computed(() => [
+  { key: 'raised', label: 'Raised', values: trend.value?.days.map(d => Math.round(d.raised / 100)) ?? [] }
+])
 const rangeLabel = computed(() => RANGES.find(r => r.days === range.value)?.label ?? '')
+
+/** One picked day across every chart in the section: the crosshairs move together. */
+const pickedDay = ref<number | null>(null)
+watch(range, () => {
+  pickedDay.value = null
+})
+
+/** The journey, compressed to five stops: the same story the home page walks. */
+const JOURNEY = [
+  { year: '2018', label: 'The train', note: 'Mahroni to Bangalore, no plan' },
+  { year: '2019', label: 'Learning', note: 'Java, SQL and the written round' },
+  { year: '2019', label: 'First job', note: 'The 34th walk-in, ₹13,000 a month' },
+  { year: '2022', label: 'The switch', note: 'Negotiated like the guide says' },
+  { year: 'Now', label: 'Europe', note: 'Salesforce engineer, writing this' }
+] as const
 
 const maxCountry = computed(() => Math.max(1, ...(details.value?.countries || []).map(c => c.visitors)))
 const maxPage = computed(() => Math.max(1, ...(details.value?.topPages || []).map(p => p.views)))
@@ -131,6 +150,27 @@ usePageSeo({
         </div>
       </div>
     </header>
+
+    <!-- The journey, in one strip -------------------------------------------------- -->
+    <section
+      class="band guides"
+      aria-label="The journey behind these numbers"
+    >
+      <div class="frame">
+        <ol class="strip">
+          <li
+            v-for="(stop, i) in JOURNEY"
+            :key="stop.label"
+            class="strip__stop"
+            :data-now="i === JOURNEY.length - 1 ? '' : undefined"
+          >
+            <span class="strip__year num">{{ stop.year }}</span>
+            <span class="strip__label">{{ stop.label }}</span>
+            <span class="strip__note">{{ stop.note }}</span>
+          </li>
+        </ol>
+      </div>
+    </section>
 
     <!-- Headline numbers -------------------------------------------------------- -->
     <section
@@ -210,6 +250,7 @@ usePageSeo({
             />
             <StatsChart
               v-else-if="trend?.days.length"
+              v-model:active="pickedDay"
               :days="days"
               :series="trafficSeries"
               :caption="`Unique visitors and page views per day, last ${rangeLabel}`"
@@ -236,11 +277,36 @@ usePageSeo({
             </p>
             <StatsChart
               v-if="trend?.days.length"
+              v-model:active="pickedDay"
               :days="days"
               :series="signupSeries"
               :caption="`New accounts per day, last ${rangeLabel}`"
               :height="160"
               class="chart--small"
+              :class="{ 'opacity-50': trendStatus === 'pending' }"
+            />
+          </div>
+
+          <div class="col-span-full lg:col-span-8">
+            <p class="label">
+              Earnings
+            </p>
+            <h3 class="headline mt-2">
+              Raised per day
+            </h3>
+            <p class="mt-2 mb-5 text-sm text-muted">
+              Gifts, tips and sponsor bids that actually cleared, by the day
+              the checkout was opened. {{ trend ? formatPaise(trend.totals.raised) : '–' }}
+              in the last {{ rangeLabel }}.
+            </p>
+            <StatsChart
+              v-if="trend?.days.length"
+              v-model:active="pickedDay"
+              :days="days"
+              :series="raisedSeries"
+              format="inr"
+              :caption="`Money raised per day in rupees, last ${rangeLabel}`"
+              :height="220"
               :class="{ 'opacity-50': trendStatus === 'pending' }"
             />
           </div>
@@ -536,5 +602,55 @@ usePageSeo({
 
 .cta {
   border-top: 2px solid var(--rule-strong);
+}
+
+/* The journey strip: five stops on one rule, reading left to right. */
+.strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  gap: var(--gutter, 1.5rem);
+}
+
+.strip__stop {
+  position: relative;
+  display: grid;
+  gap: 0.25rem;
+  padding-top: 0.875rem;
+  border-top: 2px solid var(--rule-strong);
+}
+
+.strip__stop::before {
+  content: '';
+  position: absolute;
+  top: -5px;
+  left: 0;
+  width: 8px;
+  height: 8px;
+  background: var(--ui-text-highlighted);
+}
+
+.strip__stop[data-now]::before {
+  background: var(--ui-primary);
+}
+
+.strip__year {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--ui-text-dimmed);
+}
+
+.strip__stop[data-now] .strip__year {
+  color: var(--ui-primary);
+}
+
+.strip__label {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--ui-text-highlighted);
+}
+
+.strip__note {
+  font-size: 0.8125rem;
+  color: var(--ui-text-muted);
 }
 </style>

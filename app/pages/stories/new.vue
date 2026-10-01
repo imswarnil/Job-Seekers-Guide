@@ -5,6 +5,8 @@
  * you want to say, and the story itself. Photos or a video are optional; a
  * YouTube link costs nothing to host and plays anywhere.
  */
+import { richDocText } from '~/components/StoryEditor.vue'
+
 definePageMeta({ middleware: 'auth' })
 
 interface Media { kind: 'image' | 'video' | 'youtube', url: string, name?: string }
@@ -14,9 +16,11 @@ const form = reactive({
   from: '',
   to: '',
   company: '',
-  package: '',
-  body: ''
+  package: ''
 })
+/** The tiptap JSON document from the editor; the server derives the plain text. */
+const bodyDoc = ref<Record<string, unknown> | null>(null)
+const bodyLength = computed(() => richDocText(bodyDoc.value).length)
 const media = ref<Media[]>([])
 const youtube = ref('')
 const uploading = ref(false)
@@ -71,7 +75,7 @@ function addYoutube() {
 
 async function submit() {
   error.value = ''
-  if (form.body.trim().length < 80) {
+  if (bodyLength.value < 80) {
     error.value = 'Tell it in a little more detail: at least a few sentences (80 characters).'
     return
   }
@@ -85,7 +89,7 @@ async function submit() {
         to: form.to,
         company: form.company || undefined,
         package: form.package || undefined,
-        body: form.body,
+        bodyRich: bodyDoc.value,
         media: media.value.map(m => ({ kind: m.kind, url: m.url }))
       }
     })
@@ -172,17 +176,22 @@ useSeoMeta({ title: 'Share your story', robots: 'noindex' })
 
       <UFormField
         label="The story"
-        :hint="`${form.body.length} / 8000`"
+        :hint="`${bodyLength} / 8000`"
         required
       >
-        <UTextarea
-          v-model="form.body"
-          :rows="12"
-          maxlength="8000"
-          autoresize
-          placeholder="What was the hardest part? What did you get wrong first? What would you tell yourself on the first day?"
-          class="w-full"
-        />
+        <ClientOnly>
+          <template #fallback>
+            <USkeleton class="h-72 w-full" />
+          </template>
+          <StoryEditor
+            v-model="bodyDoc"
+            placeholder="What was the hardest part? What did you get wrong first? What would you tell yourself on the first day?"
+          />
+        </ClientOnly>
+        <p class="mt-2 text-xs text-muted">
+          Headings, lists, quotes and links are there in the toolbar if the
+          story wants structure. Plain paragraphs are fine too.
+        </p>
       </UFormField>
 
       <div class="panel">

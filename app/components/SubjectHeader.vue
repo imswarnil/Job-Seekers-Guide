@@ -24,7 +24,8 @@ const number = computed(() => {
   }
   return ''
 })
-const color = computed(() => trackStyle(subject.value?.slug, subject.value?.icon).color)
+const slug = computed(() => subject.value?.slug)
+const color = computed(() => trackStyle(slug.value, subject.value?.icon).color)
 
 const resumeTo = computed(() => resume(path.value, subject.value)?.path || subject.value?.lessons[0]?.path)
 const resumeLabel = computed(() => {
@@ -40,6 +41,13 @@ const resumeLabel = computed(() => {
     class="subject-head swiss-grid"
     :style="{ '--track': color }"
   >
+    <div
+      class="subject-head__art"
+      aria-hidden="true"
+    >
+      <TrackIllustration :slug="slug" />
+    </div>
+
     <p class="subject-head__kicker label">
       <span
         class="subject-head__swatch"
@@ -130,8 +138,30 @@ const resumeLabel = computed(() => {
 </template>
 
 <style scoped>
+.subject-head {
+  position: relative;
+}
+
 .subject-head > * {
   grid-column: 1 / -1;
+}
+
+/* The track's line drawing: absolute on the right, so the hero band keeps
+   exactly the height its words give it. Wide screens only. */
+.subject-head__art {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .subject-head__art {
+    display: block;
+    position: absolute;
+    inset-block: 0;
+    right: 0;
+    width: calc(33.333% - 0.667 * var(--gutter));
+    max-width: 16rem;
+    pointer-events: none;
+  }
 }
 
 .subject-head__swatch {
@@ -195,7 +225,7 @@ const resumeLabel = computed(() => {
 
 @media (min-width: 1024px) {
   .subject-head__title {
-    grid-column: 1 / span 10;
+    grid-column: 1 / span 8;
   }
 
   .subject-head__lede {
